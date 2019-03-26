@@ -8,7 +8,6 @@ header-img: img/post-bg-hacker.jpg
 catalog: true
 tags:
     - Xcode
-    - 开发技巧
 ---
 
 
