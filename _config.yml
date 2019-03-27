@@ -99,8 +99,8 @@ service-worker: true
 # Friends
 friends: [
     {
-        title: "bilibili",
-        href: "http://bilibili.com"
+        title: "MI",
+        href: "https://www.mi.com/"
     },{
         title: "Samsung",
         href: "https://www.samsung.com/cn/"
