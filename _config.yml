@@ -1,6 +1,6 @@
 # Site settings
 title: pic's home
-SEOTitle: pic4xiu的博客 | pic's home
+SEOTitle: pic4xiu's blog
 header-img: img/pic4xiu.jpg
 email: pic4xiu@gmail.com
 description: "Everyting that kills me make me feel alive."
@@ -11,7 +11,7 @@ github_repo: "https://github.com/pic4xiu/pic4xiu.github.io.git" # you code repos
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "沉迷二进制无法自拔,啊～～"
+sidebar-about-description: "Indulge in pwn"
 sidebar-avatar: /img/main.png           # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
@@ -21,7 +21,7 @@ RSS: false
 weibo_username:     6308132071
 zhihu_username:     wo-zhao-huan-pi-qia-qiu/
 github_username:    pic4xiu
-facebook_username:  
+#facebook_username:  
 #jianshu_username:   8c8c963aea59
 twitter_username:  pic4xiu
 
