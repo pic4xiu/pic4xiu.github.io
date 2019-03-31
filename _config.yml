@@ -107,8 +107,6 @@ friends: [
     },{
         title: "Apple",
         href: "https://apple.com"
-    },{
-        title: "NVIDIA",
-        href: "https://www.nvidia.com/en-us/"
     }
+    #,{    title: "NVIDIA",   href: "https://www.nvidia.com/en-us/"}
 ]
