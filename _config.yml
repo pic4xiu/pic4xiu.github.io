@@ -11,7 +11,7 @@ github_repo: "https://github.com/pic4xiu/pic4xiu.github.io.git" # you code repos
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "Write the code. Change the world."
+sidebar-about-description: "Studying!~"
 sidebar-avatar: /img/main.png           # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
