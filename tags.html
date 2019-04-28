@@ -5,34 +5,35 @@ description: keep hungry keep foolish
 header-img: "img/tag-bg.jpg"
 ---
 
-<script>
-
-(function () {
-	//不赞成显式地使用Array构造函数来创建数组，也就是尽量不要用new Array()
-	var arr = ["Linux", "pwn", "C", "misc", "reverse", "English", "Chick"];	
-	var aIndex = 0;
-	document.onmousedown = function (ev) {
-		var oEvent = ev ? ev : window.event;
-		var tSpan = document.createElement('div');
-		aIndex = (aIndex + 1) % arr.length;
-		var sTxt = document.createTextNode(arr[aIndex]);
-		tSpan.appendChild(sTxt);
-		tSpan.style.left = (oEvent.clientX - 35) + 'px';
-		tSpan.style.top = (oEvent.clientY - 20) + 'px';
-		tSpan.style.position = 'absolute';
-		tSpan.style.width = '34px';
-		tSpan.style.height = '17px';
-		tSpan.style.fontWeight = "bold";
-		tSpan.style.color = "#2B9499";
-		tSpan.style.fontSize = 20;
-		tSpan.style.opacity = 0.76;
-		tSpan.style.zIndex = 100000;
-		document.body.appendChild(tSpan);
-		setTimeout(function () {
-			document.body.removeChild(tSpan);
-		}, 300)
-	}
-})();
+<script type="text/javascript">
+/* 鼠标点击特效 */
+var a_idx = 0;
+jQuery(document).ready(function($) {
+    $("body").click(function(e) {
+var a = new Array("富强", "民主", "文明", "和谐", "自由", "平等", "公正" ,"法治", "爱国", "敬业", "诚信", "友善");
+var $i = $("<span/>").text(a[a_idx]);
+        a_idx = (a_idx + 1) % a.length;
+var x = e.pageX,
+        y = e.pageY;
+        $i.css({
+"z-index": 999999999999999999999999999999999999999999999999999999999999999999999,
+"top": y - 20,
+"left": x,
+"position": "absolute",
+"font-weight": "bold",
+"color": "#ff6651"
+        });
+        $("body").append($i);
+        $i.animate({
+"top": y - 180,
+"opacity": 0
+        },
+        1500,
+function() {
+            $i.remove();
+        });
+    });
+});
 </script>
 
 <!-- Page Header -->
