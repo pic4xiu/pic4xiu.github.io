@@ -9,9 +9,9 @@ header-img: "img/tag-bg.jpg"
 
 (function () {
 	//不赞成显式地使用Array构造函数来创建数组，也就是尽量不要用new Array()
-	var arr = ["Linux", "pwn", "C", "misc", "reverse", "English", "Chick", "法治", "爱国", "敬业", "诚信", "友善"];	
+	var arr = ["Linux", "pwn", "C", "misc", "reverse", "English", "Chick"];	
 	var aIndex = 0;
-	document.onmousemove = function (ev) {
+	document.onmousedown = function (ev) {
 		var oEvent = ev ? ev : window.event;
 		var tSpan = document.createElement('div');
 		aIndex = (aIndex + 1) % arr.length;
@@ -30,7 +30,7 @@ header-img: "img/tag-bg.jpg"
 		document.body.appendChild(tSpan);
 		setTimeout(function () {
 			document.body.removeChild(tSpan);
-		}, 3000)
+		}, 300)
 	}
 })();
 </script>
