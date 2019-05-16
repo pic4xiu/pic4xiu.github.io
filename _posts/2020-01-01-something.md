@@ -37,3 +37,7 @@ objdump -d -j .plt file_name
 objdump -R file_name
 #显示got表
 ```
+
+> got plt
+
+这里记一下got、plt表，好不容易差不多明了了，网上有很多解释，这里通俗说一下，调用got_func可以直接使用函数，而plt_func中保存着真实地址
