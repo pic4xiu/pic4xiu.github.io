@@ -40,4 +40,4 @@ objdump -R file_name
 
 > got plt
 
-这里记一下got、plt表，好不容易差不多明了了，网上有很多解释，这里通俗说一下，调用got_func可以直接使用函数，而plt_func中保存着真实地址
+这里记一下got、plt表，好不容易差不多明了了，网上有很多解释，这里通俗说一下，调用plt_func可以直接使用函数，而got_func中保存着真实地址，当然如果直接是`call addr`的时候就要直接使用got_func了
