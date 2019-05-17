@@ -25,7 +25,7 @@ echo 0 > /proc/sys/kernel/randomize_va_space
 
 x/32gx addr
 x/10s  addr
-find addr offset string
+find addr,offset,string
 print function
 #gdb显示一些addr存放的值🤣，炒鸡好用
 
