@@ -21,9 +21,7 @@ pic@ubuntu:~/Desktop/pwn$ checksec easycanary
     Stack:    Canary found
     NX:       NX enabled
     PIE:      No PIE (0x400000)
-'''
 
-'''
 pic@ubuntu:~/Desktop/pwn$ ./easycanary 
 welcome any
 learn some canary challenge
