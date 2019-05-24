@@ -111,3 +111,5 @@ p.sendline(payload2)
 
 p.interactive()
 ```
+
+> [题目链接](https://github.com/pic4xiu/C/blob/master/%E9%A2%98%E7%9B%AE%E9%93%BE%E6%8E%A5/pwn/easycanary)(so环境同目录
