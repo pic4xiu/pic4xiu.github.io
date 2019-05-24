@@ -13,7 +13,7 @@ tags:						#标签
 ## Overview
 > Safeguard、operation and analysis
 
-'''
+```
 pic@ubuntu:~/Desktop/pwn$ checksec easycanary
 [*] '/home/pic/Desktop/pwn/easycanary'
     Arch:     amd64-64-little
@@ -31,7 +31,7 @@ hello 1����
 Let's start a game, can you guess the keyword?
 1
 fail
-'''
+```
 
 可以看到本题开了nx和canary，我们逻辑看了个大概，下面到*ida*中具体分析，主函数没啥看的，直接到`name()`函数中看
 
