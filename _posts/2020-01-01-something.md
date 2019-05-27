@@ -17,6 +17,11 @@ tags:						#标签
 这篇就更新一下pwn相关的常用的小命令
 
 ```
+Ctrl+F9
+#od跑到最近ret处
+Alt+F9
+#调用dll时快速回到用户代码中
+
 ROPgadget --binary pwnme --only "call|ret"
 #找gadget贼6，但是有时候不太好用
 
