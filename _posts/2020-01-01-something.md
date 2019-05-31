@@ -17,6 +17,10 @@ tags:						#标签
 这篇就更新一下pwn相关的常用的小命令
 
 ```
+nm -D some.so
+objdump -tT  some.so
+#dump出so各函数地址
+
 Ctrl+F9
 #od跑到最近ret处
 Alt+F9
