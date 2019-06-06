@@ -17,20 +17,24 @@ tags:						#标签
 这篇就更新一下pwn相关的常用的小命令
 
 ```
-nm -D some.so
-objdump -tT  some.so
-#dump出so各函数地址
+od
 
 Ctrl+F9
 #od跑到最近ret处
 Alt+F9
 #调用dll时快速回到用户代码中
 
+nm -D some.so
+objdump -tT  some.so
+#dump出so各函数地址
+
 ROPgadget --binary pwnme --only "call|ret"
 #找gadget贼6，但是有时候不太好用
 
 echo 0 > /proc/sys/kernel/randomize_va_space
 #关掉linux系统的pie保护
+
+gdb
 
 x/wx addr
 find addr,offset,string
@@ -39,6 +43,10 @@ print function
  - w可换位b/h/g，分别取1/2/8字节
  - /后可以接数字，表示显示多少
  - 第二个x可以换成u（unsinged int）/d（10进制数）/s（字符串）/i（指令）
+ 
+set *addr=value
+ - 设置addr值，默认为4字节
+ - 也可以将*换位{char/short/long}分别设置1/2/8字节
 
 ulimit -c unlimited
 #开启core dump，防止地址受gdb影响
@@ -54,11 +62,6 @@ objdump -R file_name
 这里记一下got、plt表，好不容易差不多明了了，网上有很多解释，这里通俗说一下，调用plt_func可以直接使用函数，如我们吧ret_addr改为plt_func函数后，后边跟参数（32位）或者是之前已经pop_reg的话（64位），即可直接使用，而got_func中保存着真实地址，当然如果直接是`call addr`的时候就要直接使用got_func了
 
 > Thought
-
-下边说一下根据`checksec`结果解常规栈溢出pwn题的思路
-
-#全关
-直接在栈上写shellcode，然后ret写成shellcode地址
 
 #只开NX
 找`system`和`/bin/sh`地址，当然静态链接没有的话可以直接写入
