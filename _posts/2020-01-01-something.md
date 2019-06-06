@@ -32,11 +32,13 @@ ROPgadget --binary pwnme --only "call|ret"
 echo 0 > /proc/sys/kernel/randomize_va_space
 #关掉linux系统的pie保护
 
-x/32gx addr
-x/10s  addr
+x/wx addr
 find addr,offset,string
 print function
 #gdb显示一些addr存放的值🤣，炒鸡好用
+ - w可换位b/h/g，分别取1/2/8字节
+ - /后可以接数字，表示显示多少
+ - 第二个x可以换成u（unsinged int）/d（10进制数）/s（字符串）/i（指令）
 
 ulimit -c unlimited
 #开启core dump，防止地址受gdb影响
