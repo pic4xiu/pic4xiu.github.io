@@ -27,12 +27,16 @@ Alt+F9
 nm -D some.so
 objdump -tT  some.so
 #dump出so各函数地址
-
 ROPgadget --binary pwnme --only "call|ret"
 #找gadget贼6，但是有时候不太好用
-
 echo 0 > /proc/sys/kernel/randomize_va_space
 #关掉linux系统的pie保护
+ulimit -c unlimited
+#开启core dump，防止地址受gdb影响
+objdump -d -j .plt file_name
+#显示plt表
+objdump -R file_name
+#显示got表
 
 gdb
 
@@ -43,18 +47,17 @@ print function
  - w可换位b/h/g，分别取1/2/8字节
  - /后可以接数字，表示显示多少
  - 第二个x可以换成u（unsinged int）/d（10进制数）/s（字符串）/i（指令）
- 
 set *addr=value
  - 设置addr值，默认为4字节
  - 也可以将*换位{char/short/long}分别设置1/2/8字节
 
-ulimit -c unlimited
-#开启core dump，防止地址受gdb影响
+gdb-peda
 
-objdump -d -j .plt file_name
-#显示plt表
-objdump -R file_name
-#显示got表
+elfsymbol
+vmmap
+readelf
+find string
+record
 ```
 
 > got plt
