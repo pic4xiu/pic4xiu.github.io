@@ -75,6 +75,7 @@ record
 ## bugs which make the head big
 
 > gdb插件冲突
+
 我们在安装peda和pwngdb这两个各有特点(pwngdb调试堆一绝)的插件时,可能会遇到这样的问题,一般起因是因为先装了peda,之后装pwngdb,在`.gdbinit`文件中未及时注释掉,也即这样
 ```
 source ~/peda/peda.py
