@@ -1,7 +1,7 @@
 ---
 layout:     post   			        # 使用的布局（不需要改）
 title:      整理一些小命令   			# 标题 
-subtitle:   随时更新😀  			#副标题
+subtitle:   还有一些让人头大的bug  			#副标题
 date:       2020-01-01 				# 时间
 author:     pic4xiu 		    		# 作者
 header-img: img/post-bg-debug.png 		#这篇文章标题背景图片
@@ -10,9 +10,7 @@ tags:						#标签
     - pwn
 ---
 
-## Recent
-
-最近一直很迷茫，看看pwn看看Re，很懵逼，不过现在找回状态了，还是好好看pwn吧，老是想一口气吃成胖子，现在还不是老老实实看文章，（难受
+## small orders
 
 这篇就更新一下pwn相关的常用的小命令
 
@@ -71,3 +69,36 @@ record
 
 #开NX和PIE
 利用`write`泄露地址，然后根据偏移找到`system`和`/bin/sh`，也可以使用`DynELF`来泄露`system`地址
+
+
+
+## bugs which make the head big
+
+> gdb插件冲突
+我们在安装peda和pwngdb这两个各有特点(pwngdb调试堆一绝)的插件时,可能会遇到这样的问题,一般起因是因为先装了peda,之后装pwngdb,在`.gdbinit`文件中未及时注释掉,也即这样
+```
+source ~/peda/peda.py
+source /home/pic/pwndbg/gdbinit.py
+```
+造成如下问题
+```
+Traceback (most recent call last):
+  File "/home/pic/pwndbg/gdbinit.py", line 36, in <module>
+    import pwndbg # isort:skip
+  File "/home/pic/pwndbg/pwndbg/__init__.py", line 19, in <module>
+    import pwndbg.commands.aslr
+  File "/home/pic/pwndbg/pwndbg/commands/aslr.py", line 24, in <module>
+    def aslr(state=None):
+  File "/home/pic/pwndbg/pwndbg/commands/__init__.py", line 298, in __call__
+    return _ArgparsedCommand(self.parser, function)
+  File "/home/pic/pwndbg/pwndbg/commands/__init__.py", line 267, in __init__
+    super(_ArgparsedCommand, self).__init__(function, command_name=command_name, *a, **kw)
+  File "/home/pic/pwndbg/pwndbg/commands/__init__.py", line 61, in __init__
+    raise Exception('Cannot override non-whitelisted built-in command "%s"' % command_name)
+Exception: Cannot override non-whitelisted built-in command "aslr"
+```
+看到大意是想把aslr重写但是失败了,解决方法便是将`.gdbinit`文件第一行注释掉
+```
+source ~/peda/peda.py
+source /home/pic/pwndbg/gdbinit.py
+```
