@@ -16,13 +16,13 @@ tags:						#标签
 
 使用`gcc -g -fno-stack-protector -z execstack -o test test.c`依次关掉**Canary**和**NX**
 
-`echo 0 > /proc/sys/kernel/randomize_va_space`关闭`PIE`
+`echo 0 > /proc/sys/kernel/randomize_va_space`关闭**PIE**
 
 ` ulimit -c unlimited`表示自己程序只要错误就生成dump文件,之后`echo "/tmp/core.%t" > /proc/sys/kernel/core_pattern`表示存到tmp目录下,之后我们就可以`gdb $文件名 core.%t`调试了
 
 ## ASLR和PIE的各种事
 
-其实我第一遍学的时候以为,emm,这不是一样的东西吗,甚至以为效果是它俩求并就行,靠发现完全不是,[这个](https://blog.csdn.net/Plus_RE/article/details/79199772)写的很棒了,谢谢师傅,在这里简单记录一下诀窍吧(表格中提到的是被随机化的,堆另外再提)
+其实我第一遍学的时候以为,emm,这不是一样的东西吗,甚至以为效果是它俩求并就行,靠发现完全不是,[这个](https://blog.csdn.net/Plus_RE/article/details/79199772)写的很棒了,谢谢师傅,在这里简单记录一下技巧吧(表格中提到的是被随机化的,堆另外再提)
 
 \ |aslr=0 | aslr=1 | aslr=2
 :-: | :-: | :-: | :-:
