@@ -115,7 +115,8 @@ pwndbg> stack 8
 07:001c│      0xffffcff4 —▸ 0xffffd0b4 —▸ 0xffffd293 ◂— 0x6d6f682f ('/hom')
 ```
 之后的` ► 0x8048414 <hello+9>     push   dword ptr [ebp + 8]`我们应该知道了,这个是参数,目前具体的堆栈图如下
-指针 |内存
+
+指针 | 内存
 :-: | :-: 
 esp | sth 
 esp+4 | sth
