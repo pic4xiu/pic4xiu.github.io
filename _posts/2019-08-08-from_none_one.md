@@ -253,3 +253,41 @@ pwndbg> p $esp
 $1 = (void *) 0xffffd050
 ```
 今天努力分析一下原因吧,虽然也能调出来,但是这佛系bug让我属实难以接受,不知道和本机环境有没有关系
+
+## 简单的解释
+简单看一下这个bug,我自己写了一个小demo
+```
+#include<stdio.h>
+int main()
+{
+	int y=1;
+	printf("%p\n",&y);
+}
+```
+我们打印出来就是
+```
+➜  demo ./a.out     
+0x7fffffffde54
+```
+可是使用pwntools直接process启这个进程发现确实会出现向后偏移0x10字节
+```
+from pwn import *
+context.log_level = "debug"
+p = process('./a.out')
+p.interactive()
+```
+```
+➜  demo python te.py 
+[+] Starting local process './a.out': pid 13184
+[*] Switching to interactive mode
+[*] Process './a.out' stopped with exit code 0 (pid 13184)
+[DEBUG] Received 0xf bytes:
+    '0x7fffffffde64\n'
+0x7fffffffde64
+[*] Got EOF while reading in interactive
+$ 
+[DEBUG] Sent 0x1 bytes:
+    '\n' * 0x1
+[*] Got EOF while sending in interactive
+```
+发现这是一个普遍问题,所以以后找ret地址必须要gdb进行调试后再填写,不然会出现问题,当然解决办法也可以是多填写一些`nop`,只要位置够,当然象这种直接在栈上写shellcode的题也确实不多,毕竟这么简单
