@@ -122,6 +122,34 @@ esp | sth
 esp+4 | sth
 esp+8 | sth
 esp+c | sth
-ebp | sth
+ebp | $ebp
 ebp+4 | ret
 ebp+8 | 3
+
+之后的调用我们就不谈了,继续到`leave`指令,所谓这个指令就是和抬升栈相反,我们只需要记住这是反操作就行了,执行完后指针下移,ret返回主函数
+```
+───────────────────────────────────[ DISASM ]───────────────────────────────────
+   0x8048417 <hello+12>    push   0x80484e0
+   0x804841c <hello+17>    call   printf@plt <0x80482e0>
+ 
+   0x8048421 <hello+22>    add    esp, 0x10
+   0x8048424 <hello+25>    nop    
+   0x8048425 <hello+26>    leave  
+ ► 0x8048426 <hello+27>    ret             <0x8048442; main+27>
+    ↓
+   0x8048442 <main+27>     add    esp, 0x10
+   0x8048445 <main+30>     mov    eax, 0
+   0x804844a <main+35>     mov    ecx, dword ptr [ebp - 4]
+   0x804844d <main+38>     leave  
+   0x804844e <main+39>     lea    esp, [ecx - 4]
+───────────────────────────────────[ STACK ]────────────────────────────────────
+00:0000│ esp  0xffffcfec —▸ 0x8048442 (main+27) ◂— add    esp, 0x10
+01:0004│      0xffffcff0 ◂— 0x3
+02:0008│      0xffffcff4 —▸ 0xffffd0b4 —▸ 0xffffd293 ◂— 0x6d6f682f ('/hom')
+03:000c│      0xffffcff8 —▸ 0xffffd0bc —▸ 0xffffd2af ◂— 'XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0'
+04:0010│      0xffffcffc —▸ 0x8048481 (__libc_csu_init+33) ◂— lea    eax, [ebx - 0xf8]
+05:0014│      0xffffd000 —▸ 0xf7fb03dc (__exit_funcs) —▸ 0xf7fb11e0 (initial) ◂— 0x0
+06:0018│      0xffffd004 —▸ 0xffffd020 ◂— 0x1
+07:001c│ ebp  0xffffd008 ◂— 0x0
+```
+顺利结束
