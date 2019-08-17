@@ -68,3 +68,5 @@ p.interactive()
 ```
 ## 纸上谈兵
 首先我们根据objdump能搞出来write函数的got和plt表,之后可以利用`plt_write`把`got_write`即真正到内存里的地址泄漏出来,得到`got_write`后我们又有原来的libc,故而能根据偏移找到system和sh的地址,而这个这个程序很简单,我们可以有一个`vulfun_addr`函数不断的跳,也算是一个很好的工具函数
+
+> 完毕
