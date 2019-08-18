@@ -16,7 +16,7 @@ tags:						#标签
 
 使用`gcc -g -fno-stack-protector -z execstack -o test test.c`依次关掉**Canary**和**NX**
 
-`echo 0 > /proc/sys/kernel/randomize_va_space`关闭**PIE**
+`echo 0 > /proc/sys/kernel/randomize_va_space`关闭**ASLR**
 
 ` ulimit -c unlimited`表示自己程序只要错误就生成dump文件,之后`echo "/tmp/core.%t" > /proc/sys/kernel/core_pattern`表示存到tmp目录下,之后我们就可以`gdb $文件名 core.%t`调试了
 
