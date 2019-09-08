@@ -99,9 +99,6 @@ service-worker: true
 # Friends
 friends: [
     {
-        title: "MI",
-        href: "https://www.mi.com/"
-    },{
         title: "nekosec",
         href: "http://nekosec.top/"
     },{
