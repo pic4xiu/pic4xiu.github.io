@@ -30,7 +30,7 @@ int main(){
 
 ## exp
 ```
-from pwn import*
+from pwn import *
 p = process('./x86')
 context.log_level = 'debug'
 elf = ELF('./x86')
