@@ -102,11 +102,11 @@ friends: [
         title: "MI",
         href: "https://www.mi.com/"
     },{
-        title: "Samsung",
-        href: "https://www.samsung.com/cn/"
+        title: "nekosec",
+        href: "http://nekosec.top/"
     },{
-        title: "Apple",
-        href: "https://apple.com"
+        title: "knightswd",
+        href: "https://www.knightswd.xyz/"
     }
     #,{    title: "NVIDIA",   href: "https://www.nvidia.com/en-us/"}
 ]
