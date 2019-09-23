@@ -13,11 +13,12 @@ tags:						#标签
 Study heap by **走位**,orz
 
 main thread (don't have **heap_info** just one heap)heap use **brk** (adjoin with data)
-ust **program break location** to adjust the main arena(global variable)
+
+use **program break location** to adjust the main arena(global variable)
 
 thread heap use mmap(can contain many heaps)
 
-arena -> heap -> chunk
+ - arena -> heap -> chunk
 
 ```
 struct malloc_state
@@ -73,11 +74,8 @@ struct malloc_chunk {
   struct malloc_chunk* bk_nextsize;
 };
 ```
-[](https://introspelliam.github.io/images/2017-09-10/v2-cdc4b19aeb0c5bd01d24589c303f5d3b_b.png)
-[](https://introspelliam.github.io/images/2017-09-10/v2-d1ef4f85211061232d4397f4929e8e91_b.png)
+[two picture](https://introspelliam.github.io/2017/09/10/pwn/Linux%E5%A0%86%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90%E4%B8%8A/)
 
 ## last remainder chunk
 
-当用户请求的是一个small chunk，且该请求无法被small bin、unsorted bin满足的时候，就通过binmaps遍历bin查找最合适的chunk，如果该chunk有剩余部分的话，就将该剩余部分变成一个新的chunk加入到unsorted bin中，另外，再将该新的chunk变成新的last remainder chunk。
-
-当用户请求一个small chunk，且该请求无法被small bin满足，那么就转而交由unsorted bin处理。同时，假设当前unsorted bin中只有一个chunk的话——就是last remainder chunk，那么就将该chunk分成两部分：前者分配给用户，剩下的部分放到unsorted bin中，并成为新的last remainder chunk。这样就保证了连续malloc(small chunk)中，各个small chunk在内存分布中是相邻的，即提高了内存分配的局部性。
+when I malloc(small chunk) but my small bin and unsorted bin can not satisfy,I will ergodic binmaps to find the most fit chunk .if this chunk has rest,the rest will be put into unsorted bin and we call it last remainer chunk
