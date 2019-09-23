@@ -79,3 +79,34 @@ struct malloc_chunk {
 ## last remainder chunk
 
 when I malloc(small chunk) but my small bin and unsorted bin can not satisfy,I will ergodic binmaps to find the most fit chunk .if this chunk has rest,the rest will be put into unsorted bin and we call it last remainer chunk
+
+## fast bin
+
+first malloc(fast bin) , system will execute _int_malloc function , it will find that fast bin is null , and small bin is also null , so will execute malloc_consolidate to initialize malloc_state
+
+> malloc_consolidate
+ - initialize malloc_state
+ - initialize bins
+ 
+> malloc_state
+ - bins pointe to themselves
+
+## unsorted bin
+> circulating double linked list
+
+No restrictions for size
+
+## small bin
+> smaller than 512 bytes
+
+ - FIFO
+ - also `circulating double linked list`
+ - need to be merged
+ - 16 + 61*8 = 508
+ 
+when you free(small bin) , system will check the bin adjoin the other free bin or not , if adjoin ,system will merge them and fall off from small bin , and put them into unsorted bin
+
+## large bin
+> larged tham 512 bytes
+
+Sort from big to small in one bin , the largest will be put into front end and the smallest will be rear end
