@@ -10,7 +10,7 @@ tags:						#标签
     - pwn
 ---
 
-Study heap by **走位**,orz
+Studyed by **走位**,orz
 
 main thread (don't have **heap_info** just one heap)heap use **brk** (adjoin with data)
 
