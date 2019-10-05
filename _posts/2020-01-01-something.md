@@ -103,3 +103,7 @@ Exception: Cannot override non-whitelisted built-in command "aslr"
 source ~/peda/peda.py
 source /home/pic/pwndbg/gdbinit.py
 ```
+
+> pwngdb 安装死活不成功
+
+今天学习 tcache ，结果在 18.04 里边死活装不上 pwngdb ，在 `sudo ./setup.sh` 报错中发现是 pip 源的问题，就用[这个](https://blog.csdn.net/yucicheung/article/details/79095742)大佬的方法把 pip 默认源改成了 豆瓣的，立马见效
