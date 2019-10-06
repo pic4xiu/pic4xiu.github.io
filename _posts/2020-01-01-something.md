@@ -48,6 +48,9 @@ print function
 set *addr=value
  - 设置addr值，默认为4字节
  - 也可以将*换位{char/short/long}分别设置1/2/8字节
+ 
+p *((struct _IO_FILE_plus*)0x602400)
+ - 按照 ** 结构体显示
 
 gdb-peda
 
@@ -56,6 +59,7 @@ vmmap
 readelf
 find string
 record
+
 ```
 
 > got plt
