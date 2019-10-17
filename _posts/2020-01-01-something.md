@@ -1,7 +1,7 @@
 ---
 layout:     post   			        # 使用的布局（不需要改）
-title:      整理一些小命令   			# 标题 
-subtitle:   还有一些让人头大的bug  			#副标题
+title:      Sort out some commands   			# 标题 
+subtitle:   and some nauseous bug  			#副标题
 date:       2020-01-01 				# 时间
 author:     pic4xiu 		    		# 作者
 header-img: img/post-bg-debug.png 		#这篇文章标题背景图片
