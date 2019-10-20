@@ -2,7 +2,7 @@
 layout:     post   			        # 使用的布局（不需要改）
 title:      One_gadget   			# 标题 
 subtitle:   Seckill  			#副标题
-date:       2020-10-20 				# 时间
+date:       2019-10-20 				# 时间
 author:     pic4xiu 		    		# 作者
 header-img: img/post-bg-debug.png 		#这篇文章标题背景图片
 catalog: true 					# 是否归档
