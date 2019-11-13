@@ -10,13 +10,18 @@ tags:						#标签
     - pwn
 ---
 
-## exp template
+## 洞
+
+> 栈溢出
 
 ```
-addr = int(p.recvuntil(']')[:-1],16)#以16进制接受
-success(hex(addr))#打印出来
-shellcode = "\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x56\x53\x54\x5f\x6a\x3b\x58\x31\xd2\x0f\x05"#小 shellcode
-shellcode.ljust(0x38,'\x00')#补齐0x38字节
+    gets(&v2);
+```
+
+> 格式化字符串
+
+```
+     printf(s2, &v1);
 ```
 
 ## small orders
