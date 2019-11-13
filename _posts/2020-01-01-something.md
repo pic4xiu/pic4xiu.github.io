@@ -21,7 +21,7 @@ tags:						#标签
 > 格式化字符串
 
 ```
-     printf(s2, &v1);
+    printf(s2, &v1);
 ```
 
 ## small orders
