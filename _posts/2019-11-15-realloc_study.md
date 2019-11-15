@@ -101,10 +101,10 @@ empty
 ```
 bss-> | ** | 0x31
 :-:   | :-: | :-: 
- | title | name
- | time() | chunk_ptr
- | size | **
-bss-> | content
+* | title | name
+* | time() | chunk_ptr
+* | size | **
+bss-> | content | *
 
 bss	->	 **	0x31
   title	name
