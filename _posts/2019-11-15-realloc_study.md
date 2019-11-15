@@ -99,6 +99,13 @@ empty
 这题其实挺反常规的,程序的 bss 端 ptr 指向存放内容头,之后的内容头中有指向内容的指针,大致长这样
 
 ```
+bss-> | ** | 0x31
+:-:   | :-: | :-: 
+ | title | name
+ | time() | chunk_ptr
+ | size | **
+bss-> | content
+
 bss	->	 **	0x31
   title	name
   time()	chunk_ptr
