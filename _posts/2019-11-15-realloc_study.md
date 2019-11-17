@@ -1,7 +1,7 @@
 ---
 layout:     post   			        # 使用的布局（不需要改）
 title:      realloc   			# 标题 
-subtitle:   in heap#副标题
+subtitle:   in heap	#副标题
 date:       2019-11-15 				# 时间
 author:     pic4xiu 		    		# 作者
 header-img: img/post-bg-debug.png 		#这篇文章标题背景图片
