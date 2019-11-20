@@ -132,7 +132,12 @@ source /home/pic/pwndbg/gdbinit.py
 
 ## 脚本
 
+一些网上的脚本
+
+
+
 ```
+#from hit
 import base64
 import string
 key="!#%')+-/13579;=?ACEGIKMOQSUWY[]_acegikmoqsuwy{}\n"
