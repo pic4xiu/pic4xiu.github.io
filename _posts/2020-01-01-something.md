@@ -33,12 +33,8 @@ tags:						#标签
 这篇就更新一下pwn相关的常用的小命令
 
 ```
-od
-
-Ctrl+F9
-#od跑到最近ret处
-Alt+F9
-#调用dll时快速回到用户代码中
+find $sys_addr,+2200000,"/bin/sh"
+寻找字符串地址
 
 nm -D some.so
 objdump -tT  some.so
