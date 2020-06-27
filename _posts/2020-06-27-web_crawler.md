@@ -12,7 +12,7 @@ tags:						#标签
 
 就拿这个记录自己学习 python 爬虫的日常吧
 
-##6.27
+## 6.27
 
 ```
 import requests
