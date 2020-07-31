@@ -10,6 +10,8 @@ tags:						#标签
     - pwn
 ---
 
+本文首发[先知](https://xz.aliyun.com/t/6598)
+
 ## 问题来源
 
 在有 `one_gadget` 之前,我们一般都是通过常规 rop 的方式 getshell .有了它之后,知道 libc 偏移就能够通过它的地址一步 getshell .详细介绍参见[此处](https://xz.aliyun.com/t/2720),我们就可以把更多精力花在利用漏洞上边.但是在做栈溢出时经常遇到 one_gadget 的佛系 bug ,究其原因还是 `constraints` 的锅,每次执行都是一次`execve("/bin/sh",?????, environ)`未知考验,这时候就有必要去根据限制条件来布置我们的环境了
