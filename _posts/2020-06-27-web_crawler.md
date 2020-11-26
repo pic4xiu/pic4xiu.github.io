@@ -1,6 +1,6 @@
 ---
 layout:     post   			        # 使用的布局（不需要改）
-title:      Simple web crawlers   			# 标题 
+title:      Simple gadgets  			# 标题 
 subtitle:   written by Python 			#副标题
 date:       2020-06-27 				# 时间
 author:     pic4xiu 		    		# 作者
@@ -10,7 +10,7 @@ tags:						#标签
     - python
 ---
 
-就拿这个记录自己学习 python 爬虫的日常吧
+这个是完成了一个获取长理官网新闻文字和图片的小爬虫，完成的功能及其简陋。写完想笑哈哈哈哈哈
 
 ## 6.27
 
@@ -45,6 +45,97 @@ for i in people:
         jpg_count=jpg_count+1
 ```
 
-最近一直没碰 python 和二进制，最近一次敲代码就是作品赛~~~
+5月份参加了个作品赛，完成了一套linux平台的源代码漏洞加固程序，整合的py脚本如下，然后里边用到的东西在自己github里，也没啥特别有技术含量的东西，就不献丑了
 
-这个是完成了一个获取学校官网新闻文字和图片的菜鸡爬虫，完成的功能及其简陋。虽然技术不过关但我觉得代码还是写的比较精简的
+```
+import re
+
+def Findhf(text):
+    Headerfile=[]
+    x=text.split("\n")
+    #print(x)
+    for i in x:
+        if('#include' in i):
+            Headerfile.append(i)
+    #print(Headerfile)
+    return Headerfile
+
+def Findo(text):
+    others=[]
+
+    x=text.split("\n")
+    #print(x)
+    for i in x:
+        if('#include' not in i):
+                if('main' not in i):
+                    others.append(i)
+                else:
+                    break
+    #print(others)
+    return others
+
+def Findm(text):
+    real=[]
+    rep=[]
+    count=1
+    x=text.split("\n")
+    for i in x:
+        if(count==1):
+            if('main' in i):
+                #print(i)
+                count=count-1
+        else:
+                if('}' != i):
+                    real.append(i)
+                else:
+                    print('found finish')
+    for a in real:
+        if('write' in a):
+            te=a.split(',')
+            del te[0]
+            te.pop()
+            place=','.join(te)
+            place='    mywrite('+place+');'
+            rep.append(place)
+        else:
+            rep.append(a)
+    #print(rep)
+    return rep
+
+def antidebug(text):
+    head=Findhf(text)
+    oth=Findo(text)
+    main_real=Findm(text)
+    fp = open('head.c', "r", encoding='UTF-8')
+    head0 = fp.read()
+    fp = open('ot.c', "r", encoding='UTF-8')
+    oth0 = fp.read()
+    head1='\n'.join(head)+head0+'\n'.join(oth)
+    print(head1)
+    fp = open('mai.c', "r", encoding='UTF-8')
+    main0 = fp.read()
+    main1=main0+'\n'.join(main_real)
+    print(main1)
+    text=head1+main1+oth0
+    return text
+
+def start():
+    filename = input("请输入文件名字：")
+    try:
+        fp = open(filename, "r", encoding='UTF-8')
+        print("%s 文件打开成功" % filename)
+        text = fp.read()
+        text = antidebug(text)
+        outputFileName = "antidebug_"+filename
+        f2 = open(outputFileName, "w+")
+        f2.write(text)
+    except IOError:
+        print("文件打开失败,%s 文件不存在" % filename)
+        start()
+
+if __name__ == '__main__':
+    message=''
+    while message != "exit":
+        start()
+        message = input("输入exit结束程序 或 输入任意键继续\n")
+```
