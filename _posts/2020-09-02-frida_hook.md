@@ -10,6 +10,8 @@ tags:						#标签
     - android
 ---
 
+首发于[先知](https://xz.aliyun.com/t/8211)
+
 ## 前言
 > frida Xposed简单对比
 
