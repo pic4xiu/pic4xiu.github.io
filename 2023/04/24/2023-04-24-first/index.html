@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>安全开发 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="目前是三条线在并行，一个是油猴插件，一个就是 go 的安全工具开发，还有个就是 ai 来处理恶意代码，下面简单汇报一下第一周的进展 油猴插件 kids like bili  油猴的插件想实现一个模仿青少年模式的东西，目前是完成了单体的，技术栈是 ajax 和 nodejs 整体效果就是两个客户端，一个服务端，两个客户端通过 ajax 的轮询方式将服务端当成个通道实现了 A 客户端控制 B 客户端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安全开发">
+<meta property="og:url" content="http://example.com/2023/04/24/2023-04-24-first/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="目前是三条线在并行，一个是油猴插件，一个就是 go 的安全工具开发，还有个就是 ai 来处理恶意代码，下面简单汇报一下第一周的进展 油猴插件 kids like bili  油猴的插件想实现一个模仿青少年模式的东西，目前是完成了单体的，技术栈是 ajax 和 nodejs 整体效果就是两个客户端，一个服务端，两个客户端通过 ajax 的轮询方式将服务端当成个通道实现了 A 客户端控制 B 客户端">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-04-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Web">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2023-04-24-first" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/04/24/2023-04-24-first/" class="article-date">
+  <time class="dt-published" datetime="2023-04-23T16:00:00.000Z" itemprop="datePublished">2023-04-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      安全开发
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>目前是三条线在并行，一个是油猴插件，一个就是 go 的安全工具开发，还有个就是 ai 来处理恶意代码，下面简单汇报一下第一周的进展</p>
+<h2 id="油猴插件"><a href="#油猴插件" class="headerlink" title="油猴插件"></a>油猴插件</h2><blockquote>
+<p>kids like bili</p>
+</blockquote>
+<p>油猴的插件想实现一个模仿青少年模式的东西，目前是完成了单体的，技术栈是 ajax 和 nodejs</p>
+<p>整体效果就是两个客户端，一个服务端，两个客户端通过 ajax 的轮询方式将服务端当成个通道实现了 A 客户端控制 B 客户端</p>
+<p>但还有好多东西可以加：首先就是功能方面想把 token<br>或者 session 引进来实现多个用户的受害（bushi ，还有一个就是安全方面的防护，主要是考虑这么几件事，就是把 B 客户端当成一个技术高手，如何防护 B<br>逃脱 A 的控制，比如直接把插件关掉（目前两个想法，一个是在搞一个守护进程，还有个就是把自己这个文件给输出出来给服务端，服务端看代码改没改），或者是 A<br>客户端能否通过水平越权的方式实现控制别的 B ？引进来 token 就简单了，下周看看</p>
+<h2 id="go-安全工具开发"><a href="#go-安全工具开发" class="headerlink" title="go 安全工具开发"></a>go 安全工具开发</h2><blockquote>
+<p>扫描器</p>
+</blockquote>
+<p>这个简单多了，就是无脑暴力，先扫描端口，用了 SYN 扫描，然后使用 channel 并发的方式实现一个比较循序渐进的扫描，然后看了好几个库，通过引入 go 插件的方式实现了针对特定端口的爆破</p>
+<p>下周想想还能加点什么，整体感觉其实没啥技术含量（😂 ，主要两个想法，一个是指纹识别，一个就是看看能不能直接用抓包的方式逆向逆向这些协议，大工程！</p>
+<h2 id="ai-处理恶意代码"><a href="#ai-处理恶意代码" class="headerlink" title="ai 处理恶意代码"></a>ai 处理恶意代码</h2><p>这周算是刚开始吧，第一个贼有意思，看了几篇论文，就是把恶意代码的代码用 ida 啊啥的反编译出来，然后转成个图，之后就简单了，老本行 CNN 图像识别，但效果很好。</p>
+<p>第二个是直接用 nlp 的思路来识别恶意代码，但我听了一波本科好哥们的做法，感觉很蠢啊，代码每个变量都当成了个向量，这也太占内存了，我下周想想优化下，感觉应该不难</p>
+<p>第三个就是用传统机器学习实现特征分类（恶意流量的，github 上找了几个，我打算自己写个，数据集什么的还挺多，简单！</p>
+<h2 id="总结-下周计划"><a href="#总结-下周计划" class="headerlink" title="总结 &amp; 下周计划"></a>总结 &amp; 下周计划</h2><p>其实还是挺后悔没早点开始的，感觉东西好多啊，还得把自己的论文发出去，还得看算法，自己是真的菜，还想复现几个 CVE 和挖洞呢。不说了不说了冲冲冲！</p>
+<ul>
+<li>插件继续编写，把服务器充分用上</li>
+<li>go 开发继续继续，加想法，敲代码，嘿嘿</li>
+<li>老本行 ai 继续搞起来</li>
+<li>任何想做的做就好了！</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/04/24/2023-04-24-first/" data-id="cuidL-m0pjc1tXok934qO62nv" data-title="安全开发" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/04/27/2023-04-27-leetcode/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Leetcode
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/03/08/2023-03-08-WorkForWork/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">研二</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

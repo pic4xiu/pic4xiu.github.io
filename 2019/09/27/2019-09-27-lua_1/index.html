@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Mysterious app | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="本次记录一下本菜鸡小小的分析这个送给最好的TA 我是直接暴力把 apk 后缀改成 zip 后打开的，没想到大佬们可以发现这个神奇的网站进行拆包，学到了，但是要关闭屏蔽广告的插件，毕竟不能靠爱发电 然后我就开始研究 classes.dex 源码了，先把 dex 转成 jar ，然后用jd-gui一顿 xjb 分析，大致看了一下有一个获取路径 12345678public String getLuaP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysterious app">
+<meta property="og:url" content="http://example.com/2019/09/27/2019-09-27-lua_1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="本次记录一下本菜鸡小小的分析这个送给最好的TA 我是直接暴力把 apk 后缀改成 zip 后打开的，没想到大佬们可以发现这个神奇的网站进行拆包，学到了，但是要关闭屏蔽广告的插件，毕竟不能靠爱发电 然后我就开始研究 classes.dex 源码了，先把 dex 转成 jar ，然后用jd-gui一顿 xjb 分析，大致看了一下有一个获取路径 12345678public String getLuaP">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-09-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="CTF">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-09-27-lua_1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/09/27/2019-09-27-lua_1/" class="article-date">
+  <time class="dt-published" datetime="2019-09-26T16:00:00.000Z" itemprop="datePublished">2019-09-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Mysterious app
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本次记录一下本菜鸡小小的分析这个<strong>送给最好的TA</strong></p>
+<p>我是直接暴力把 apk 后缀改成 zip 后打开的，没想到大佬们可以发现这个<a target="_blank" rel="noopener" href="http://www.javadecompilers.com/">神奇的网站</a>进行拆包，学到了，但是要关闭屏蔽广告的插件，毕竟不能靠爱发电</p>
+<p>然后我就开始研究 classes.dex 源码了，先把 dex 转成 jar ，然后用jd-gui一顿 xjb 分析，大致看了一下有一个获取路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public String getLuaPath()</span><br><span class="line">&#123;</span><br><span class="line">  initMain();</span><br><span class="line">  StringBuilder localStringBuilder = new StringBuilder();</span><br><span class="line">  localStringBuilder.append(getLocalDir());</span><br><span class="line">  localStringBuilder.append(&quot;/main.lua&quot;);</span><br><span class="line">  return localStringBuilder.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用到了 lua ~~~ ，程序对 lua 进行加载和解密，进入<code>com\androlua\LuaActivity.class</code>,一个<code>public Object loadLib(String paramString)</code>使用 jni 加载 so 文件，之后就开始了 so 文件的排查解密函数</p>
+<p>我目前的思路就是通过排查 so 进而解出 main.lua 了，如果 main.lua 没什么问题就是 java 写的了</p>
+<p>通过几个关键函数如<code>luaL_loadstring</code>,我们最终定位到了<code>j_luaL_loadbufferx</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">int __fastcall luaL_loadbufferx(int a1, int a2, size_t size, int a4, int a5)</span><br><span class="line">&#123;</span><br><span class="line">  int v5; // r10</span><br><span class="line">  size_t v6; // r6</span><br><span class="line">  int v7; // r11</span><br><span class="line">  int v8; // r8</span><br><span class="line">  _BYTE *v9; // r0</span><br><span class="line">  int v10; // r1</span><br><span class="line">  signed int v11; // r2</span><br><span class="line">  _BYTE *v13; // [sp+8h] [bp-28h]</span><br><span class="line">  size_t v14; // [sp+Ch] [bp-24h]</span><br><span class="line"></span><br><span class="line">  v5 = a1;</span><br><span class="line">  v6 = size;</span><br><span class="line">  v7 = a2;</span><br><span class="line">  v8 = a4;</span><br><span class="line">  v13 = (_BYTE *)a2;</span><br><span class="line">  v14 = size;</span><br><span class="line">  if ( *(_BYTE *)a2 == 27 &amp;&amp; *(_BYTE *)(a2 + 1) != 76 )</span><br><span class="line">  &#123;</span><br><span class="line">    v9 = malloc(size);</span><br><span class="line">    if ( v6 )</span><br><span class="line">    &#123;</span><br><span class="line">      *v9 = 27;</span><br><span class="line">      if ( v6 != 1 )</span><br><span class="line">      &#123;</span><br><span class="line">        v10 = 0;</span><br><span class="line">        v11 = 1;</span><br><span class="line">        do</span><br><span class="line">        &#123;</span><br><span class="line">          v10 += v6;</span><br><span class="line">          v9[v11] = *(_BYTE *)(v7 + v11) ^ (v10</span><br><span class="line">                                          + ((unsigned int)(((unsigned __int64)(-2139062143LL * v10) &gt;&gt; 32) + v10) &gt;&gt; 7)</span><br><span class="line">                                          + ((signed int)(((unsigned __int64)(-2139062143LL * v10) &gt;&gt; 32) + v10) &lt; 0));</span><br><span class="line">          ++v11;</span><br><span class="line">        &#125;</span><br><span class="line">        while ( v6 != v11 );</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    v13 = v9;</span><br><span class="line">  &#125;</span><br><span class="line">  return ((int (__fastcall *)(int, int (*)(), _BYTE **, int, int))j_lua_load)(v5, sub_E6AA, &amp;v13, v8, a5);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们发现逻辑其实十分清晰，只有一行关键加密，我们把文件加载进来，然后顺着整个脚本就能把 lua 解密成字节码形式了，卧槽，看见大佬直接 dump 出来了，真是orz</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">v9[v11] = *(_BYTE *)(v7 + v11) ^ (v10</span><br><span class="line">                                          + ((unsigned int)(((unsigned __int64)(-2139062143LL * v10) &gt;&gt; 32) + v10) &gt;&gt; 7)</span><br><span class="line">                                          + ((signed int)(((unsigned __int64)(-2139062143LL * v10) &gt;&gt; 32) + v10) &lt; 0));</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>v11</code>为下标，<code>v6 = size;</code>，<code>v9</code>则为原字节，下面就得想了，之前 a2 把值赋给了 v7 ，同时判断 a2&#x3D;&#x3D;27 ，我们断定这只能是原字节，然后剩下的就能写出脚本了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">uint8_t *decode(uint8_t *data, int size) &#123;</span><br><span class="line">        uint8_t *real = malloc(size);</span><br><span class="line">        *real = 27;</span><br><span class="line">        v10 = 0;</span><br><span class="line">        v11 = 1;</span><br><span class="line">        do</span><br><span class="line">        &#123;</span><br><span class="line">          v10 += size;</span><br><span class="line">          real[v11] = date[v11] ^ (v10</span><br><span class="line">                                          + ((unsigned int)(((unsigned __int64)(-2139062143LL * v10) &gt;&gt; 32) + v10) &gt;&gt; 7)</span><br><span class="line">                                          + ((signed int)(((unsigned __int64)(-2139062143LL * v10) &gt;&gt; 32) + v10) &lt; 0));</span><br><span class="line">          ++v11;</span><br><span class="line">         &#125;</span><br><span class="line">         while ( size != v11 );</span><br><span class="line">         return real;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们可以拿着这个函数去解密了，但是我发现我把 buf 读出来怎么少了一截？？只好从网上 dang 了点东西，整出来解密后的东西后我就开始了反编译之路，找了好多软件都不好用，不是报错就是嫌这个 lua 版本太新，最后终于找到了<a target="_blank" rel="noopener" href="https://sourceforge.net/projects/unluac/files/latest/download">unluac</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar unluac_2015_06_13.jar main.lua &gt; main_real.lua</span><br></pre></td></tr></table></figure>
+
+<p>终于完事了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">require(&quot;import&quot;)</span><br><span class="line">import(&quot;android.app.*&quot;)</span><br><span class="line">import(&quot;android.os.*&quot;)</span><br><span class="line">import(&quot;android.widget.*&quot;)</span><br><span class="line">import(&quot;android.view.*&quot;)</span><br><span class="line">import(&quot;android.view.View&quot;)</span><br><span class="line">import(&quot;android.content.Context&quot;)</span><br><span class="line">import(&quot;android.media.MediaPlayer&quot;)</span><br><span class="line">import(&quot;android.media.AudioManager&quot;)</span><br><span class="line">import(&quot;com.androlua.Ticker&quot;)</span><br><span class="line">activity.getSystemService(Context.AUDIO_SERVICE).setStreamVolume(AudioManager.STREAM_MUSIC, 15, AudioManager.FLAG_SHOW_UI)</span><br><span class="line">activity.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE)</span><br><span class="line">m = MediaPlayer()</span><br><span class="line">m.reset()</span><br><span class="line">m.setDataSource(activity.getLuaDir() .. &quot;/0.mp3&quot;)</span><br><span class="line">m.prepare()</span><br><span class="line">m.start()</span><br><span class="line">m.setLooping(true)      //单曲循环，真狠啊你是</span><br><span class="line">ti = Ticker()</span><br><span class="line">ti.Period = 10</span><br><span class="line">function ti.onTick()    //重写点击</span><br><span class="line">  activity.getSystemService(Context.AUDIO_SERVICE).setStreamVolume(AudioManager.STREAM_MUSIC, 15, AudioManager.FLAG_SHOW_UI)</span><br><span class="line">  activity.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE)</span><br><span class="line">end</span><br><span class="line">ti.start()</span><br><span class="line">function onKeyDown(A0_0, A1_1)</span><br><span class="line">  if string.find(tostring(A1_1), &quot;KEYCODE_BACK&quot;) ~= nil then    //KEYCODE_BACK返回按键</span><br><span class="line">    activity.getSystemService(Context.AUDIO_SERVICE).setStreamVolume(AudioManager.STREAM_MUSIC, 15, AudioManager.FLAG_SHOW_UI)</span><br><span class="line">  end</span><br><span class="line">  return true</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 lua 只是找到了 0.mp3 ，之后疯狂循环，并且瞎写控制函数，然后就没有然后了，咱也不知道 java 里有没有瞎写， app 分析实在太难了~~</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/09/27/2019-09-27-lua_1/" data-id="cuidYZ1fIPsJkadbZIK0LB3dL" data-title="Mysterious app" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/09/29/2019-09-27-how2heap/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          how2heap
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/25/2019-09-25-java_1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Small weak chick</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

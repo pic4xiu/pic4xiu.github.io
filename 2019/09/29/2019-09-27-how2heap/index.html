@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>how2heap | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="好多大佬们都对how2heap这个项目进行了汇总,我就不班门弄斧了,但是同时大佬对一些问题一笔带过,这里就记一下本人在学 how2heap 中的一些有疑问的点,应该具有一定的代表性.大佬可以帮忙挑错,希望和大家一起进步 first_fit 疑问和拓展我一开始就有疑问,为什么明明是 smallbins 和 largebins 范围内的 chunk ,它直接去 unsortedbins 呢,事实上只要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="how2heap">
+<meta property="og:url" content="http://example.com/2019/09/29/2019-09-27-how2heap/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="好多大佬们都对how2heap这个项目进行了汇总,我就不班门弄斧了,但是同时大佬对一些问题一笔带过,这里就记一下本人在学 how2heap 中的一些有疑问的点,应该具有一定的代表性.大佬可以帮忙挑错,希望和大家一起进步 first_fit 疑问和拓展我一开始就有疑问,为什么明明是 smallbins 和 largebins 范围内的 chunk ,它直接去 unsortedbins 呢,事实上只要">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-09-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-09-27-how2heap" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/09/29/2019-09-27-how2heap/" class="article-date">
+  <time class="dt-published" datetime="2019-09-28T16:00:00.000Z" itemprop="datePublished">2019-09-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      how2heap
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>好多大佬们都对<strong>how2heap</strong>这个项目进行了汇总,我就不班门弄斧了,但是同时大佬对一些问题一笔带过,这里就记一下本人在学 how2heap 中的一些有疑问的点,应该具有一定的代表性.大佬可以帮忙挑错,希望和大家一起进步</p>
+<h2 id="first-fit-疑问和拓展"><a href="#first-fit-疑问和拓展" class="headerlink" title="first_fit 疑问和拓展"></a>first_fit 疑问和拓展</h2><p>我一开始就有疑问,为什么明明是 smallbins 和 largebins 范围内的 chunk ,它直接去 unsortedbins 呢,事实上只要不是 fastbins 范围内的,经过 free 后都会先进入 unsorted bin 待命.系统在进行 malloc 分配的时候 unsortedbin 算是起到一个缓冲区的作用,测试程序如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    char* a = malloc(512);</span><br><span class="line">    char* b = malloc(256);</span><br><span class="line">    free(a);</span><br><span class="line">    char* c = malloc(500);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>断在 malloc(c)处(<strong>注</strong>:以后 <code>char* c = malloc(500)</code> 这种直接简写成 malloc(c) )</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">    4 int main()</span><br><span class="line">    5 &#123;</span><br><span class="line">    6     char* a = malloc(512);</span><br><span class="line">    7     char* b = malloc(256);</span><br><span class="line">    8     free(a);</span><br><span class="line"> ►  9     char* c = malloc(500);</span><br><span class="line">   10 //  char* d = malloc(512); </span><br><span class="line">   11 &#125;</span><br><span class="line">──────────────────────────────────────────────────[ STACK ]───────────────────────────────────────────────────</span><br><span class="line">...</span><br><span class="line">────────────────────────────────────────────────[ BACKTRACE ]─────────────────────────────────────────────────</span><br><span class="line">...</span><br><span class="line">──────────────────────────────────────────────────────────────────────────────────────────────────────────────</span><br><span class="line">Breakpoint /home/pic/桌面/te.c:9</span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x602000 —▸ 0x7ffff7dd1b78 (main_arena+88) ◂— 0x602000</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br></pre></td></tr></table></figure>
+
+<p>之后 malloc(c) 会把 unsortedbin 这个取出(只有这个bin不加s,不是复数,也可以说明只有一个链表,2333),而倘若把程序进行如下的修改</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">    5 &#123;</span><br><span class="line">    6     char* a = malloc(512);</span><br><span class="line">    7     char* b = malloc(256);</span><br><span class="line">    8     free(a);</span><br><span class="line">    9     char* c = malloc(10);</span><br><span class="line"> ► 10     char* d = malloc(512); </span><br><span class="line">   11 &#125;</span><br><span class="line">──────────────────────────────────────────────────[ STACK ]───────────────────────────────────────────────────</span><br><span class="line">...</span><br><span class="line">────────────────────────────────────────────────[ BACKTRACE ]─────────────────────────────────────────────────</span><br><span class="line">...</span><br><span class="line">──────────────────────────────────────────────────────────────────────────────────────────────────────────────</span><br><span class="line">pwndbg&gt; x/32gx 0x602000</span><br><span class="line">0x602000:	0x0000000000000000	0x0000000000000021</span><br><span class="line">0x602010:	0x00007ffff7dd1d78	0x00007ffff7dd1d78</span><br><span class="line">0x602020:	0x0000000000000000	0x00000000000001f1</span><br><span class="line">0x602030:	0x00007ffff7dd1b78	0x00007ffff7dd1b78</span><br><span class="line">0x602040:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602050:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602060:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602070:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602080:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602090:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x6020a0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x6020b0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x6020c0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x6020d0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x6020e0:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x6020f0:	0x0000000000000000	0x0000000000000000</span><br></pre></td></tr></table></figure>
+<p>可以看到程序仍然是从 unsortedbin 取出的,不过进行了切割, c 只拿走了0x20(1是标志位)个字节,剩下了0x1f0字节(剩下的我们称之为 <strong>remainder chunk</strong> ,仍留在 unsortedbin 中),而 remainder chunk 完全不够 d 的大小,所以猜想 d 会切割 top chunk ,之后我们再 n 单步运行发现果然是这样,但是同时</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; heap</span><br><span class="line">0x602000 FASTBIN &#123;			&lt;------------------c</span><br><span class="line">  prev_size = 0, </span><br><span class="line">  size = 33, </span><br><span class="line">  fd = 0x7ffff7dd1d78 &lt;main_arena+600&gt;, </span><br><span class="line">  bk = 0x7ffff7dd1d78 &lt;main_arena+600&gt;, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x1f1</span><br><span class="line">&#125;</span><br><span class="line">0x602020 PREV_INUSE &#123;			&lt;------------------之前的 remainder chunk</span><br><span class="line">  prev_size = 0, </span><br><span class="line">  size = 497, </span><br><span class="line">  fd = 0x7ffff7dd1d58 &lt;main_arena+568&gt;, </span><br><span class="line">  bk = 0x7ffff7dd1d58 &lt;main_arena+568&gt;, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x0</span><br><span class="line">&#125;</span><br><span class="line">0x602210 &#123;				&lt;------------------b</span><br><span class="line">  prev_size = 496, </span><br><span class="line">  size = 272, </span><br><span class="line">  fd = 0x0, </span><br><span class="line">  bk = 0x0, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x0</span><br><span class="line">&#125;</span><br><span class="line">0x602320 PREV_INUSE &#123;			&lt;-------------------d</span><br><span class="line">  prev_size = 0, </span><br><span class="line">  size = 529, </span><br><span class="line">  fd = 0x0, </span><br><span class="line">  bk = 0x0, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x0</span><br><span class="line">&#125;</span><br><span class="line">0x602530 PREV_INUSE &#123;			&lt;-------------------top chunk</span><br><span class="line">  prev_size = 0, </span><br><span class="line">  size = 133841, </span><br><span class="line">  fd = 0x0, </span><br><span class="line">  bk = 0x0, </span><br><span class="line">  fd_nextsize = 0x0, </span><br><span class="line">  bk_nextsize = 0x0</span><br><span class="line">&#125;</span><br><span class="line">pwndbg&gt; p d</span><br><span class="line">$1 = 0x602330 &quot;&quot;</span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">0x1f0: 0x602020 —▸ 0x7ffff7dd1d58 (main_arena+568) ◂— 0x602020 /* &#x27;  `&#x27; */</span><br><span class="line">largebins</span><br><span class="line">empty</span><br></pre></td></tr></table></figure>
+
+<p>发现我们之前剩下的 chunk 这才被归入了 smallbins .我们可以形象的理解为 unsortedbin 非常强势,试图掌握一切,但是它在能力不足时才会把别人应得的归还,也即我们常说的甩锅,2333</p>
+<h2 id="consolidate研究"><a href="#consolidate研究" class="headerlink" title="consolidate研究"></a>consolidate研究</h2><p>我在这里直接演示一个比较极端的例子,因为 how2heap 中的程序 fastbin_dup_consolidate 看上去就像是直接整合到了 smallbins 一样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdint.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">int main() &#123;</span><br><span class="line">  void* p1 = malloc(0x70);</span><br><span class="line">  void* p3 = malloc(0x70);</span><br><span class="line">  void* p4 = malloc(0x70);</span><br><span class="line">  void* p5 = malloc(0x70);</span><br><span class="line">  void* p6 = malloc(0x70);</span><br><span class="line">  void* p7 = malloc(0x70);</span><br><span class="line">  void* p8 = malloc(0x70);</span><br><span class="line">  void* p9 = malloc(0x70);</span><br><span class="line">  void* p10 = malloc(0x70);</span><br><span class="line">  void* p2 = malloc(0x70);</span><br><span class="line">  free(p1);</span><br><span class="line">  free(p3);</span><br><span class="line">  free(p4);</span><br><span class="line">  free(p5);</span><br><span class="line">  free(p6);</span><br><span class="line">  free(p7);</span><br><span class="line">  free(p8);</span><br><span class="line">  free(p9);</span><br><span class="line">  free(p10);</span><br><span class="line">  void* p12 = malloc(0x400);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接在 malloc(p12) 中下断,跑起来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x602400 —▸ 0x602380 —▸ 0x602300 —▸ 0x602280 —▸ 0x602200 ◂— ...</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br></pre></td></tr></table></figure>
+
+<p>之前 free 的都跑到了 fastbins 再次 n 单步,发现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x602410 —▸ 0x7ffff7dd1b78 (main_arena+88) ◂— 0x602410</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br></pre></td></tr></table></figure>
+
+<p>经过 consolidate 后,我们的 fastbins 全部被摘下来了,同时进入了 unsortedbin ,而且也够 p12 要求的大小.所以整合过的 chunk 就直接分配给 p12 了.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p p12</span><br><span class="line">$2 = (void *) 0x602010</span><br></pre></td></tr></table></figure>
+
+<p>这时候我们再回头看看 fastbin_dup_consolidate ,把之前我们介绍的强势的 unsortedbin 概念拿过来,我们发现,事实上该程序在 <code>void* p3 = malloc(0x400);</code> 时, unsortedbin 的大小并不满足 p3 所要求的大小,所以会进行”甩锅”,把 unsortedbin 中的 chunk 丢到 smallbins 中</p>
+<h2 id="unsafe-unlink"><a href="#unsafe-unlink" class="headerlink" title="unsafe_unlink"></a>unsafe_unlink</h2><p>大佬们已经总结的很好了,解决这两个问题就完事</p>
+<ul>
+<li>unlink 过程</li>
+<li>最后的赋值修改</li>
+</ul>
+<blockquote>
+<p>unlink过程</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FD = P-&gt;fd;</span><br><span class="line">BK = P-&gt;bk;</span><br><span class="line">FD-&gt;bk = BK</span><br><span class="line">BK-&gt;fd = FD</span><br></pre></td></tr></table></figure>
+
+<p>我们看一下, FD 和 BK 都是相对 P(fake chunk) 而言的,所以 FD 就是 0x602058 ,同时 BK 是 0x602060 ,所以 FD-&gt;bk &#x3D; 0x602060 , BK-&gt;fd &#x3D; 0x602058 ,由于<code>FD-&gt;bk</code>和<code>BK-&gt;fd</code>这两块都是指向一处地址,后边的有效,改成了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/32gx 0x602058</span><br><span class="line">0x602058:	0x0000000000000000	0x00007ffff7dd2540</span><br><span class="line">0x602068 &lt;completed.7594&gt;:	0x0000000000000000	0x0000000000602058</span><br></pre></td></tr></table></figure>
+
+<p>要注意 chunk0_ptr 此时地址为 0x602070 ,我们可以修改指针的指向以达到任意写的目的,可以看看如下的小 demo</p>
+<blockquote>
+<p>最后的赋值修改,类似如此</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">#include &lt;stdint.h&gt;</span><br><span class="line"></span><br><span class="line">uint64_t  *chunk0_ptr;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	char b[8]=&quot;aaaa&quot;;</span><br><span class="line">	chunk0_ptr=&amp;b;</span><br><span class="line">	chunk0_ptr[0] = 0x4242424242424242LL;</span><br><span class="line">	printf(&quot;%s\n&quot;,b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;13:40&#125;~/桌面 ➭ gcc te.c</span><br><span class="line">te.c: In function ‘main’:</span><br><span class="line">te.c:10:12: warning: assignment from incompatible pointer type [-Wincompatible-pointer-types]</span><br><span class="line">  chunk0_ptr=&amp;b;</span><br><span class="line">            ^</span><br><span class="line">&#123;13:40&#125;~/桌面 ➭ ./a.out </span><br><span class="line">BBBBBBBB</span><br></pre></td></tr></table></figure>
+
+
+<p>接上篇.上一篇见<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6437">这里</a> (虽然两篇联系不大).这篇出现的小 demo ,都可以直接调试,供大家参考</p>
+<h2 id="困惑我的-small-bin-的源码"><a href="#困惑我的-small-bin-的源码" class="headerlink" title="困惑我的 small bin 的源码"></a>困惑我的 small bin 的源码</h2><p>做 house_of_lore 时,我在看源码时我遇到了一个很费解的问题(注释来自 ctf-wiki)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">   If a small request, check regular bin.  Since these &quot;smallbins&quot;</span><br><span class="line">   hold one size each, no searching within bins is necessary.</span><br><span class="line">   (For a large request, we need to wait until unsorted chunks are</span><br><span class="line">   processed to find best fit. But for small ones, fits are exact</span><br><span class="line">   anyway, so we can check now, which is faster.)</span><br><span class="line"> */</span><br><span class="line"></span><br><span class="line">if (in_smallbin_range(nb)) &#123;</span><br><span class="line">    // 获取 small bin 的索引</span><br><span class="line">    idx = smallbin_index(nb);</span><br><span class="line">    // 获取对应 small bin 中的 chunk 指针</span><br><span class="line">    bin = bin_at(av, idx);</span><br><span class="line">    // 先执行 victim= last(bin)，获取 small bin 的最后一个 chunk</span><br><span class="line">    // 如果 victim = bin ，那说明该 bin 为空。</span><br><span class="line">    // 如果不相等，那么会有两种情况</span><br><span class="line">    if ((victim = last(bin)) != bin) &#123;</span><br><span class="line">        // 第一种情况，small bin 还没有初始化。</span><br><span class="line">        if (victim == 0) /* initialization check */</span><br><span class="line">            // 执行初始化，将 fast bins 中的 chunk 进行合并</span><br><span class="line">            malloc_consolidate(av);</span><br><span class="line">        // 第二种情况，small bin 中存在空闲的 chunk</span><br><span class="line">        else &#123;</span><br><span class="line">            // 获取 small bin 中倒数第二个 chunk 。</span><br><span class="line">            bck = victim-&gt;bk;</span><br><span class="line">            // 检查 bck-&gt;fd 是不是 victim，防止伪造</span><br><span class="line">            if (__glibc_unlikely(bck-&gt;fd != victim)) &#123;</span><br><span class="line">                errstr = &quot;malloc(): smallbin double linked list corrupted&quot;;</span><br><span class="line">                goto errout;</span><br><span class="line">            &#125;</span><br><span class="line">            // 设置 victim 对应的 inuse 位</span><br><span class="line">            set_inuse_bit_at_offset(victim, nb);</span><br><span class="line">            // 修改 small bin 链表，将 small bin 的最后一个 chunk 取出来</span><br><span class="line">            bin-&gt;bk = bck;</span><br><span class="line">            bck-&gt;fd = bin;</span><br><span class="line">            // 如果不是 main_arena，设置对应的标志</span><br><span class="line">            if (av != &amp;main_arena) set_non_main_arena(victim);</span><br><span class="line">            // 细致的检查</span><br><span class="line">            check_malloced_chunk(av, victim, nb);</span><br><span class="line">            // 将申请到的 chunk 转化为对应的 mem 状态</span><br><span class="line">            void *p = chunk2mem(victim);</span><br><span class="line">            // 如果设置了 perturb_type , 则将获取到的chunk初始化为 perturb_type ^ 0xff</span><br><span class="line">            alloc_perturb(p, bytes);</span><br><span class="line">            return p;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的<code>bck = victim-&gt;bk;</code>把我整蒙了.ei??既然找到最后一个( victim ),那倒数第二个不就应该是 victim-&gt;fd 吗??怎么是找 victim-&gt;bk 呢.事实上,这就要考虑到 smallbins 的 FIFO (先进先出)原则,在本程序中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/32gx victim-2</span><br><span class="line">0x602000:	0x0000000000000000	0x0000000000000071</span><br><span class="line">0x602010:	0x00007ffff7dd1bd8	0x00007fffffffddf0</span><br><span class="line">...</span><br><span class="line">pwndbg&gt; p stack_buffer_1</span><br><span class="line">$1 = &#123;0x0, 0x0, 0x602000, 0x7fffffffddd0&#125;</span><br><span class="line">pwndbg&gt; p stack_buffer_2</span><br><span class="line">$2 = &#123;0x0, 0x0, 0x7fffffffddf0&#125;</span><br><span class="line">pwndbg&gt; p &amp;stack_buffer_1</span><br><span class="line">$3 = (intptr_t *(*)[4]) 0x7fffffffddf0</span><br><span class="line">pwndbg&gt; p &amp;stack_buffer_2</span><br><span class="line">$4 = (intptr_t *(*)[3]) 0x7fffffffddd0</span><br></pre></td></tr></table></figure>
+<p>通过构造情况我们画一下图(表格)</p>
+<table>
+<thead>
+<tr>
+<th align="center">victim_hdr</th>
+<th align="center">pre_size</th>
+<th align="center">size</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">victim_ptr</td>
+<td align="center">fd</td>
+<td align="center">&amp;stack_buffer_1_hdr</td>
+</tr>
+<tr>
+<td align="center">…</td>
+<td align="center">…</td>
+<td align="center">…</td>
+</tr>
+<tr>
+<td align="center">stack_buffer_1_hdr</td>
+<td align="center">pre_size</td>
+<td align="center">size</td>
+</tr>
+<tr>
+<td align="center">stack_buffer_1_ptr</td>
+<td align="center">&amp;victim_hdr</td>
+<td align="center">&amp;stack_buffer_2_hdr</td>
+</tr>
+<tr>
+<td align="center">…</td>
+<td align="center">…</td>
+<td align="center">…</td>
+</tr>
+<tr>
+<td align="center">stack_buffer_2_hdr</td>
+<td align="center">pre_size</td>
+<td align="center">size</td>
+</tr>
+<tr>
+<td align="center">stack_buffer_2_ptr</td>
+<td align="center">&amp;stack_buffer_1_hdr</td>
+<td align="center">bk</td>
+</tr>
+<tr>
+<td align="center">…</td>
+<td align="center">…</td>
+<td align="center">…</td>
+</tr>
+</tbody></table>
+<p>所谓的最后一个其实是 victim_hdr (我们伪造的链是从后向前伪造的),关键满足的 bypass 条件便是 <code>chunk-&gt;bk-&gt;fd==chunk</code> 即可,程序第一次 malloc(p3) 的时候是最后一个即 0x602010 要验证的便是 <code>victim-&gt;bk-&gt;fd==victim</code> ,把程序具体变量放进去就是 <code>stack_buffer_1-&gt;fd==victim</code> .同理,之后的 malloc(p4) 便是 <code>stack_buffer_2-&gt;fd==stack_buffer_1</code> ,确实成立后自然就 malloc 出来了</p>
+<h2 id="关于-poison-null-byte-的思考"><a href="#关于-poison-null-byte-的思考" class="headerlink" title="关于 poison_null_byte 的思考"></a>关于 poison_null_byte 的思考</h2><p>做这个的时候我感觉这个 bypass 条件有点过于简单,既然条件为  <code>prev_size(nextchunk(P))==chunksize(P)</code> ,只要能够利用溢出修改 chunksize(P) ,我们的 prev_size(nextchunk(P)) 也是由我们控制的,那我在下方任意一处伪造一个 fake_nextchunk 不就行了吗??测试程序如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">#include &lt;stdint.h&gt;</span><br><span class="line">#include &lt;malloc.h&gt;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">	uint8_t* a = (uint8_t*) malloc(1);</span><br><span class="line">	int real_a_size = malloc_usable_size(a);</span><br><span class="line">	void * B = malloc(0x150);</span><br><span class="line">	void * C = malloc(0x150);</span><br><span class="line">	malloc(0x10);</span><br><span class="line">	free(B);</span><br><span class="line">	a[real_a_size] = 0x40;</span><br><span class="line">	*(size_t*)(B+0x130) = 0x140;</span><br><span class="line">	void * D = malloc(0x80);</span><br><span class="line">	void * E = malloc(0x10);</span><br><span class="line">	free(D);</span><br><span class="line">	free(C);</span><br><span class="line">	C = malloc(0x2b0);</span><br><span class="line">	D = malloc(0x90);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到,我在<code>a[real_a_size] = 0x40;</code>和<code>*(size_t*)(B+0x130) = 0x140;</code>构造了和 poison_null_byte 一样的条件.断在 malloc(D) 之前,让程序跑起来</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">0x602160:	0x0000000000000140	0x0000000000000000</span><br><span class="line">0x602170:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602180:	0x0000000000000160	0x0000000000000160</span><br><span class="line">0x602190:	0x0000000000000000	0x0000000000000000</span><br><span class="line">pwndbg&gt; p C</span><br><span class="line">$3 = (void *) 0x602190</span><br></pre></td></tr></table></figure>
+
+<p>之后在 n 单步运行,发现程序果真修改的是我们伪造的 0x602160 处的地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0x602160:	0x00000000000000b0	0x0000000000000000</span><br><span class="line">0x602170:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602180:	0x0000000000000160	0x0000000000000160</span><br></pre></td></tr></table></figure>
+
+<p>事实上,把 prev_size(nextchunk(P)) 改到 C 的下方也是可以的(修改一下上方程序调试一下).所以结论便是:修改的 0x602160 ( prev_size(nextchunk(P)) )是通过现在的 B 的 size 找到的,然而在 free(D) 和 free(C) 后 chunk 之间的合并竟然利用的是 C 的 pre_size 来找到的之前的 B (虽然听上去很矛盾,但是 pre_size 设计出来的目的确实是如此,参见<a target="_blank" rel="noopener" href="https://introspelliam.github.io/2017/09/10/pwn/Linux%E5%A0%86%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90%E4%B8%8A/">此处</a>).所以只要不修改 real_c_presize 无论如何都是能够完成 chunk 的合并的.</p>
+<p>其实通过这个 bypass 还可以挖掘一些骚操作,比如通过把 chunksize(P) 改大(要求有溢出漏洞)我们甚至可以通过切割 unsortedbin 的方式获得一个新的 ptr_c ,用来完成一个变向的 UAF 等等</p>
+<h2 id="about-unsortedbin"><a href="#about-unsortedbin" class="headerlink" title="about unsortedbin"></a>about unsortedbin</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;stdint.h&gt;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">  intptr_t stack_buffer[4] = &#123;0&#125;;</span><br><span class="line">  intptr_t stack_buffer_1[4] = &#123;0&#125;;</span><br><span class="line">  intptr_t* victim = malloc(0x100);</span><br><span class="line">  intptr_t* p1 = malloc(0x100);</span><br><span class="line">  free(victim);</span><br><span class="line">  stack_buffer[1] = 0x110;</span><br><span class="line">  stack_buffer[3] = (intptr_t)stack_buffer_1;</span><br><span class="line">  stack_buffer_1[1] = 0x100 + 0x10;</span><br><span class="line">  stack_buffer_1[3] = (intptr_t)stack_buffer_1;</span><br><span class="line">  victim[-1] = 32;</span><br><span class="line">  victim[1] = (intptr_t)stack_buffer;</span><br><span class="line">  fprintf(stderr, &quot;malloc(0x100): %p\n&quot;, malloc(0x100));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为了加深理解,我写了一个这样的小 demo ,可以看到,我故意把链加长了,有一个 check 我们需要注意一下,即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fprintf(stderr, &quot;Size should be different from the next request size to return fake_chunk and need to pass the check 2*SIZE_SZ (&gt; 16 on x64) &amp;&amp; &lt; av-&gt;system_mem\n&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>大小必须让它和下一个要求的不同,且大于 2*SIZE_SZ ,同时还必须小于已分配内存的大小.好,我们让程序跑起来,断在最后一个 malloc(0x100) 处.尽管 stack_buffer 和 stack_buffer_1 差不多,但是程序在 malloc(0x100) 的时候还是会选择 stack_buffer </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/8gx stack_buffer</span><br><span class="line">0x7fffffffddd0:	0x0000000000000000	0x0000000000000110		----stack_buffer</span><br><span class="line">0x7fffffffdde0:	0x0000000000000000	0x00007fffffffddf0</span><br><span class="line">0x7fffffffddf0:	0x0000000000000000	0x0000000000000110		----stack_buffer_1</span><br><span class="line">0x7fffffffde00:	0x0000000000000000	0x00007fffffffddf0</span><br><span class="line">pwndbg&gt; n</span><br><span class="line">malloc(0x100): 0x7fffffffdde0</span><br></pre></td></tr></table></figure>
+
+<p>然而当把 <code>stack_buffer[1] = 0x110;</code> 中的 0x110 改成别的,这时候再 malloc(0x100) 才会使用我们之后构造的 stack_buffer_1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">11	  stack_buffer[1] = 0x100;		--------修改为 0x100</span><br><span class="line">12	  stack_buffer[3] = (intptr_t)stack_buffer_1;</span><br><span class="line">13	  stack_buffer_1[1] = 0x110;</span><br><span class="line">14	  stack_buffer_1[3] = (intptr_t)stack_buffer_1;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/8gx stack_buffer</span><br><span class="line">0x7fffffffddd0:	0x0000000000000000	0x0000000000000100</span><br><span class="line">0x7fffffffdde0:	0x0000000000000000	0x00007fffffffddf0</span><br><span class="line">0x7fffffffddf0:	0x0000000000000000	0x0000000000000110</span><br><span class="line">0x7fffffffde00:	0x0000000000000000	0x00007fffffffddf0</span><br><span class="line">pwndbg&gt; n</span><br><span class="line">malloc(0x100): 0x7fffffffde00</span><br></pre></td></tr></table></figure>
+
+<p>同时经过遍历的 stack_buffer 和一开始真的 chunk 即 victim 也因为能力不足(上篇中形象的概念),跑到了 smallbins.当然能能不能用另说,2333</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all [corrupted]</span><br><span class="line">FD: 0x602000 —▸ 0x7ffff7dd1b88 (main_arena+104) ◂— 0x602000</span><br><span class="line">BK: 0x7fffffffddf0 ◂— 0x7fffffffddf0</span><br><span class="line">smallbins</span><br><span class="line">0x20: 0x602000 —▸ 0x7ffff7dd1b88 (main_arena+104) ◂— 0x602000</span><br><span class="line">0x100: 0x7fffffffddd0 —▸ 0x7ffff7dd1c68 (main_arena+328) ◂— 0x7fffffffddd0</span><br><span class="line">largebins</span><br><span class="line">empty</span><br></pre></td></tr></table></figure>
+
+<p>所以 unsortedbin 是从头开始遍历,途中遇到的能力不足的 unsortedbin 都会被安排到对应的 bins 中,而一旦有合适的就停止遍历并使用,为什么说是停止遍历呢??可以调试一下一开始的程序,看程序在最后一个 malloc(0x100) 之后的 bins</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all [corrupted]</span><br><span class="line">FD: 0x602000 —▸ 0x7ffff7dd1b88 (main_arena+104) ◂— 0x602000</span><br><span class="line">BK: 0x7fffffffddf0 ◂— 0x7fffffffddf0</span><br><span class="line">smallbins</span><br><span class="line">0x20: 0x602000 —▸ 0x7ffff7dd1b88 (main_arena+104) ◂— 0x602000</span><br><span class="line">largebins</span><br><span class="line">empty</span><br></pre></td></tr></table></figure>
+
+<p>相当于只把一开始的 victim 给并入了 smallbins ,而 stack_buffer_1 还是待在 unsortedbin 中</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>剩下的一些问题,在网上各位师傅的分析中已经很明了了.本篇的初衷就是扣一些易犯的错和问题,越是遇到难的诸如 <code>house of orange</code> 等问题大家就越深入分析,本篇也就不再谈了(而且感觉自己也不能表达的很清楚). how2heap 中的大部分都是欺骗系统的一系列 bypass 和构造,提升的方式就是做题和看源码了</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/09/29/2019-09-27-how2heap/" data-id="cuidi1VNqIATjxyZuKJJT_NCb" data-title="how2heap" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/10/04/2019-10-04-printf/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          format string
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/27/2019-09-27-lua_1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Mysterious app</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

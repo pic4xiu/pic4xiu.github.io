@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>advanced understanding | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Studyed by 走位,orz main thread (don’t have heap_info just one heap)heap use brk (adjoin with data) use program break location to adjust the main arena(global variable) thread heap use mmap(can contain">
+<meta property="og:type" content="article">
+<meta property="og:title" content="advanced understanding">
+<meta property="og:url" content="http://example.com/2019/09/23/2019-09-23-heap_advan/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Studyed by 走位,orz main thread (don’t have heap_info just one heap)heap use brk (adjoin with data) use program break location to adjust the main arena(global variable) thread heap use mmap(can contain">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-09-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-09-23-heap_advan" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/09/23/2019-09-23-heap_advan/" class="article-date">
+  <time class="dt-published" datetime="2019-09-22T16:00:00.000Z" itemprop="datePublished">2019-09-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      advanced understanding
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Studyed by <strong>走位</strong>,orz</p>
+<p>main thread (don’t have <strong>heap_info</strong> just one heap)heap use <strong>brk</strong> (adjoin with data)</p>
+<p>use <strong>program break location</strong> to adjust the main arena(global variable)</p>
+<p>thread heap use mmap(can contain many heaps)</p>
+<ul>
+<li>arena -&gt; heap -&gt; chunk</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">struct malloc_state</span><br><span class="line">&#123;</span><br><span class="line">  /* Serialize access.  */</span><br><span class="line">  mutex_t mutex;</span><br><span class="line">  /* Flags (formerly in max_fast).  */</span><br><span class="line">  int flags;</span><br><span class="line">  /* Fastbins */</span><br><span class="line">  mfastbinptr fastbinsY[NFASTBINS];</span><br><span class="line">  /* Base of the topmost chunk -- not otherwise kept in a bin */</span><br><span class="line">  mchunkptr top;</span><br><span class="line">  /* The remainder from the most recent split of a small request */</span><br><span class="line">  mchunkptr last_remainder;</span><br><span class="line">  /* Normal bins packed as described above */</span><br><span class="line">  mchunkptr bins[NBINS * 2 - 2];</span><br><span class="line">  /* Bitmap of bins */</span><br><span class="line">  unsigned int binmap[BINMAPSIZE];</span><br><span class="line">  /* Linked list */</span><br><span class="line">  struct malloc_state *next;</span><br><span class="line">  /* Linked list for free arenas.  */</span><br><span class="line">  struct malloc_state *next_free;</span><br><span class="line">  /* Memory allocated from the system in this arena.  */</span><br><span class="line">  INTERNAL_SIZE_T system_mem;</span><br><span class="line">  INTERNAL_SIZE_T max_system_mem;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">typedef struct _heap_info</span><br><span class="line">&#123;</span><br><span class="line">  mstate ar_ptr; /* Arena for this heap. */</span><br><span class="line">  struct _heap_info *prev; /* Previous heap. */</span><br><span class="line">  size_t size;   /* Current size in bytes. */</span><br><span class="line">  size_t mprotect_size; /* Size in bytes that has been mprotected</span><br><span class="line">                           PROT_READ|PROT_WRITE.  */</span><br><span class="line">  /* Make sure the following data is properly aligned, particularly</span><br><span class="line">     that sizeof (heap_info) + 2 * SIZE_SZ is a multiple of</span><br><span class="line">     MALLOC_ALIGNMENT. */</span><br><span class="line">  char pad[-6 * SIZE_SZ &amp; MALLOC_ALIGN_MASK];</span><br><span class="line">&#125; heap_info;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">struct malloc_chunk &#123;</span><br><span class="line">  /* #define INTERNAL_SIZE_T size_t */</span><br><span class="line">  INTERNAL_SIZE_T      prev_size;  /* Size of previous chunk (if free).  */</span><br><span class="line">  INTERNAL_SIZE_T      size;       /* Size in bytes, including overhead. */</span><br><span class="line">  struct malloc_chunk* fd;         /* double links -- used only if free. 这两个指针只在free chunk中存在*/</span><br><span class="line">  struct malloc_chunk* bk;</span><br><span class="line">  /* Only used for large blocks: pointer to next larger size.  */</span><br><span class="line">  struct malloc_chunk* fd_nextsize; /* double links -- used only if free. */</span><br><span class="line">  struct malloc_chunk* bk_nextsize;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://introspelliam.github.io/2017/09/10/pwn/Linux%E5%A0%86%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90%E4%B8%8A/">two picture</a></p>
+<h2 id="last-remainder-chunk"><a href="#last-remainder-chunk" class="headerlink" title="last remainder chunk"></a>last remainder chunk</h2><p>when I malloc(small chunk) but my small bin and unsorted bin can not satisfy,I will ergodic binmaps to find the most fit chunk .if this chunk has rest,the rest will be put into unsorted bin and we call it last remainer chunk</p>
+<h2 id="fast-bin"><a href="#fast-bin" class="headerlink" title="fast bin"></a>fast bin</h2><p>first malloc(fast bin) , system will execute _int_malloc function , it will find that fast bin is null , and small bin is also null , so will execute malloc_consolidate to initialize malloc_state</p>
+<blockquote>
+<p>malloc_consolidate</p>
+</blockquote>
+<ul>
+<li>initialize malloc_state</li>
+<li>initialize bins</li>
+</ul>
+<blockquote>
+<p>malloc_state</p>
+</blockquote>
+<ul>
+<li>bins pointe to themselves</li>
+</ul>
+<h2 id="unsorted-bin"><a href="#unsorted-bin" class="headerlink" title="unsorted bin"></a>unsorted bin</h2><blockquote>
+<p>circulating double linked list</p>
+</blockquote>
+<p>No restrictions for size</p>
+<h2 id="small-bin"><a href="#small-bin" class="headerlink" title="small bin"></a>small bin</h2><blockquote>
+<p>smaller than 512 bytes</p>
+</blockquote>
+<ul>
+<li>FIFO</li>
+<li>also <code>circulating double linked list</code></li>
+<li>need to be merged</li>
+<li>16 + 61*8 &#x3D; 508</li>
+</ul>
+<p>when you free(small bin) , system will check the bin adjoin the other free bin or not , if adjoin ,system will merge them and fall off from small bin , and put them into unsorted bin</p>
+<h2 id="large-bin"><a href="#large-bin" class="headerlink" title="large bin"></a>large bin</h2><blockquote>
+<p>larged tham 512 bytes</p>
+</blockquote>
+<p>Sort from big to small in one bin , the largest will be put into front end and the smallest will be rear end</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/09/23/2019-09-23-heap_advan/" data-id="cuid0mkhTvV-A9KxXH7q_q63t" data-title="advanced understanding" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/09/25/2019-09-25-java_1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Small weak chick
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/09/04/2019-09-08-isc2019/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">信息安全竞赛</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>C language | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Foreword Why do I have to do this tag  以后此标签是C语言学习，会说一些奇淫技巧和算法思路，毕竟逆向搞的就是算(shu)法(xue),再加上本人大一C++学的超级菜，不练习不会啊，正向开发都不会何谈逆向~ Problem and Analysis Calculate two numbers‘ highest common divisor  我们最先想到的应该是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C language">
+<meta property="og:url" content="http://example.com/2019/03/30/2019-03-30-C1st/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Foreword Why do I have to do this tag  以后此标签是C语言学习，会说一些奇淫技巧和算法思路，毕竟逆向搞的就是算(shu)法(xue),再加上本人大一C++学的超级菜，不练习不会啊，正向开发都不会何谈逆向~ Problem and Analysis Calculate two numbers‘ highest common divisor  我们最先想到的应该是">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-03-29T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="misc">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-03-30-C1st" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/03/30/2019-03-30-C1st/" class="article-date">
+  <time class="dt-published" datetime="2019-03-29T16:00:00.000Z" itemprop="datePublished">2019-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      C language
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="Foreword"><a href="#Foreword" class="headerlink" title="Foreword"></a>Foreword</h2><blockquote>
+<p>Why do I have to do this tag</p>
+</blockquote>
+<p>以后此标签是C语言学习，会说一些奇淫技巧和算法思路，毕竟逆向搞的就是算(shu)法(xue),再加上本人大一C++学的超级菜，不练习不会啊，正向开发都不会何谈逆向~</p>
+<h2 id="Problem-and-Analysis"><a href="#Problem-and-Analysis" class="headerlink" title="Problem and Analysis"></a>Problem and Analysis</h2><blockquote>
+<p>Calculate two numbers‘ highest common divisor</p>
+</blockquote>
+<p>我们最先想到的应该是<strong>素因数分解法</strong>（短除法与之类似）了，将两数进行因数分解，取共同元素组成最大公因数，这是之前我乱写的分解质因数的算法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    int x;</span><br><span class="line">    scanf(&quot;%d&quot;, &amp;x);</span><br><span class="line">    for (int y = 2; y &lt;= x; y++)</span><br><span class="line">    &#123;</span><br><span class="line">        if (x % y == 0)</span><br><span class="line">        &#123;</span><br><span class="line">            x = x / y;</span><br><span class="line">            printf(&quot;%d\t&quot;, y);</span><br><span class="line">            y = 1;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种方法极其简单科学，但是同时也面临着一个很大的问题：时间复杂度，这种暴力计算在计算很大的数上不占优势。我们需进行优化</p>
+<p>于是想起之前学过的**<a target="_blank" rel="noopener" href="http://mathworld.wolfram.com/EuclideanAlgorithm.html">辗转相除法</a>**，我们来进行编程解决，核心如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">while( a &gt; 0 &amp;&amp; b &gt; 0 ) </span><br><span class="line">   &#123;</span><br><span class="line">   if( a &gt; b )</span><br><span class="line">       a = a % b;</span><br><span class="line">   else</span><br><span class="line">       b = b % a;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然觉得这段已经很简单，但是觉得可以再次进行优化（因为感觉”对称度”很高），于是在维基百科上看到了这个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int GCD(int a, int b)</span><br><span class="line">&#123;</span><br><span class="line">	if (b)</span><br><span class="line">            while((a %= b) &amp;&amp; (b %= a));</span><br><span class="line">	return a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>惊为天人，这么优美的算法是怎么想出了来的，三行代码把辗转相除法的思想解释的淋漓尽致，tql</p>
+<p>我们来分析一下<code>while((a %= b) &amp;&amp; (b %= a))</code>。我们在学习C++的时候知道，while中的赋值语句是先赋值之后会进行判断表达式左侧的值是否为0，同时while中的&amp;&amp;运算符在判断时进行了优化，只要左侧值为0，右侧的语句将不执行。我们直接用27和19进行举例</p>
+<ul>
+<li>a &#x3D; 27 % 19 &#x3D; 8	；	b &#x3D; 19 % 8 &#x3D; 3	</li>
+<li>a &#x3D; 08 % 03 &#x3D; 2	；	b &#x3D; 03 % 2 &#x3D; 1	</li>
+<li>a &#x3D; 02 % 01 &#x3D; 0	；	结束循环(之后的语句不会被执行)</li>
+</ul>
+<p>这时候a &#x3D; 0，b &#x3D; 1返回<code>a+b</code>的值为1。事实上，值永远是去取a和b经过计算后的最大值，且两个变量的值有某一个必然是0（否则不会退出循环），写入a+b较为简单明了</p>
+<h2 id="Link"><a href="#Link" class="headerlink" title="Link"></a>Link</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%9C%80%E5%A4%A7%E5%85%AC%E5%9B%A0%E6%95%B8">GCD source code</a></p>
+</blockquote>
+<h2 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h2><blockquote>
+<p>print the diamond below</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">   *   </span><br><span class="line">  ***  </span><br><span class="line"> ***** </span><br><span class="line">*******</span><br><span class="line"> ***** </span><br><span class="line">  ***  </span><br><span class="line">   *   </span><br></pre></td></tr></table></figure>
+
+<p>原本我想讲这个菱形分成两部分，打印出两个三角形后<strong>拼合</strong>形成菱形（这也是Ｃ++老师讲的）．但是显然这种方法够粗暴，但是代码量不少，能不能直接打印出来，不”钻空子”?</p>
+<p>之后我找了一些代码进行挑选，最终选了一个最奇怪，但我感觉是给我触动最大的．(代码来自知乎大佬<strong>WHsT</strong>)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#define ABS(x) ((x) &gt; 0 ? (x) : -(x))</span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    double a = 3, b = 3; </span><br><span class="line">    int i, j;</span><br><span class="line">    for (i = -a; i &lt;= a; ++i) &#123;</span><br><span class="line">        for (j = -b; j &lt;= b; ++j)</span><br><span class="line">            putchar((ABS(i)/a + ABS(j)/b &gt; 1) ? &#x27; &#x27; : &#x27;*&#x27;);</span><br><span class="line">        putchar(&#x27;\n&#x27;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码简洁精炼，但一开始我没看懂，怎么用double类型？看到define的宏定义我可能明白了，它利用绝对值进行判断，来控制<code>*</code>和<code> </code>的输出，下面我们具体分析一下这段精密的代码</p>
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><p>一开始定义的<code>ABS</code>是取绝对值，到主函数中先遍历行，之后是列，关键代码来了<code>putchar((ABS(i)/a + ABS(j)/b &gt; 1) ? &#39; &#39; : &#39;*&#39;)</code>,这句话的意思直接上代码很难理解，我们上一个表达式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">|x|/a+|y|/b&lt;=1</span><br></pre></td></tr></table></figure>
+
+<p>其中a和b是菱形的长和宽的一半，通过这个表达式去判定真正符合条件的点，最终实现打印.从数学层面理解就不难了</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>本题不难,但昨天通过这题知道了原来打印图形神马的,其实不一定从结果出发,从问题的本质出发也许会是另一番天地,算法还是要学习啊,什么都不会怎么逆向:)</p>
+<h2 id="Impression"><a href="#Impression" class="headerlink" title="Impression"></a>Impression</h2><blockquote>
+<p>Some small tricks</p>
+</blockquote>
+<p>其实在自己编程时我都是尽可能做到最优解,但有一次将自己程序丢到<strong>ida</strong>用<strong>F5</strong>大法,在分析的时候发现它竟然把我的算法又进行了优化,遭到狠狠的打脸,很强~~~</p>
+<p>下面仅仅利用for循环这个例子给大家细致的看一下,for语句怎么用才能达到较为完美的效果.</p>
+<h2 id="Combination"><a href="#Combination" class="headerlink" title="Combination"></a>Combination</h2><p>例如:<code>计算100~200内的素数</code></p>
+<p>这个是我之前写的,我们直接上代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    int j;</span><br><span class="line">    for (int i = 101; i &lt;= 200; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        for (j = 2; j &lt; i / 2; j++)</span><br><span class="line">            if (i % j == 0)</span><br><span class="line">                break;</span><br><span class="line">        if (j == i / 2)</span><br><span class="line">            printf(&quot;%d\n&quot;, i);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里,我们没有利用数学层面的优化,仅仅利用代码层面暴力求解,且没有引进<code>math.h</code>头文件的<code>sqrt()</code>函数,只是找遍<code>i/2</code>的因数就停止进而输出</p>
+<p>很好看懂的一个程序,我们这时候看第二层循环(第一层仅仅是让数字递增,无法优化),我们观察到<strong>for</strong>循环中的<strong>if</strong>语句仅仅是一个<code>break</code>操作,我们知道<strong>for</strong>循环中间的条件也是控制循环跳出的,那我们就可以将两者写到一个表达式中,进而把算法优化(<strong>ida</strong>的功劳)为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for ( j = 2; j &lt; i / 2 &amp;&amp; i % j; ++j )</span><br><span class="line">   ;</span><br></pre></td></tr></table></figure>
+
+<p>当然我们利用这个的前提是<strong>for</strong>语句中仅含<strong>if</strong>控制程序走向的情况,其他情况还是好好用括号码代码为妙</p>
+<h2 id="Simplify"><a href="#Simplify" class="headerlink" title="Simplify"></a>Simplify</h2><blockquote>
+<p>Some easy example</p>
+</blockquote>
+<h3 id="printf"><a href="#printf" class="headerlink" title="printf"></a>printf</h3><p>常见的输出:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for (int i = 0; i &lt;= 9; i++)</span><br><span class="line">        printf(&quot;%d\n&quot;, a[i]);</span><br></pre></td></tr></table></figure>
+
+<p>完成从a[0]到a[10]输出</p>
+<p>改进后:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">for (int i=0; i&lt;10; printf(&quot;%d\n&quot;, a[i++])); </span><br></pre></td></tr></table></figure>
+
+<p>这给我们提供了一个思路,那就是将尽可能多的要素包含到<strong>for</strong>语句中,使得代码更加精简与优美,当然这带来一个显著的缺点,比之前的程序不自然,别人读起来会别扭</p>
+<h3 id="Infinite-loop"><a href="#Infinite-loop" class="headerlink" title="Infinite loop"></a>Infinite loop</h3><p>很早之前程序员习惯于利用<code>goto</code>来实现无限循环,到现在<code>while(1)</code>和<code>for(;;)</code>早已是大势所趋,主要还是<code>goto</code>语句太过强大,导致程序可读性很低,到后期的维护也会比较难办</p>
+<h2 id="Reflection"><a href="#Reflection" class="headerlink" title="Reflection"></a>Reflection</h2><blockquote>
+<p>Present feelings</p>
+</blockquote>
+<p>上周经历了一周（04-22）的数学建模，把我压抑得够呛，现在终于能玩我的计算机了~~十分开心，上周熬了几天，在实验室混了好久。可能是最近习惯了学习新鲜知识，今天的实验课竟然没在划水，一直在搞，今天的算法分析整了个<strong>大整数乘法</strong>，记录一下好不容易看懂的一个算法。</p>
+<h2 id="Analysis-1"><a href="#Analysis-1" class="headerlink" title="Analysis"></a>Analysis</h2><p>问题如下所描述:</p>
+<p><code>输入两个2^n位大整数X和Y, 用分治法的变形方式实现乘积运算，使时间复杂度降得尽可能低</code></p>
+<p>其实我们应该回忆一下自己在计算乘法时候的采用的算数式，我们其实是把<strong>对应位数</strong>一样的数字进行相加，而不同的位数要进行相应的进位换算才能在最后进行相加，这不就是<strong>分治法</strong>吗?</p>
+<p>我们以<strong>27</strong>和<strong>41</strong>为例：</p>
+<p>7与1对应相乘得到最低位，2与1和7与4对应乘积进行相加得到中间位，最后2与4的乘积得到最高位，其中中间位结果位<code>2*1+4*7=30</code>，我们需要把3进位上去，最后的结果为1107</p>
+<p>接下来我们把这些进行代码<strong>抽象</strong></p>
+<p>相关变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int len_a = strlen(a); //a为字符串数字，同理，b与之类似</span><br><span class="line">int len_b = strlen(b);</span><br><span class="line">int* num_arr = new int[len_a+len_b];</span><br></pre></td></tr></table></figure>
+
+<p>对应位数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for (int i=len_a-1; i&gt;=0; --i) &#123;//分别算出各个位数 </span><br><span class="line">        for (int j=len_b-1; j&gt;=0; --j) &#123;</span><br><span class="line">        num_arr[i+j+1] += (b[j]-&#x27;0&#x27;)*(a[i]-&#x27;0&#x27;);//把对应位数的数字直接加起来</span><br><span class="line">        &#125;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+<p>进行进位：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">for (int i=len_a+len_b-1; i&gt;=0; --i) &#123;//进位</span><br><span class="line">        if (num_arr[i] &gt;= 10) &#123;</span><br><span class="line">        	num_arr[i-1] += num_arr[i]/10;</span><br><span class="line">        	num_arr[i] %= 10;</span><br><span class="line">        &#125;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成，我们只需将数组num_arr输出即可完成，这其实不算一个创新算法，只是将我们日常使用的方法进行了推广</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/03/30/2019-03-30-C1st/" data-id="cuidVeALwwyO1X-VmZAACDWms" data-title="C language" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/misc/" rel="tag">misc</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/04/01/2019-03-30-%E5%98%89%E9%9F%A6%E6%80%9D/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          嘉韦思杯
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/03/26/2019-03-26-first/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">My First Post</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

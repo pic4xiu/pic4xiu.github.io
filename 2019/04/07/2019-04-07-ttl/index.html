@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>西湖论剑 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="TTL An interesting misc  拿到本题很奇怪，题目文件是 1234567891011121314151617TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;63TTL&#x3D;63TTL&#x3D;255TTL&#x3D;191TTL&#x3D;63...  我们没什么思路，只是看到很多TTL的值 TT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="西湖论剑">
+<meta property="og:url" content="http://example.com/2019/04/07/2019-04-07-ttl/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="TTL An interesting misc  拿到本题很奇怪，题目文件是 1234567891011121314151617TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;191TTL&#x3D;127TTL&#x3D;63TTL&#x3D;63TTL&#x3D;255TTL&#x3D;191TTL&#x3D;63...  我们没什么思路，只是看到很多TTL的值 TT">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-04-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-07T18:15:52.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="CTF">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-2019-04-07-ttl" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2019/04/07/2019-04-07-ttl/" class="article-date">
+  <time class="dt-published" datetime="2019-04-06T16:00:00.000Z" itemprop="datePublished">2019-04-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      西湖论剑
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="TTL"><a href="#TTL" class="headerlink" title="TTL"></a>TTL</h2><blockquote>
+<p>An interesting misc</p>
+</blockquote>
+<p>拿到本题很奇怪，题目文件是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=191</span><br><span class="line">TTL=127</span><br><span class="line">TTL=63</span><br><span class="line">TTL=63</span><br><span class="line">TTL=255</span><br><span class="line">TTL=191</span><br><span class="line">TTL=63</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>我们没什么思路，只是看到很多TTL的值</p>
+<p><strong>TTL是 Time To Live的缩写，该字段指定IP包被路由器丢弃之前允许通过的最大网段数量。TTL是IPv4包头的一个8 bit字段。</strong>   –摘自百度百科</p>
+<p>没什么思路，在网上搜索了一波发现</p>
+<p><strong>IP报文在路由间穿梭的时候每经过一个路由，TTL就会减1，当TTL为0的时候，该报文就会被丢弃。TTL所占的位数是8位，也就是0-255的范围，但是在大多数情况下通常只需要经过很小的跳数就能完成报文的转发，远远比上限255小得多，所以我们可以用TTL值的前两位来进行传输隐藏数据。</strong></p>
+<p><strong>如：须传送H字符，只需把H字符换成二进制，每两位为一组，每次填充到TTL字段的开头两位并把剩下的6位设置为1（xx111111），这样发4个IP报文即可传送1个字节。</strong>	  –摘自<a target="_blank" rel="noopener" href="https://wooyun.js.org/drops/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F%E6%8A%80%E6%9C%AF.html">此处</a></p>
+<h2 id="Analysis"><a href="#Analysis" class="headerlink" title="Analysis"></a>Analysis</h2><blockquote>
+<p>My thought</p>
+</blockquote>
+<p>于是思路有了，想到把TTL直接用python按下列替换</p>
+<ul>
+<li>63 &#x3D; 00111111</li>
+<li>127 &#x3D; 01111111</li>
+<li>191 &#x3D; 10111111</li>
+<li>255 &#x3D; 11111111</li>
+</ul>
+<p>但是想到要提取前2位，所以我们按下列替换</p>
+<ul>
+<li>TTL&#x3D;63 -&gt; 00</li>
+<li>TTL&#x3D;127-&gt; 01</li>
+<li>TTL&#x3D;191-&gt; 10</li>
+<li>TTL&#x3D;255-&gt; 11</li>
+<li>“\n”     -&gt; “”(趁机把换行替换)</li>
+</ul>
+<p>py脚本类似下方</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">fp1=open(&quot;ttl.txt&quot;,&quot;r&quot;)</span><br><span class="line">fp2=open(&quot;ttl_1.txt&quot;,&quot;w&quot;)</span><br><span class="line"> </span><br><span class="line">for s in fp1.readlines():#读出</span><br><span class="line">    fp4.write(s.replace(&quot;TTL=63&quot;,&quot;00&quot;)) #替换并写入</span><br><span class="line">fp1.close()</span><br><span class="line">fp2.close()</span><br></pre></td></tr></table></figure>
+
+<p>之后我们得到一串二进制数字（具体是295326组），然后我们就要把这串数字转换为字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">import re</span><br><span class="line">aa=&quot;(那串数字，当然打开文件也可以)&quot;</span><br><span class="line">bb=re.findall(r&#x27;.&#123;8&#125;&#x27;,aa)#以八位为一组进行读取</span><br><span class="line">str1 = &quot;&quot;</span><br><span class="line">for b in bb:</span><br><span class="line">    str1 += chr(int(b,2))</span><br><span class="line"></span><br><span class="line">print(str1)</span><br></pre></td></tr></table></figure>
+
+<p>终于得到了一堆二进制数字看到开头是<strong>FFD8FF</strong>，我们可以直接将这串字符串另存为png格式（就叫a.png），奇迹发生了，是1&#x2F;6个二维码，我们想到应该是图片分离，利用<br><code>foremost a.png</code>得到六个二维码，<strong>画图</strong>大法直接拼接即可扫码，然后就得到二位码内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">key:AutomaticKey </span><br><span class="line">cipher:fftu&#123;2028mb39927wn1f96o6e12z03j58002p&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到<strong>AutomaticKey</strong>我们就理解了，本题是<strong>Autokey Cipher</strong>，我们直接到这<a target="_blank" rel="noopener" href="http://www.practicalcryptography.com/ciphers/classical-era/autokey/">在线解题</a>,得到flag？？怎么比原来短了，看了看发现，哦，数字都消失了，没事，我们直接手动填写，Get！</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><blockquote>
+<p>A zibi day</p>
+</blockquote>
+<p>今天做西湖论剑，本来本人想做逆向和pwn，结果全程划水，就解了几道题，还没逆向和pwn，看了看杂项和密码，把最简单的做了。逆向第一题是C++的时候心态都爆了，之后心情极度难受，主要还是太菜了，焦灼等待writeup，继续学习啊~</p>
+<h2 id="Link"><a href="#Link" class="headerlink" title="Link"></a>Link</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/pic4xiu/C/blob/master/%E9%A2%98%E7%9B%AE%E9%93%BE%E6%8E%A5/TTL.txt">TTL</a></p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2019/04/07/2019-04-07-ttl/" data-id="cuida2KSoEkVHY3VMPv_125Yi" data-title="西湖论剑" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/05/02/2019-05-02-easyCpp/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          西湖论剑
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/04/06/2019-04-06-U1st/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Ubuntu beautify</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/pwn/">pwn</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/tools/">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CTF/" rel="tag">CTF</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Misc/" rel="tag">Misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Web/" rel="tag">Web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ai/" rel="tag">ai</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chat/" rel="tag">chat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fuzz/" rel="tag">fuzz</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/misc/" rel="tag">misc</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pwn/" rel="tag">pwn</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tools/" rel="tag">tools</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CTF/" style="font-size: 17.5px;">CTF</a> <a href="/tags/Fuzz/" style="font-size: 10px;">Fuzz</a> <a href="/tags/Misc/" style="font-size: 12.5px;">Misc</a> <a href="/tags/Web/" style="font-size: 12.5px;">Web</a> <a href="/tags/ai/" style="font-size: 10px;">ai</a> <a href="/tags/chat/" style="font-size: 15px;">chat</a> <a href="/tags/fuzz/" style="font-size: 10px;">fuzz</a> <a href="/tags/misc/" style="font-size: 17.5px;">misc</a> <a href="/tags/pwn/" style="font-size: 20px;">pwn</a> <a href="/tags/python/" style="font-size: 10px;">python</a> <a href="/tags/tools/" style="font-size: 10px;">tools</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">October 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">June 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/05/">May 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/04/">April 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">July 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">September 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">August 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">October 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">September 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">August 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">June 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">May 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/08/">August 1999</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/1999/01/">January 1999</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2025/10/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/2023-06-27-fuzzer/">如何完成一个 fuzzer</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-05-31-report/">安全开发</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/31/2023-06-18-fixandPR/">记一次 fuzz go 的一个第三方库</a>
+          </li>
+        
+          <li>
+            <a href="/2023/05/23/2023-05-23-waf/">AI 安全之</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
